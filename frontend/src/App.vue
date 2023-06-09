@@ -1,10 +1,26 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+   <div id="app">
+    <component :is="navComponent"></component>
+  </div>
 </template>
+
+<script lang="ts" setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+import NavBar from './components/NavBar.vue'
+import NavBarGuest from './components/NavBarGuest.vue'
+
+const route = useRoute()
+
+const navComponent = computed(() => {
+  if (route.path === '/' || route.path === '/signup') {
+    return NavBarGuest
+  } else {
+    return NavBar
+  }
+})
+</script>
 
 <style lang="scss">
 #app {
