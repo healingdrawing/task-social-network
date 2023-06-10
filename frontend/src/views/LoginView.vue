@@ -4,11 +4,11 @@
     <div> "LoginView.vue . Welcome to Your Vue.js + TypeScript App"</div>
   </div>
   <div>
-    <h1>Login</h1>
+    <h1>Log in</h1>
     <form @submit.prevent="login"> <!-- login means the function name will be call after the default behavior was prevented -->
       <div>
-        <label for="nickname">Nickname:</label>
-        <input type="text" id="nickname"> v-model="nickname">
+        <label for="email">Nickname:</label>
+        <input type="email" id="email"> v-model="email">
       </div>
       <div>
         <label for="password">Password:</label>
@@ -33,7 +33,7 @@ const login = async () => {
   /* shoud happens only if login is successful */
   router.push('/profile')
 
-  /* also manual open any routes from browser url window,
+  /* todo: also manual open any routes from browser url window,
   should logout the user, and redirect to login page again
   to prevent any not desirable experimenting, and decrease
   chances of pretension in audit process, from experimentators */
