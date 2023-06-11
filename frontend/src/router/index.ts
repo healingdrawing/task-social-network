@@ -21,7 +21,27 @@ const routes: Array<RouteRecordRaw> = [
     path: '/profile',
     name: 'profile',
     component: () => import(/* webpackChunkName: "profile" */ '../views/ProfileView.vue')
-  }
+  },
+  {
+    path: '/post',
+    name: 'post',
+    component: () => import(/* webpackChunkName: "post" */ '../views/PostView.vue')
+  },
+  {
+    path: '/posts',
+    name: 'posts',
+    component: () => import(/* webpackChunkName: "posts" */ '../views/PostsView.vue')
+  },
+  {
+    path: '/groups',
+    name: 'groups',
+    component: () => import(/* webpackChunkName: "groups" */ '../views/GroupsView.vue')
+  },
+  {
+    path: '/chats',
+    name: 'chats',
+    component: () => import(/* webpackChunkName: "chats" */ '../views/ChatsView.vue')
+  },
 ]
 
 const router = createRouter({
