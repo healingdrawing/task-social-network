@@ -10,13 +10,12 @@
     <h2>Comments:</h2>
     <!-- add new comment using text area -->
     <div>
-      <textarea
-        v-model="commentContent"
-        placeholder="Enter comment here..."
-        rows="3"
-        cols="50"
-      ></textarea>
-      <button @click="addComment">Add Comment</button>
+      <form @submit.prevent="addComment">
+        <label for="commentContent">Comment Content:</label>
+        <textarea id="commentContent" v-model="commentContent" required></textarea>
+        <br>
+        <button type="submit">Submit</button>
+      </form>
     </div>
     <!-- add comments list , already created -->
     <div v-for="comment in commentsList"
