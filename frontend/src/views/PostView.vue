@@ -20,6 +20,8 @@
     <!-- add comments list , already created -->
     <div v-for="comment in commentsList"
       :key="comment.id">
+      <hr>
+      <p>Comment Author id: {{ comment.authorId }}</p>
       <h3>Comment Author: {{ comment.authorFullName }}</h3>
       <p>Comment id: {{ comment.id }}</p>
       <p>Comment content: {{ comment.content }}</p>
@@ -53,7 +55,8 @@ const postTitle = ref('');
 const postContent = ref(''); //todo: not sure it can be just string, because the images can be part of post content
 
 interface Comment {
-  id: number;
+  id: number; // comment id, unique, autoincrement, primary key, all comments must be stored one table in database
+  authorId: number; //todo: need to implement clickable link to user profile
   authorFullName: string; //todo: need to implement clickable link to user profile
   content: string;
 }
@@ -61,8 +64,8 @@ interface Comment {
 //todo: remove/refactor later, dummy data, must be collected from backend
 function getComments() {
   const comments: Comment[] = [
-    { id: 1, authorFullName: 'John Doe', content: 'Dummy comment.', },
-    { id: 2, authorFullName: 'Jane Doe', content: 'Dummy comment.', },
+    { id: 1, authorId: 11, authorFullName: 'John Doe 11', content: 'Dummy comment.', },
+    { id: 2, authorId: 22, authorFullName: 'Jane Doe 22', content: 'Dummy comment.', },
   ];
   return comments;
 }
@@ -77,6 +80,7 @@ function addComment() {
   commentAuthorFullName.value = 'dummy author full name'
   const comment: Comment = {
     id: 3,
+    authorId: 33,
     authorFullName: commentAuthorFullName.value,
     content: commentContent.value,
   };
