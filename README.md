@@ -15,3 +15,7 @@ https://github.com/01-edu/public/tree/master/subjects/social-network
 So using **websockets** for all interaction between client and server can be the best solution.
 
 And websocket connection established only once, in time of user login success. Registration process before is required. After registration the client redirects user to login page, which is default page.
+
+In task the require from us to use sessions and cookies, perhaps it can be limited by only login logout process, other interaction can be done by websockets, and in our case **pinia** storage, which is **Vue** js framework package.
+
+Also database **migrations** are required on **golang based backend** side, and some allowed packages are provided for these needs.
