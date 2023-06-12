@@ -9,3 +9,9 @@
 
 ## task description and audit questions, on github
 https://github.com/01-edu/public/tree/master/subjects/social-network
+
+# According to task requirements, at the moment, there is no any restrictions for connection type, and level of privacy of the project.  
+
+So using **websockets** for all interaction between client and server can be the best solution.
+
+And websocket connection established only once, in time of user login success. Registration process before is required. After registration the client redirects user to login page, which is default page.
