@@ -141,7 +141,7 @@ interface Post {
 const postsList = ref<Post[]>([]);
 
 // todo: dummy data, remove/refactor later
-function updatePostList() {
+function updatePostsList() {
   // Code to get the user posts goes here
   const posts: Post[] = [
     { id: 1, title: 'Dummy Post 1 Title' },
@@ -169,7 +169,7 @@ const updateStorageForPostView = (post: Post) => {
 onMounted(() => {
   updateFollowingList();
   updateFollowersList();
-  updatePostList();
+  updatePostsList();
 });
 
 </script>
