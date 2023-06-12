@@ -54,7 +54,7 @@ const postContent = ref(''); //todo: not sure it can be just string, because the
 
 interface Comment {
   id: number;
-  authorFullName: string;
+  authorFullName: string; //todo: need to implement clickable link to user profile
   content: string;
 }
 
