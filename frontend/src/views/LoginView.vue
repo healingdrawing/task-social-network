@@ -5,6 +5,7 @@
   </div>
   <div>
     <h1>Log in</h1>
+     <!-- todo: add required keyword into tags input(email and password) later, to prevent empty input. Login uses only email as nickname, because the "Nickname" property is optional in registration, so ignore it in login implementation , because unsafe to use -->
     <form @submit.prevent="login"> <!-- login means the function name will be call after the default behavior was prevented -->
       <div>
         <label for="email">Nickname:</label>
