@@ -86,7 +86,7 @@ function addComment() {
 }
 
 onMounted(() => {
-  updateFullPost(profileStore.getPostId); //no needed at this point, just test
+  updateFullPost(profileStore.getPostId); //no needed at this point, just test of pinia storage implementation
 });
 
 </script>
