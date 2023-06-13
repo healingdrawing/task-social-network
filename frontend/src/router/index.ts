@@ -38,9 +38,24 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import(/* webpackChunkName: "posts" */ '../views/PostsView.vue')
   },
   {
+    path: '/group',
+    name: 'group',
+    component: () => import(/* webpackChunkName: "group" */ '../views/GroupView.vue')
+  },
+  {
+    path: '/groupInvite',
+    name: 'groupInvite',
+    component: () => import(/* webpackChunkName: "groupInvite" */ '../views/GroupInviteView.vue')
+  },
+  {
     path: '/groups',
     name: 'groups',
     component: () => import(/* webpackChunkName: "groups" */ '../views/GroupsView.vue')
+  },
+  {
+    path: '/groupsAll',
+    name: 'groupsAll',
+    component: () => import(/* webpackChunkName: "groupsAll" */ '../views/GroupsAllView.vue')
   },
   {
     path: '/chat',

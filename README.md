@@ -18,4 +18,11 @@ And websocket connection established only once, in time of user login success. R
 
 In task the require from us to use sessions and cookies, perhaps it can be limited by only login logout process, other interaction can be done by websockets, and in our case **pinia** storage, which is **Vue** js framework package.
 
-Also database **migrations** are required on **golang based backend** side, and some allowed packages are provided for these needs.
+Also database **migrations** are required on **golang based backend** side, and some allowed packages are provided for these needs.  
+To implement some migrations more soft way it looks like not bad approach to **overwrite old tables structure from real-time-forum backend, and add to "Post/post" table new field(column) groupId(group_id), and overwrite the old records in table with value 0 or -1(depends on sqlite autoincrement minimum value) for the old posts not binded to group, using new migration**.
+In the "ProfileView.vue" both type of posts (user created, and user created inside groups with membership) must be collected in one section, maybe on backend side, and sorted by date, descending order, the most fresh first.
+
+New tables must be implemented for group functionality. Need discuss it.
+F.e. it can be:
+- "group" table: id, title, description, creator_id, created_at
+- wip
