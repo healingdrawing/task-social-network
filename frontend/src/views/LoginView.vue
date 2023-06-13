@@ -21,17 +21,20 @@
 </template>
 
 <script lang="ts" setup>
-// import { useRouter } from 'vue-router' // TODO: remove this not working shit
-import router from '@/router/index' /* this works,
-some fail with .ts at the end, so it was removed.
+import router from '@/router/index' /* this works.
 Looks like once created router(inside "router/index.ts"),
 must be used everywhere
 */
 
-const login = async () => {
-  // const router = useRouter() //todo: remove this not working, the result of shit above
+import { useProfileStore } from '@/store/profile';
 
-  /* shoud happens only if login is successful */
+const profileStore = useProfileStore();
+
+const login = async () => {
+  // backend api call
+  const dummyUserId = 88;
+  /* todo: shoud happens only if login is successful */
+  profileStore.setUserId(dummyUserId); // set once in login process. Perhaps need clear before logout etc.
   router.push('/profile')
 
   /* todo: also manual open any routes from browser url window,
