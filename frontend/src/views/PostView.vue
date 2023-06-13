@@ -33,14 +33,15 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
-import { useProfileStore } from '@/store/pinia';
+import { usePostStore } from '@/store/pinia';
 
-const profileStore = useProfileStore();
+const postStore = usePostStore();
 
 // todo: plan to use this view(PostView.vue) like target view from both "ProfileView.vue" and "PostView.vue", when user click on post title, it will be redirected to "PostView.vue" and this postId will be used to get post from backend, and show it on "PostView.vue". So "userId" must be provided some way(pinia storage or cookie/session not sure) too, to create comment for this post
 
 // todo: refactor to get post from backend , and update postTitle, and postContent(include some way images, which is part of task)
-function updateFullPost(postId: number) {
+function updateFullPost() {
+  postId.value = postStore.getPostId;
   // todo: get post from backend, using postId, and update x3 data bottom
   postAuthor.value = "must be collected from backend later inside updateFullPost()";
   postTitle.value = "must be collected from backend later inside updateFullPost()";
@@ -50,7 +51,7 @@ function updateFullPost(postId: number) {
 
 // const postId = computed(() => profileStore.getPostId); // reactivity syntax
 /** managed by pinia storage, to keep links in browser as possible short, just "/post" */
-const postId = profileStore.getPostId; //no need reactivity in this case
+const postId = ref(-1); //no need reactivity in this case
 const postAuthor = ref(''); //todo: full name of author
 const postTitle = ref('');
 const postContent = ref(''); //todo: not sure it can be just string, because the images can be part of post content
@@ -91,7 +92,7 @@ function addComment() {
 }
 
 onMounted(() => {
-  updateFullPost(profileStore.getPostId); //no needed at this point, just test of pinia storage implementation
+  updateFullPost();
 });
 
 </script>

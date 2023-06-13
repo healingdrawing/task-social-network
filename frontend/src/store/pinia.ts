@@ -6,3 +6,5 @@ export const pinia = createPinia();
 // export const usePinia = () => pinia;
 
 export { useProfileStore } from '@/store/profile';
+export { usePostStore } from '@/store/post';
+export { useChatStore } from '@/store/chat';
