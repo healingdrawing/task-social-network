@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Cretate Post:</h1>
+    <h1>Create Post:</h1>
     <form @submit.prevent="addPost">
       <label for="postTitle">Post Title:</label>
       <input type="text" id="postTitle" v-model="postTitle" required>
