@@ -1,12 +1,7 @@
 <template>
   <h1>Profile:</h1>
-  <!-- add checkbox to make profile public -->
-  <div>
-    <label>
-      <input type="checkbox" v-model="isPublic" />
-      is public
-    </label>
-  </div>
+  <!-- todo: remove later . show id for dev needs-->
+  <p>Id: {{ profileStore.getTargetUserId }}</p>
   <!-- add user information -->
   <div>
     <p>Email: {{ email }}</p>
@@ -97,8 +92,8 @@ function fillDummyProfileData(userId: number): Profile {
 const profileStore = useProfileStore();
 /** Function to update the profile data using dummy data at the moment*/
 function updateProfile() {
-  //todo: get data from backend based on user id from profileStore
-  const profile = fillDummyProfileData(profileStore.getUserId);
+  //todo: get data from backend based on user() id from profileStore
+  const profile = fillDummyProfileData(profileStore.getTargetUserId);
 
   email.value = profile.email;
   firstName.value = profile.firstName;
