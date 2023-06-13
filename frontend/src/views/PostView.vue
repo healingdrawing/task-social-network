@@ -15,6 +15,7 @@
         <textarea id="commentContent" v-model="commentContent" required></textarea>
         <br>
         <button type="submit">Submit</button>
+        <!-- todo: add image or gif to comment required in task. Perhaps, to prevent posting "anacondas" and "caves" photos, the images can be limited from allowed lists of images, but generally it sounds like they expect any image upload, which is unsafe, like in avatar too -->
       </form>
     </div>
     <!-- add comments list , already created -->
