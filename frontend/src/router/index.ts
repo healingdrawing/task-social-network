@@ -38,6 +38,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import(/* webpackChunkName: "groups" */ '../views/GroupsView.vue')
   },
   {
+    path: '/chat',
+    name: 'chat',
+    component: () => import(/* webpackChunkName: "chat" */ '../views/ChatView.vue')
+  },
+  {
     path: '/chats',
     name: 'chats',
     component: () => import(/* webpackChunkName: "chats" */ '../views/ChatsView.vue')
@@ -46,7 +51,10 @@ const routes: Array<RouteRecordRaw> = [
 
 const router = createRouter({
   history: createWebHashHistory(),
-  routes
+  routes,
+  scrollBehavior(/*to, from, savedPosition*/) { //todo: BE CAREFUL. scrollBehavior(to, from, savedPosition) { - raise warning(NOT DEADLY). To mute this shit of vscode, incoming parameters was removed. This can produce weird behavior if you will try to use router with scrollBehavior later (according to perplexity message).
+    return { top: 0 };//scroll to top in time of navigation between routes
+  },
 })
 
 export default router
