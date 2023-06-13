@@ -1,5 +1,5 @@
 <template>
-  <h1>Profile</h1>
+  <h1>Profile:</h1>
   <!-- add checkbox to make profile public -->
   <div>
     <label>
@@ -45,7 +45,7 @@
 
 <script lang="ts" setup>
 import { ref, watch, onMounted } from 'vue';
-import { useProfileStore } from '@/store/profile';
+import { usePostStore } from '@/store/post';
 
 const isPublic = ref(false);
 
@@ -160,9 +160,9 @@ function updatePostsList() {
 }
 
 
-const profileStore = useProfileStore()
+const postStore = usePostStore()
 const updateStorageForPostView = (post: Post) => {
-  profileStore.setPostId(post.id)
+  postStore.setPostId(post.id)
   // router.push('/post') //todo: remove later, no need because of router-link
 }
 
