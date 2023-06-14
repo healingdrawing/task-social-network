@@ -75,7 +75,7 @@ const createGroup = () => {
     id: Date.now(),
     title: title.value,
     description: description.value,
-    members: invitedUsers.value.map(id => allUsers.find(user => user.id === id)!)
+    members: invitedUsers.value.map(id => allUsers.find(user => user.id === id)!) //todo: refactor/check this on real data , it looks ugly
   };
   groupsList.value.unshift(group);
   title.value = '';
