@@ -14,75 +14,75 @@
     <style level="9" isset="true" branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="underlined" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true" connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
     <style level="10" isset="true" branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="underlined" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true" connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
   </styles>
-  <drawarea x="227.00000000001" y="-285" scale="0.5"/>
+  <drawarea x="1547.00000000001" y="-285" scale="0.5"/>
   <images/>
   <nodes>
-    <node id="0" posx="273.99999999999773" posy="783.49999999999727" width="197" height="55" side="left" fold="false" treesize="1429.6581420898433" layout="Manual" group="false">
+    <node id="0" posx="-1046.0000000000023" posy="783.49999999999727" width="197" height="55" side="left" fold="false" treesize="1429.6581420898433" layout="Manual" group="false">
       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="none" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-      <nodename posx="287.99999999999773" posy="797.49999999999727" maxwidth="200">
+      <nodename posx="-1032.0000000000023" posy="797.49999999999727" maxwidth="200">
         <text data="LoginView.vue"/>
       </nodename>
       <nodenote></nodenote>
       <nodes>
-        <node id="1" posx="570.9999999999975" posy="687.60372924804688" width="132" height="55" side="right" fold="false" treesize="1429.6581420898433" color="#c6262e" colorroot="false" layout="Manual" group="false">
+        <node id="1" posx="-749.0000000000025" posy="687.60372924804688" width="132" height="55" side="right" fold="false" treesize="1429.6581420898433" color="#c6262e" colorroot="false" layout="Manual" group="false">
           <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-          <nodename posx="584.9999999999975" posy="701.60372924804688" maxwidth="200">
+          <nodename posx="-735.0000000000025" posy="701.60372924804688" maxwidth="200">
             <text data="&quot;submit&quot;"/>
           </nodename>
           <nodenote></nodenote>
           <nodes>
-            <node id="2" posx="825.51934814452875" posy="545.51879374186228" width="80" height="55" side="right" fold="false" treesize="55" color="#c6262e" colorroot="false" layout="Manual" group="false">
+            <node id="2" posx="-494.48065185547125" posy="545.51879374186228" width="80" height="55" side="right" fold="false" treesize="55" color="#c6262e" colorroot="false" layout="Manual" group="false">
               <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="bracket" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-              <nodename posx="839.51934814452875" posy="559.51879374186228" maxwidth="200">
+              <nodename posx="-480.48065185547125" posy="559.51879374186228" maxwidth="200">
                 <text data="fail"/>
               </nodename>
               <nodenote></nodenote>
             </node>
-            <node id="3" posx="802.99999999999727" posy="738.60372924804642" width="54" height="55" side="right" fold="false" treesize="1429.6581420898433" color="#c6262e" colorroot="false" layout="Manual" group="false">
+            <node id="3" posx="-517.00000000000273" posy="738.60372924804642" width="54" height="55" side="right" fold="false" treesize="1429.6581420898433" color="#c6262e" colorroot="false" layout="Manual" group="false">
               <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="bracket" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-              <nodename posx="816.99999999999727" posy="752.60372924804642" maxwidth="200">
+              <nodename posx="-503.00000000000273" posy="752.60372924804642" maxwidth="200">
                 <text data="ok"/>
               </nodename>
               <nodenote></nodenote>
               <nodes>
-                <node id="15" posx="956.99999999999727" posy="738.60372924804642" width="223" height="55" side="right" fold="false" treesize="1429.6581420898433" color="#c6262e" colorroot="false" layout="Manual" group="false">
+                <node id="15" posx="-363.00000000000273" posy="738.60372924804642" width="223" height="55" side="right" fold="false" treesize="1429.6581420898433" color="#c6262e" colorroot="false" layout="Manual" group="false">
                   <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="none" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                  <nodename posx="970.99999999999727" posy="752.60372924804642" maxwidth="200">
+                  <nodename posx="-349.00000000000273" posy="752.60372924804642" maxwidth="200">
                     <text data="ProfileView.vue"/>
                   </nodename>
                   <nodenote></nodenote>
                   <nodes>
-                    <node id="18" posx="1279.9999999999973" posy="24.812840779623002" width="145" height="55" side="right" fold="false" treesize="55" color="#bbbbbb" colorroot="true" layout="Manual" group="false">
+                    <node id="18" posx="-40.000000000002728" posy="24.812840779623002" width="145" height="55" side="right" fold="false" treesize="55" color="#bbbbbb" colorroot="true" layout="Manual" group="false">
                       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                      <nodename posx="1293.9999999999973" posy="38.812840779623002" maxwidth="200">
+                      <nodename posx="-26.000000000002728" posy="38.812840779623002" maxwidth="200">
                         <text data="&lt;Profile&gt;"/>
                       </nodename>
                       <nodenote></nodenote>
                     </node>
-                    <node id="24" posx="1279.9999999999973" posy="115.23817443847656" width="275" height="55" side="right" fold="false" treesize="271" color="#3689e6" colorroot="true" layout="Manual" group="false">
+                    <node id="24" posx="-40.000000000002728" posy="115.23817443847656" width="275" height="55" side="right" fold="false" treesize="271" color="#3689e6" colorroot="true" layout="Manual" group="false">
                       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="237" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                      <nodename posx="1293.9999999999973" posy="129.23817443847656" maxwidth="247.1407470703125">
+                      <nodename posx="-26.000000000002728" posy="129.23817443847656" maxwidth="247.1407470703125">
                         <text data="&lt;each post of user&gt;"/>
                       </nodename>
                       <nodenote></nodenote>
                       <nodes>
-                        <node id="25" posx="1576.9999999999977" posy="115.23817443847656" width="184" height="55" side="right" fold="false" treesize="271" color="#3689e6" colorroot="false" layout="Manual" group="false">
+                        <node id="25" posx="256.99999999999773" posy="115.23817443847656" width="184" height="55" side="right" fold="false" treesize="271" color="#3689e6" colorroot="false" layout="Manual" group="false">
                           <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="none" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                          <nodename posx="1590.9999999999977" posy="129.23817443847656" maxwidth="200">
+                          <nodename posx="270.99999999999773" posy="129.23817443847656" maxwidth="200">
                             <text data="PostView.vue"/>
                           </nodename>
                           <nodenote></nodenote>
                           <nodes>
-                            <node id="28" posx="1861.8409423828107" posy="116.70025126139353" width="301" height="55" side="right" fold="false" treesize="271" color="#3689e6" colorroot="false" layout="Manual" group="false">
+                            <node id="28" posx="541.84094238281068" posy="116.70025126139353" width="301" height="55" side="right" fold="false" treesize="271" color="#3689e6" colorroot="false" layout="Manual" group="false">
                               <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="255" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                              <nodename posx="1875.8409423828107" posy="130.70025126139353" maxwidth="273.4539794921875">
+                              <nodename posx="555.84094238281068" posy="130.70025126139353" maxwidth="273.4539794921875">
                                 <text data="&lt;each comment author&gt;"/>
                               </nodename>
                               <nodenote></nodenote>
                               <nodes>
-                                <node id="29" posx="2300.1220703124973" posy="-56.043767293293968" width="262" height="271" side="right" fold="false" treesize="271" color="#3689e6" colorroot="false" layout="Manual" group="false">
+                                <node id="29" posx="980.12207031249727" posy="-56.043767293293968" width="262" height="271" side="right" fold="false" treesize="271" color="#3689e6" colorroot="false" layout="Manual" group="false">
                                   <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="bracket" nodewidth="235" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                                  <nodename posx="2314.1220703124973" posy="-42.043767293293968" maxwidth="242.963134765625">
+                                  <nodename posx="994.12207031249727" posy="-42.043767293293968" maxwidth="242.963134765625">
                                     <text data="TargetView.vue ------------------ (Which is modified ProfileView.vue with similar functionality used to safely visit another user profile section)"/>
                                   </nodename>
                                   <nodenote></nodenote>
@@ -93,30 +93,30 @@
                         </node>
                       </nodes>
                     </node>
-                    <node id="16" posx="1279.9999999999973" posy="256.01232401529978" width="119" height="55" side="right" fold="false" treesize="176.99129231770848" color="#f9c440" colorroot="true" layout="Manual" group="false">
+                    <node id="16" posx="-40.000000000002728" posy="256.01232401529978" width="119" height="55" side="right" fold="false" treesize="176.99129231770848" color="#f9c440" colorroot="true" layout="Manual" group="false">
                       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                      <nodename posx="1293.9999999999973" posy="270.01232401529978" maxwidth="200">
+                      <nodename posx="-26.000000000002728" posy="270.01232401529978" maxwidth="200">
                         <text data="&lt;Posts&gt;"/>
                       </nodename>
                       <nodenote></nodenote>
                       <nodes>
-                        <node id="17" posx="1498.9999999999975" posy="250.34968566894531" width="197" height="55" side="right" fold="false" treesize="176.99129231770848" color="#f9c440" colorroot="false" layout="Manual" group="false">
+                        <node id="17" posx="178.9999999999975" posy="250.34968566894531" width="197" height="55" side="right" fold="false" treesize="176.99129231770848" color="#f9c440" colorroot="false" layout="Manual" group="false">
                           <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="none" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                          <nodename posx="1512.9999999999975" posy="264.34968566894531" maxwidth="200">
+                          <nodename posx="192.9999999999975" posy="264.34968566894531" maxwidth="200">
                             <text data="PostsView.vue"/>
                           </nodename>
                           <nodenote></nodenote>
                           <nodes>
-                            <node id="44" posx="1795.9999999999973" posy="229.55285135904933" width="171" height="55" side="right" fold="false" treesize="55" color="#f9c440" colorroot="false" layout="Manual" group="false">
+                            <node id="44" posx="475.99999999999727" posy="229.55285135904933" width="171" height="55" side="right" fold="false" treesize="55" color="#f9c440" colorroot="false" layout="Manual" group="false">
                               <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                              <nodename posx="1809.9999999999973" posy="243.55285135904933" maxwidth="200">
+                              <nodename posx="489.99999999999727" posy="243.55285135904933" maxwidth="200">
                                 <text data="&lt;each post&gt;"/>
                               </nodename>
                               <nodenote></nodenote>
                             </node>
-                            <node id="27" posx="1795.9999999999973" posy="351.54414367675781" width="132" height="55" side="right" fold="false" treesize="55" color="#f9c440" colorroot="false" layout="Manual" group="false">
+                            <node id="27" posx="475.99999999999727" posy="351.54414367675781" width="132" height="55" side="right" fold="false" treesize="55" color="#f9c440" colorroot="false" layout="Manual" group="false">
                               <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                              <nodename posx="1809.9999999999973" posy="365.54414367675781" maxwidth="200">
+                              <nodename posx="489.99999999999727" posy="365.54414367675781" maxwidth="200">
                                 <text data="&quot;submit&quot;"/>
                               </nodename>
                               <nodenote></nodenote>
@@ -125,72 +125,72 @@
                         </node>
                       </nodes>
                     </node>
-                    <node id="21" posx="1279.9999999999973" posy="696.41056315104106" width="132" height="55" side="right" fold="false" treesize="875.76171366373705" color="#715344" colorroot="true" layout="Manual" group="false">
+                    <node id="21" posx="-40.000000000002728" posy="696.41056315104106" width="132" height="55" side="right" fold="false" treesize="848.76171366373705" color="#715344" colorroot="true" layout="Manual" group="false">
                       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                      <nodename posx="1293.9999999999973" posy="710.41056315104106" maxwidth="200">
+                      <nodename posx="-26.000000000002728" posy="710.41056315104106" maxwidth="200">
                         <text data="&lt;Groups&gt;"/>
                       </nodename>
                       <nodenote></nodenote>
                       <nodes>
-                        <node id="22" posx="1511.9999999999975" posy="691.48018391927053" width="210" height="55" side="right" fold="false" treesize="875.76171366373705" color="#715344" colorroot="false" layout="Manual" group="false">
+                        <node id="22" posx="191.9999999999975" posy="691.48018391927053" width="210" height="55" side="right" fold="false" treesize="848.76171366373705" color="#715344" colorroot="false" layout="Manual" group="false">
                           <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="none" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                          <nodename posx="1525.9999999999975" posy="705.48018391927053" maxwidth="200">
+                          <nodename posx="205.9999999999975" posy="705.48018391927053" maxwidth="200">
                             <text data="GroupsView.vue"/>
                           </nodename>
                           <nodenote></nodenote>
                           <nodes>
-                            <node id="33" posx="1821.9999999999982" posy="554.54069519042923" width="210" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
+                            <node id="33" posx="501.99999999999818" posy="554.54069519042923" width="210" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
                               <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                              <nodename posx="1835.9999999999982" posy="568.54069519042923" maxwidth="200">
+                              <nodename posx="515.99999999999818" posy="568.54069519042923" maxwidth="200">
                                 <text data="&quot;create group&quot;"/>
                               </nodename>
                               <nodenote></nodenote>
                             </node>
-                            <node id="34" posx="1821.9999999999982" posy="655.19853719075491" width="184" height="55" side="right" fold="false" treesize="413.96727498372343" color="#715344" colorroot="false" layout="Manual" group="false">
+                            <node id="34" posx="501.99999999999818" posy="655.19853719075491" width="184" height="55" side="right" fold="false" treesize="413.96727498372343" color="#715344" colorroot="false" layout="Manual" group="false">
                               <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                              <nodename posx="1835.9999999999982" posy="669.19853719075491" maxwidth="200">
+                              <nodename posx="515.99999999999818" posy="669.19853719075491" maxwidth="200">
                                 <text data="&lt;each group&gt;"/>
                               </nodename>
                               <nodenote></nodenote>
                               <nodes>
-                                <node id="35" posx="2182.6596679687486" posy="591.79948933919241" width="197" height="55" side="right" fold="false" treesize="413.96727498372343" color="#715344" colorroot="false" layout="Manual" group="false">
+                                <node id="35" posx="862.65966796874864" posy="591.79948933919241" width="197" height="55" side="right" fold="false" treesize="413.96727498372343" color="#715344" colorroot="false" layout="Manual" group="false">
                                   <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="none" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                                  <nodename posx="2196.6596679687486" posy="605.79948933919241" maxwidth="200">
+                                  <nodename posx="876.65966796874864" posy="605.79948933919241" maxwidth="200">
                                     <text data="GroupView.vue"/>
                                   </nodename>
                                   <nodenote></nodenote>
                                   <nodes>
-                                    <node id="43" posx="2479.6596679687491" posy="415.28218587239576" width="197" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
+                                    <node id="43" posx="1159.6596679687491" posy="415.28218587239576" width="197" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
                                       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                                      <nodename posx="2493.6596679687491" posy="429.28218587239576" maxwidth="200">
+                                      <nodename posx="1173.6596679687491" posy="429.28218587239576" maxwidth="200">
                                         <text data="&quot;Group Posts&quot;"/>
                                       </nodename>
                                       <nodenote></nodenote>
                                     </node>
-                                    <node id="38" posx="2479.6596679687491" posy="507.17064412434911" width="197" height="55" side="right" fold="false" treesize="150.65478515624841" color="#715344" colorroot="false" layout="Manual" group="false">
+                                    <node id="38" posx="1159.6596679687491" posy="507.17064412434911" width="197" height="55" side="right" fold="false" treesize="150.65478515624841" color="#715344" colorroot="false" layout="Manual" group="false">
                                       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                                      <nodename posx="2493.6596679687491" posy="521.17064412434911" maxwidth="200">
+                                      <nodename posx="1173.6596679687491" posy="521.17064412434911" maxwidth="200">
                                         <text data="&quot;Invite User&quot;"/>
                                       </nodename>
                                       <nodenote></nodenote>
                                       <nodes>
-                                        <node id="39" posx="2776.6596679687482" posy="506.77110799153661" width="275" height="55" side="right" fold="false" treesize="150.65478515624841" color="#715344" colorroot="false" layout="Manual" group="false">
+                                        <node id="39" posx="1456.6596679687482" posy="506.77110799153661" width="275" height="55" side="right" fold="false" treesize="150.65478515624841" color="#715344" colorroot="false" layout="Manual" group="false">
                                           <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="none" nodewidth="238" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                                          <nodename posx="2790.6596679687482" posy="520.77110799153661" maxwidth="251.053955078125">
+                                          <nodename posx="1470.6596679687482" posy="520.77110799153661" maxwidth="251.053955078125">
                                             <text data="GroupInviteView.vue"/>
                                           </nodename>
                                           <nodenote></nodenote>
                                           <nodes>
-                                            <node id="40" posx="3084.9239501953098" posy="463.37541707356809" width="223" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
+                                            <node id="40" posx="1764.9239501953098" posy="463.37541707356809" width="223" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
                                               <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                                              <nodename posx="3098.9239501953098" posy="477.37541707356809" maxwidth="200">
+                                              <nodename posx="1778.9239501953098" posy="477.37541707356809" maxwidth="200">
                                                 <text data="&lt;Back to Group&gt;"/>
                                               </nodename>
                                               <nodenote></nodenote>
                                             </node>
-                                            <node id="41" posx="3099.6596679687473" posy="559.0302022298165" width="132" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
+                                            <node id="41" posx="1779.6596679687473" posy="559.0302022298165" width="132" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
                                               <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                                              <nodename posx="3113.6596679687473" posy="573.0302022298165" maxwidth="200">
+                                              <nodename posx="1793.6596679687473" posy="573.0302022298165" maxwidth="200">
                                                 <text data="&quot;Submit&quot;"/>
                                               </nodename>
                                               <nodenote></nodenote>
@@ -199,16 +199,16 @@
                                         </node>
                                       </nodes>
                                     </node>
-                                    <node id="36" posx="2479.6596679687491" posy="661.32792154947947" width="210" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
+                                    <node id="36" posx="1159.6596679687491" posy="661.32792154947947" width="210" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
                                       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                                      <nodename posx="2493.6596679687491" posy="675.32792154947947" maxwidth="200">
+                                      <nodename posx="1173.6596679687491" posy="675.32792154947947" maxwidth="200">
                                         <text data="&quot;Create Event&quot;"/>
                                       </nodename>
                                       <nodenote></nodenote>
                                     </node>
-                                    <node id="37" posx="2479.6596679687491" posy="774.24946085611919" width="249" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
+                                    <node id="37" posx="1159.6596679687491" posy="774.24946085611919" width="249" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
                                       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="219" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                                      <nodename posx="2493.6596679687491" posy="788.24946085611919" maxwidth="221.81876627604163">
+                                      <nodename posx="1173.6596679687491" posy="788.24946085611919" maxwidth="221.81876627604163">
                                         <text data="&quot;Open Group Chat&quot;"/>
                                       </nodename>
                                       <nodenote></nodenote>
@@ -217,44 +217,44 @@
                                 </node>
                               </nodes>
                             </node>
-                            <node id="42" posx="1821.9999999999982" posy="817.73385111491007" width="275" height="55" side="right" fold="false" treesize="473.31004842122275" color="#715344" colorroot="false" layout="Manual" group="false">
+                            <node id="42" posx="501.99999999999818" posy="817.73385111491007" width="275" height="55" side="right" fold="false" treesize="446.31004842122275" color="#715344" colorroot="false" layout="Manual" group="false">
                               <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="226" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                              <nodename posx="1835.9999999999982" posy="831.73385111491007" maxwidth="247.94742838541663">
+                              <nodename posx="515.99999999999818" posy="831.73385111491007" maxwidth="247.94742838541663">
                                 <text data="&lt;Browse All Groups&gt;"/>
                               </nodename>
                               <nodenote></nodenote>
                               <nodes>
-                                <node id="45" posx="2229.3276367187477" posy="962.56688944498774" width="210" height="82" side="right" fold="false" treesize="378.91628011067633" color="#715344" colorroot="false" layout="Manual" group="false">
+                                <node id="45" posx="909.32763671874773" posy="962.56688944498774" width="210" height="82" side="right" fold="false" treesize="351.91628011067633" color="#715344" colorroot="false" layout="Manual" group="false">
                                   <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="none" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                                  <nodename posx="2243.3276367187477" posy="976.56688944498774" maxwidth="200">
+                                  <nodename posx="923.32763671874773" posy="976.56688944498774" maxwidth="200">
                                     <text data="GroupsAllView.vue"/>
                                   </nodename>
                                   <nodenote></nodenote>
                                   <nodes>
-                                    <node id="46" posx="2525.2504882812491" posy="912.12761942545649" width="184" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
+                                    <node id="46" posx="1205.2504882812491" posy="912.12761942545649" width="184" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
                                       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                                      <nodename posx="2539.2504882812491" posy="926.12761942545649" maxwidth="200">
+                                      <nodename posx="1219.2504882812491" posy="926.12761942545649" maxwidth="200">
                                         <text data="&lt;each group&gt;"/>
                                       </nodename>
                                       <nodenote></nodenote>
                                     </node>
-                                    <node id="47" posx="2535.5867919921866" posy="1024.1210683186855" width="171" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
+                                    <node id="47" posx="1215.5867919921866" posy="1024.1210683186855" width="171" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
                                       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                                      <nodename posx="2549.5867919921866" posy="1038.1210683186855" maxwidth="200">
+                                      <nodename posx="1229.5867919921866" posy="1038.1210683186855" maxwidth="200">
                                         <text data="&quot;Next Page&quot;"/>
                                       </nodename>
                                       <nodenote></nodenote>
                                     </node>
-                                    <node id="48" posx="2520.0985107421866" posy="1116.6414947509775" width="223" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
+                                    <node id="48" posx="1200.0985107421866" posy="1116.6414947509775" width="223" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
                                       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                                      <nodename posx="2534.0985107421866" posy="1130.6414947509775" maxwidth="200">
+                                      <nodename posx="1214.0985107421866" posy="1130.6414947509775" maxwidth="200">
                                         <text data="&quot;Previous Page&quot;"/>
                                       </nodename>
                                       <nodenote></nodenote>
                                     </node>
-                                    <node id="49" posx="2544.1597900390616" posy="1209.0438995361328" width="132" height="82" side="right" fold="false" treesize="82" color="#715344" colorroot="false" layout="Manual" group="false">
-                                      <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                                      <nodename posx="2558.1597900390616" posy="1223.0438995361328" maxwidth="200">
+                                    <node id="49" posx="1224.1597900390616" posy="1209.0438995361328" width="236" height="55" side="right" fold="false" treesize="55" color="#715344" colorroot="false" layout="Manual" group="false">
+                                      <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="210" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
+                                      <nodename posx="1238.1597900390616" posy="1223.0438995361328" maxwidth="211.3304443359375">
                                         <text data="&lt;Back to Groups&gt;"/>
                                       </nodename>
                                       <nodenote></nodenote>
@@ -267,44 +267,44 @@
                         </node>
                       </nodes>
                     </node>
-                    <node id="23" posx="1016.020935058591" posy="976.38166809082031" width="132" height="55" side="right" fold="false" treesize="55" color="#7a36b1" colorroot="true" layout="Manual" group="false">
+                    <node id="23" posx="-303.97906494140898" posy="976.38166809082031" width="132" height="55" side="right" fold="false" treesize="55" color="#7a36b1" colorroot="true" layout="Manual" group="false">
                       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                      <nodename posx="1030.020935058591" posy="990.38166809082031" maxwidth="200">
+                      <nodename posx="-289.97906494140898" posy="990.38166809082031" maxwidth="200">
                         <text data="&lt;Logout&gt;"/>
                       </nodename>
                       <nodenote></nodenote>
                     </node>
-                    <node id="19" posx="1909.3250122070285" posy="1318.6143747965493" width="119" height="55" side="right" fold="false" treesize="56.719970703125" color="#c6262e" colorroot="true" layout="Manual" group="false">
+                    <node id="19" posx="589.32501220702852" posy="1318.6143747965493" width="119" height="55" side="right" fold="false" treesize="56.719970703125" color="#c6262e" colorroot="true" layout="Manual" group="false">
                       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                      <nodename posx="1923.3250122070285" posy="1332.6143747965493" maxwidth="200">
+                      <nodename posx="603.32501220702852" posy="1332.6143747965493" maxwidth="200">
                         <text data="&lt;Chats&gt;"/>
                       </nodename>
                       <nodenote></nodenote>
                       <nodes>
-                        <node id="20" posx="2128.3250122070285" posy="1318.6143747965493" width="197" height="55" side="right" fold="false" treesize="56.719970703125" color="#c6262e" colorroot="false" layout="Manual" group="false">
+                        <node id="20" posx="808.32501220702852" posy="1318.6143747965493" width="197" height="55" side="right" fold="false" treesize="56.719970703125" color="#c6262e" colorroot="false" layout="Manual" group="false">
                           <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="none" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                          <nodename posx="2142.3250122070285" posy="1332.6143747965493" maxwidth="200">
+                          <nodename posx="822.32501220702852" posy="1332.6143747965493" maxwidth="200">
                             <text data="ChatsView.vue"/>
                           </nodename>
                           <nodenote></nodenote>
                           <nodes>
-                            <node id="30" posx="2425.3250122070285" posy="1318.6143747965493" width="379" height="55" side="right" fold="false" treesize="56.719970703125" color="#c6262e" colorroot="false" layout="Manual" group="false">
+                            <node id="30" posx="1105.3250122070285" posy="1318.6143747965493" width="379" height="55" side="right" fold="false" treesize="56.719970703125" color="#c6262e" colorroot="false" layout="Manual" group="false">
                               <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="324" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                              <nodename posx="2439.3250122070285" posy="1332.6143747965493" maxwidth="351.0721435546875">
+                              <nodename posx="1119.3250122070285" posy="1332.6143747965493" maxwidth="351.0721435546875">
                                 <text data="&lt;each private chat of user&gt;"/>
                               </nodename>
                               <nodenote></nodenote>
                               <nodes>
-                                <node id="31" posx="2847.082336425779" posy="1316.8944040934243" width="184" height="55" side="right" fold="false" treesize="55.68318684895894" color="#c6262e" colorroot="false" layout="Manual" group="false">
+                                <node id="31" posx="1527.082336425779" posy="1316.8944040934243" width="184" height="55" side="right" fold="false" treesize="55.68318684895894" color="#c6262e" colorroot="false" layout="Manual" group="false">
                                   <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="none" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                                  <nodename posx="2861.082336425779" posy="1330.8944040934243" maxwidth="200">
+                                  <nodename posx="1541.082336425779" posy="1330.8944040934243" maxwidth="200">
                                     <text data="ChatView.vue"/>
                                   </nodename>
                                   <nodenote></nodenote>
                                   <nodes>
-                                    <node id="32" posx="3131.0823364257794" posy="1317.5775909423833" width="106" height="55" side="right" fold="false" treesize="55" color="#c6262e" colorroot="false" layout="Manual" group="false">
+                                    <node id="32" posx="1811.0823364257794" posy="1317.5775909423833" width="106" height="55" side="right" fold="false" treesize="55" color="#c6262e" colorroot="false" layout="Manual" group="false">
                                       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                                      <nodename posx="3145.0823364257794" posy="1331.5775909423833" maxwidth="200">
+                                      <nodename posx="1825.0823364257794" posy="1331.5775909423833" maxwidth="200">
                                         <text data="&quot;Send&quot;"/>
                                       </nodename>
                                       <nodenote></nodenote>
@@ -323,37 +323,37 @@
             </node>
           </nodes>
         </node>
-        <node id="4" posx="570.9999999999975" posy="1153.588455200199" width="132" height="55" side="right" fold="false" treesize="144.56689453124955" color="#f37329" colorroot="false" layout="Manual" group="false">
+        <node id="4" posx="-749.0000000000025" posy="1153.588455200199" width="132" height="55" side="right" fold="false" treesize="144.56689453124955" color="#f37329" colorroot="false" layout="Manual" group="false">
           <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-          <nodename posx="584.9999999999975" posy="1167.588455200199" maxwidth="200">
+          <nodename posx="-735.0000000000025" posy="1167.588455200199" maxwidth="200">
             <text data="&lt;signup&gt;"/>
           </nodename>
           <nodenote></nodenote>
           <nodes>
-            <node id="5" posx="802.99999999999727" posy="1158.545527140303" width="210" height="55" side="right" fold="false" treesize="144.56689453124955" color="#f37329" colorroot="false" layout="Manual" group="false">
+            <node id="5" posx="-517.00000000000273" posy="1158.545527140303" width="210" height="55" side="right" fold="false" treesize="144.56689453124955" color="#f37329" colorroot="false" layout="Manual" group="false">
               <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="none" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-              <nodename posx="816.99999999999727" posy="1172.545527140303" maxwidth="200">
+              <nodename posx="-503.00000000000273" posy="1172.545527140303" maxwidth="200">
                 <text data="SignupView.vue"/>
               </nodename>
               <nodenote></nodenote>
               <nodes>
-                <node id="6" posx="1112.9999999999973" posy="1160.0657908121771" width="132" height="55" side="right" fold="false" treesize="144.56689453124955" color="#f37329" colorroot="false" layout="Manual" group="false">
+                <node id="6" posx="-207.00000000000273" posy="1160.0657908121771" width="132" height="55" side="right" fold="false" treesize="144.56689453124955" color="#f37329" colorroot="false" layout="Manual" group="false">
                   <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                  <nodename posx="1126.9999999999973" posy="1174.0657908121771" maxwidth="200">
+                  <nodename posx="-193.00000000000273" posy="1174.0657908121771" maxwidth="200">
                     <text data="&quot;submit&quot;"/>
                   </nodename>
                   <nodenote></nodenote>
                   <nodes>
-                    <node id="8" posx="1344.9999999999973" posy="1120.8664499918668" width="54" height="55" side="right" fold="false" treesize="55" color="#f37329" colorroot="false" layout="Manual" group="false">
+                    <node id="8" posx="24.999999999997272" posy="1120.8664499918668" width="54" height="55" side="right" fold="false" treesize="55" color="#f37329" colorroot="false" layout="Manual" group="false">
                       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="bracket" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                      <nodename posx="1358.9999999999973" posy="1134.8664499918668" maxwidth="200">
+                      <nodename posx="38.999999999997272" posy="1134.8664499918668" maxwidth="200">
                         <text data="ok"/>
                       </nodename>
                       <nodenote></nodenote>
                     </node>
-                    <node id="7" posx="1344.9999999999973" posy="1210.4333445231159" width="80" height="55" side="right" fold="false" treesize="55" color="#f37329" colorroot="false" layout="Manual" group="false">
+                    <node id="7" posx="24.999999999997272" posy="1210.4333445231159" width="80" height="55" side="right" fold="false" treesize="55" color="#f37329" colorroot="false" layout="Manual" group="false">
                       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="bracket" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-                      <nodename posx="1358.9999999999973" posy="1224.4333445231159" maxwidth="200">
+                      <nodename posx="38.999999999997272" posy="1224.4333445231159" maxwidth="200">
                         <text data="fail"/>
                       </nodename>
                       <nodenote></nodenote>
@@ -366,37 +366,37 @@
         </node>
       </nodes>
     </node>
-    <node id="9" posx="448.49942016601199" posy="130.72891235351562" width="197" height="82" side="left" fold="false" treesize="356.0220947265625" layout="Manual" group="false">
+    <node id="9" posx="-871.50057983398801" posy="130.72891235351562" width="197" height="82" side="left" fold="false" treesize="356.0220947265625" layout="Manual" group="false">
       <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="207" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-      <nodename posx="462.49942016601199" posy="144.72891235351562" maxwidth="232.22555541992188">
+      <nodename posx="-857.50057983398801" posy="144.72891235351562" maxwidth="232.22555541992188">
         <text data="first view of application"/>
       </nodename>
       <nodenote></nodenote>
       <nodes>
-        <node id="12" posx="755.76235961913699" posy="47.5421142578125" width="327" height="55" side="right" fold="false" treesize="55" color="#c6262e" colorroot="false" layout="Manual" group="false">
+        <node id="12" posx="-564.23764038086301" posy="47.5421142578125" width="327" height="55" side="right" fold="false" treesize="55" color="#c6262e" colorroot="false" layout="Manual" group="false">
           <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="none" nodewidth="288" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-          <nodename posx="769.76235961913699" posy="61.5421142578125" maxwidth="299.3358154296875">
+          <nodename posx="-550.23764038086301" posy="61.5421142578125" maxwidth="299.3358154296875">
             <text data="VueJsView.vue view file"/>
           </nodename>
           <nodenote></nodenote>
         </node>
-        <node id="10" posx="786.19924926757449" posy="153.06832885742188" width="197" height="55" side="right" fold="false" treesize="55" color="#f9c440" colorroot="false" layout="Manual" group="false">
+        <node id="10" posx="-533.80075073242551" posy="153.06832885742188" width="197" height="55" side="right" fold="false" treesize="55" color="#f9c440" colorroot="false" layout="Manual" group="false">
           <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-          <nodename posx="800.19924926757449" posy="167.06832885742188" maxwidth="200">
+          <nodename posx="-519.80075073242551" posy="167.06832885742188" maxwidth="200">
             <text data="&lt;router-link&gt;"/>
           </nodename>
           <nodenote></nodenote>
         </node>
-        <node id="11" posx="785.87545776366824" posy="253.85076904296875" width="132" height="55" side="right" fold="false" treesize="55" color="#68b723" colorroot="false" layout="Manual" group="false">
+        <node id="11" posx="-534.12454223633176" posy="253.85076904296875" width="132" height="55" side="right" fold="false" treesize="55" color="#68b723" colorroot="false" layout="Manual" group="false">
           <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="rounded" nodewidth="200" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-          <nodename posx="799.87545776366824" posy="267.85076904296875" maxwidth="200">
+          <nodename posx="-520.12454223633176" posy="267.85076904296875" maxwidth="200">
             <text data="&quot;button&quot;"/>
           </nodename>
           <nodenote></nodenote>
         </node>
-        <node id="13" posx="767.25808715819949" posy="348.564208984375" width="236" height="55" side="right" fold="false" treesize="55" color="#f37329" colorroot="false" layout="Manual" group="false">
+        <node id="13" posx="-552.74191284180051" posy="348.564208984375" width="236" height="55" side="right" fold="false" treesize="55" color="#f37329" colorroot="false" layout="Manual" group="false">
           <style branchmargin="100" branchradius="25" linktype="curved" linkwidth="4" linkarrow="true" linkdash="solid" nodeborder="bracket" nodewidth="206" nodeborderwidth="4" nodefill="false" nodemargin="8" nodepadding="6" nodefont="Fira Code 16" nodemarkup="true"/>
-          <nodename posx="781.25808715819949" posy="362.564208984375" maxwidth="208.9735107421875">
+          <nodename posx="-538.74191284180051" posy="362.564208984375" maxwidth="208.9735107421875">
             <text data="result of action"/>
           </nodename>
           <nodenote></nodenote>
@@ -406,97 +406,97 @@
   </nodes>
   <groups/>
   <connections>
-    <connection from_id="2" to_id="0" drag_x="578.94580078125" drag_y="593.99340565999501">
+    <connection from_id="2" to_id="0" drag_x="-741.05419921875" drag_y="593.99340565999501">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="7" to_id="5" drag_x="1106.2661895751937" drag_y="1259.9132029215561">
+    <connection from_id="7" to_id="5" drag_x="-213.73381042480628" drag_y="1259.9132029215561">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="8" to_id="0" drag_x="732.02325439453125" drag_y="1028.9422607421875">
+    <connection from_id="8" to_id="0" drag_x="-587.97674560546875" drag_y="1028.9422607421875">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="18" to_id="15" drag_x="1161.2878519693986" drag_y="147.45812988281375">
+    <connection from_id="18" to_id="15" drag_x="-158.71214803060138" drag_y="147.45812988281375">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="23" to_id="0" drag_x="753.7135009765625" drag_y="840.24407958984375">
+    <connection from_id="23" to_id="0" drag_x="-566.2864990234375" drag_y="840.24407958984375">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="27" to_id="17" drag_x="1648.6510009765661" drag_y="370.47949218750159">
+    <connection from_id="27" to_id="17" drag_x="328.65100097656614" drag_y="370.47949218750159">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="29" to_id="15" drag_x="1285.9771728515625" drag_y="-123.62271118164062">
+    <connection from_id="29" to_id="15" drag_x="-34.0228271484375" drag_y="-123.62271118164062">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="32" to_id="31" drag_x="3039.4506225585965" drag_y="1383.6778004964244">
+    <connection from_id="32" to_id="31" drag_x="1719.4506225585965" drag_y="1383.6778004964244">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="33" to_id="22" drag_x="1671.8431777954061" drag_y="599.30523681640807">
+    <connection from_id="33" to_id="22" drag_x="351.84317779540606" drag_y="599.30523681640807">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="37" to_id="31" drag_x="2918.0030517578125" drag_y="953.2235107421875">
+    <connection from_id="37" to_id="31" drag_x="1598.0030517578125" drag_y="953.2235107421875">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="41" to_id="39" drag_x="2987.662261962907" drag_y="610.91544596354879">
+    <connection from_id="41" to_id="39" drag_x="1667.662261962907" drag_y="610.91544596354879">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="40" to_id="39" drag_x="3000.6077575683717" drag_y="452.37204996744913">
+    <connection from_id="40" to_id="39" drag_x="1680.6077575683717" drag_y="452.37204996744913">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="36" to_id="35" drag_x="2346.7189737955759" drag_y="731.2462056477907">
+    <connection from_id="36" to_id="35" drag_x="1026.7189737955759" drag_y="731.2462056477907">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="44" to_id="25" drag_x="1752.2499999999973" drag_y="195.89551289876385">
+    <connection from_id="44" to_id="25" drag_x="432.24999999999727" drag_y="195.89551289876385">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="43" to_id="17" drag_x="1849.7105611165425" drag_y="428.34969584147257">
+    <connection from_id="43" to_id="17" drag_x="529.71056111654252" drag_y="428.34969584147257">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="47" to_id="45" drag_x="2435.0300089518241" drag_y="1069.8240458170576">
+    <connection from_id="47" to_id="45" drag_x="1115.0300089518241" drag_y="1069.8240458170576">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="48" to_id="45" drag_x="2355.1854044596366" drag_y="1119.5790100097656">
+    <connection from_id="48" to_id="45" drag_x="1035.1854044596366" drag_y="1119.5790100097656">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="46" to_id="35" drag_x="2302.7278137207059" drag_y="816.48099263509175">
+    <connection from_id="46" to_id="35" drag_x="982.72781372070585" drag_y="816.48099263509175">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
     </connection>
-    <connection from_id="49" to_id="22" drag_x="1945.8316040039053" drag_y="1088.0724894205732">
+    <connection from_id="49" to_id="22" drag_x="625.83160400390534" drag_y="1088.0724894205732">
       <style connectiondash="dotted" connectionlwidth="4" connectionarrow="fromto" connectionpadding="3" connectionfont="Fira Code 16" connectiontwidth="100"/>
       <title></title>
       <note></note>
