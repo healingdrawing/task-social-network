@@ -20,7 +20,7 @@ import { useGroupStore } from '@/store/group';
 // when "posts" click happens, reset group id to -1 or 0, to prevent backend filtering of the posts to not show group only posts, but show all
 const groupStore = useGroupStore();
 function piniaManageData() {
-  alert('piniaManageData posts navbar');
+  alert('piniaManageData posts NavBar.vue');
   groupStore.setGroupId(-1); //todo: implement on backend. Now posts will be not filtered by group id. But only filtered by date, fresh first
 }
 </script>

@@ -56,7 +56,7 @@ watch(isPublic, (newValue, oldValue) => {
 
 function handleCheckboxChange(value: boolean) {
   // Call your method here
-  alert(value)
+  alert(value + ' . Checkbox changed. ProfileView.vue');
 }
 
 function getImgUrl(imageNameWithExtension: string) {
