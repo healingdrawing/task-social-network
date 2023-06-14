@@ -23,7 +23,11 @@
       :key="comment.id">
       <hr>
       <p>Comment Author id: {{ comment.authorId }}</p>
+      <router-link
+      :to="{ name: 'target' }"
+      @click="piniaManageData(comment)">
       <h3>Comment Author: {{ comment.authorFullName }}</h3>
+      </router-link>
       <p>Comment id: {{ comment.id }}</p>
       <p>Comment content: {{ comment.content }}</p>
     </div>
@@ -34,6 +38,7 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
 import { usePostStore } from '@/store/pinia';
+import { useProfileStore } from '@/store/pinia';
 
 const postStore = usePostStore();
 
@@ -89,6 +94,11 @@ function addComment() {
   commentsList.value.unshift(comment);
   commentContent.value = '';
 
+}
+
+const profileStore = useProfileStore();
+function piniaManageData(comment: Comment) {
+  profileStore.setTargetUserId(comment.authorId);
 }
 
 onMounted(() => {
