@@ -38,20 +38,25 @@
     <div v-for="post in postsList"
       :key="post.id">
       <hr>
-      <p>Post Author id: {{ post.authorId }}</p>
-      <h3>Post Author: {{ post.authorFullName }}</h3>
-      <p>Post id: {{ post.id }}</p>
-      <p>Post title: {{ post.title }}</p>
-      <p>Post tags: {{ post.tags }}</p>
-      <p>Post content: {{ post.content }}</p>
-      <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
-      <p>Post followers: {{ post.followers }}</p> <!-- todo: no need to display it of course, it is used on backend side, before return post as visible or not -->
+      <router-link
+      :to="{ name: 'post' }"
+      @click="piniaManageData(post)">
+        <p>Post Author id: {{ post.authorId }}</p>
+        <h3>Post Author: {{ post.authorFullName }}</h3>
+        <p>Post id: {{ post.id }}</p>
+        <p>Post title: {{ post.title }}</p>
+        <p>Post tags: {{ post.tags }}</p>
+        <p>Post content: {{ post.content }}</p>
+        <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
+        <p>Post followers: {{ post.followers }}</p> <!-- todo: no need to display it of course, it is used on backend side, before return post as visible or not -->
+      </router-link>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
+import { usePostStore } from '@/store/post';
 
 interface Follower {
   id: number;
@@ -121,6 +126,11 @@ function updateFollowersList() {
     { id: 22, name: 'Jane Doe 22' },
     { id: 33, name: 'Sir Flex 33' },
   ];
+}
+
+const postStore = usePostStore();
+function piniaManageData(post: Post) {
+  postStore.setPostId(post.id);
 }
 
 onMounted(() => {
