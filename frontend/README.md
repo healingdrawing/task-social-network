@@ -42,3 +42,6 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ---
 handmade section
+
+## View Interaction Diagram  
+![View Interaction Diagram](_files/vid.png)
