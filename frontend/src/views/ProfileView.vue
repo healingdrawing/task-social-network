@@ -1,5 +1,6 @@
 <template>
   <h1>Profile:</h1>
+  <!-- todo: add button to open BellView.vue -->
   <!-- add checkbox to make profile public -->
   <div>
     <label>
