@@ -67,6 +67,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'chats',
     component: () => import(/* webpackChunkName: "chats" */ '../views/ChatsView.vue')
   },
+  {
+    path: '/bell',
+    name: 'bell',
+    component: () => import(/* webpackChunkName: "bell" */ '../views/BellView.vue')
+  },
 ]
 
 const router = createRouter({

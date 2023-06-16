@@ -9,3 +9,4 @@ export { useProfileStore } from '@/store/profile';
 export { usePostStore } from '@/store/post';
 export { useChatStore } from '@/store/chat';
 export { useGroupStore } from '@/store/group';
+export { useBellStore } from '@/store/bell';
