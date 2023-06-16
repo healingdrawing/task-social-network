@@ -63,6 +63,8 @@
 import { ref, computed, onMounted } from 'vue';
 import { useBellStore } from '@/store/bell';
 import { Bell } from '@/store/bell';
+import router from '@/router';
+import { useGroupStore } from '@/store/group';
 
 const bellStore = useBellStore();
 const bells = ref<Bell[]>([]);
@@ -88,8 +90,11 @@ function updateTotalPages() {
   console.log("pages ", totalPages.value, " paginatedBells.value.length ", paginatedBells.value.length, "bells.value.length ", bells.value.length);
 }
 
+const groupStore = useGroupStore();
 function openGroup(groupId: number) {
   // code to open group
+  groupStore.setGroupId(groupId);
+  router.push({ name: 'group' });
 }
 
 function removeBell(index: number) {
