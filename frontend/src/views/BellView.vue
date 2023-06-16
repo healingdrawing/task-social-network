@@ -60,13 +60,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useBellStore } from '@/store/bell';
 import { Bell } from '@/store/bell';
 
 const bellStore = useBellStore();
+const bells = ref<Bell[]>([]);
 
-const bells = ref<Bell[]>(createDummyData());
 const currentPage = ref(1);
 const itemsPerPage = 3;
 
@@ -78,6 +78,16 @@ const paginatedBells = computed(() => {
 
 const totalPages = ref(Math.ceil(bells.value.length / itemsPerPage));
 
+function updateTotalPages() {
+  const totalItems = bells.value.length;
+  const lastPage = Math.ceil(totalItems / itemsPerPage);
+  if (currentPage.value > lastPage) {
+    currentPage.value = lastPage;
+  }
+  totalPages.value = lastPage;
+  console.log("pages ", totalPages.value, " paginatedBells.value.length ", paginatedBells.value.length, "bells.value.length ", bells.value.length);
+}
+
 function openGroup(groupId: number) {
   // code to open group
 }
@@ -85,6 +95,10 @@ function openGroup(groupId: number) {
 function removeBell(index: number) {
   bells.value.splice(index, 1);
   bellStore.setBells(bells.value);
+
+  // Update totalPages when removing the last event from the last page
+  updateTotalPages();
+
 }
 
 function acceptFollowRequest(userId: number) {
@@ -94,6 +108,7 @@ function acceptFollowRequest(userId: number) {
 function rejectFollowRequest(index: number) {
   bells.value.splice(index, 1);
   bellStore.setBells(bells.value);
+  updateTotalPages();
 }
 
 function acceptInvitation(groupId: number) {
@@ -103,6 +118,7 @@ function acceptInvitation(groupId: number) {
 function rejectInvitation(index: number) {
   bells.value.splice(index, 1);
   bellStore.setBells(bells.value);
+  updateTotalPages();
 }
 
 function allowJoinRequest(groupId: number, userId: number) {
@@ -112,6 +128,7 @@ function allowJoinRequest(groupId: number, userId: number) {
 function rejectJoinRequest(index: number) {
   bells.value.splice(index, 1);
   bellStore.setBells(bells.value);
+  updateTotalPages();
 }
 
 function previousPage() {
@@ -130,6 +147,14 @@ function clearAll() {
   bells.value = [];
   bellStore.setBells(bells.value);
 }
+
+onMounted(() => {
+  bells.value = createDummyData();
+  bellStore.setBells(bells.value);
+  updateTotalPages();
+});
+
+// todo: refactor/comment later. Dummy data section, should be replaced with real data from the backend
 
 function createDummyData(): Bell[] {
   const dummyData: Bell[] = [];
@@ -188,6 +213,7 @@ function generateRandomInteger(min: number, max: number): number {
 function generateRandomId(): number {
   return generateRandomInteger(1, 1000);
 }
+
 
 
 </script>
