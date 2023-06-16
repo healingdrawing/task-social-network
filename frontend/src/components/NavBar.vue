@@ -7,7 +7,7 @@
       <!-- todo: add implementation to mark/hightlight "Profile" and "Chats" -->
       <router-link :class="{ highlighted: hasNewBells }" to="/profile">Profile</router-link> |
       <router-link to="/posts" @click="piniaManageData()">Posts</router-link> |
-      <router-link :class="{ highlighted: true }" to="/chats">Chats</router-link> |
+      <router-link :class="{ highlighted: hasNewMessages }" to="/chats">Chats</router-link> |
       <router-link to="/groups">Groups</router-link> |
       <router-link to="/">Logout</router-link>
     </div>
@@ -24,6 +24,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { useBellStore } from '@/store/bell';
+import { useChatsStore } from '@/store/chats';
 import { useGroupStore } from '@/store/group';
 
 // when "posts" click happens, reset group id to -1 or 0, to prevent backend filtering of the posts to not show group only posts, but show all
@@ -35,4 +36,7 @@ function piniaManageData() {
 
 const bellStore = useBellStore();
 const hasNewBells = computed(() => bellStore.bells.length > 0);
+
+const chatsStore = useChatsStore();
+const hasNewMessages = computed(() => chatsStore.hasNewMessages);
 </script>
