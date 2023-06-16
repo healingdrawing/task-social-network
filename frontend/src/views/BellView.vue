@@ -134,7 +134,7 @@ function clearAll() {
 function createDummyData(): Bell[] {
   const dummyData: Bell[] = [];
 
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 7; i++) {
     const randomTypeIndex = Math.floor(Math.random() * 4);
     const randomType: string = ['event', 'following', 'invitation', 'request'][randomTypeIndex];
 
