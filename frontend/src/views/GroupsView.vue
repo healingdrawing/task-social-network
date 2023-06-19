@@ -20,7 +20,7 @@
         </select>
       </label>
       <br>
-      <button type="submit">Create group</button>
+      <button type="submit">Create Group</button>
     </form>
 
     <!-- SECTION 2 - groups list -->
