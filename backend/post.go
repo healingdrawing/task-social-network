@@ -56,9 +56,9 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 	data.Categories = sanitizeCategories(data.Categories)
 	ID, err := getIDbyUUID(data.UUID)
 	if err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusUnauthorized)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "You are not logged in",
 		})
 		w.Write(jsonResponse)
 		return
