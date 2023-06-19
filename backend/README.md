@@ -283,3 +283,27 @@ interface IsVisitorNotFollowerAndDidNotRequested {
   isVisitorNotFollowerAndDidNotRequested: boolean;
 }
 ```
+
+---
+
+# TODO: sergei see this and make them alright, make them go at the right place int he readme. Below this line is rought work.
+
+// Incoming JSON DTO for group creation over handler groupCreateHandler
+
+```json
+{
+  "UUID": 1,
+  "name": "group name",
+  "description": "group description",
+  "privacy": "public"
+}
+```
+
+// Incoming JSON DTO for group joining over handler groupJoinHandler
+
+```json
+{
+  "group_id": 1,
+  "member_id": 1
+}
+```

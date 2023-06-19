@@ -458,6 +458,11 @@ func getIDbyUsername(username string) (ID int, err error) {
 	return ID, nil
 }
 
+// # This function is used to retrieve the ID of the user that is currently logged in
+//
+// It does so by retrieving the UUID from the request body and then calling getIDbyUUID.
+// This function retrieves an ID based on a given UUID by joining the session table with the users table
+// and then selecting the ID from the users table
 func getIDbyUUID(UUID string) (ID int, err error) {
 	rows, err := statements["getIDbyUUID"].Query(UUID)
 	if err != nil {
