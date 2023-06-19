@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+      - frontend
+
+  backend:
+    build: ./backend
+    expose:
+      - "8000"
+    networks:
+      - backend_network
+
+  frontend:
+    build: ./frontend
+    expose:
+      - "8080"
+    networks:
+      - frontend_network
+
+networks:
+  backend_network:
+  frontend_network:
+
+
+# version: '3.8'
+
+# services:
+#   backend:
+#     build: ./backend
+#     ports:
+#       - "8000:8000"
+#     volumes:
+#       - ./backend:/backend
+#     networks:
+#       - social-network
+
+#   frontend:
+#     build: ./frontend
+#     ports:
+#       - "8080:8080"
+#     volumes:
+#       - ./frontend:/frontend
+#     networks:
+#       - social-network
+
+# networks:
+#   social-network:
