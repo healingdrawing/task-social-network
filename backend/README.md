@@ -286,6 +286,56 @@ interface IsVisitorNotFollowerAndDidNotRequested {
 
 ---
 
+## SignupView.vue  
+- ### `REQUEST` (signup new user) endpoint: `/api/signup`
+1. TypeScript
+```typescript
+interface User {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  dob: string;
+  avatar: File | null;
+  nickname: string;
+  aboutMe: string;
+  public: boolean;
+}
+```
+2. JSON
+```json
+{
+  "email": "string",
+  "password": "string",
+  "firstName": "string",
+  "lastName": "string",
+  "dob": "string",
+  "avatar": "string",
+  "nickname": "string",
+  "aboutMe": "string",
+  "public": false
+}
+```
+3. Golang
+```go
+type User struct {
+  Email    string `json:"email"`
+  Password string `json:"password"`
+  FirstName string `json:"firstName"`
+  LastName string `json:"lastName"`
+  Dob string `json:"dob"`
+  Avatar string `json:"avatar"`
+  Nickname string `json:"nickname"`
+  AboutMe string `json:"aboutMe"`
+  Public bool `json:"public"`
+}
+```
+- ### `RESPONSE` from backend:
+- - `SUCCESS` case
+Redirect to `LoginView.vue`. Perhaps will be better to sign in user automatically and redirect to `ProfileView.vue`.
+
+---
+
 # TODO: sergei see this and make them alright, make them go at the right place int he readme. Below this line is rought work.
 
 // Incoming JSON DTO for group creation over handler groupCreateHandler
