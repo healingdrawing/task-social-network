@@ -1,49 +1,285 @@
-# REAL-TIME-FORUM
+## DTO (Data Transfer Object) for:  
+1. frontend(TypeScript)  
+2. JSON(Transfer)  
+3. backend(Golang)  
 
-The goal of the project was to create a forum on which some of the data is updated in real time.
+- `ResponseError` used for error handling from backend to frontend.  
+- Avatar image not managed properly in dummy code(it is just link to assets at the moment)
+- `POST` requests should be used, because lot of `FUNCTIONALITY AVAILABLE ONLY FOR LOGGED IN USER`.  
+Except `LoginView.vue` and `SignupView.vue`.
+- `Èmail` is used as `ID` for user identification, because email is unique and used for login.
+- `Nickname` is optional, so not used to identify user.
 
-## Features
+---
+## LoginView.vue requests and responses
+- ### `REQUEST` to login:
+1. TypeScript
+```typescript
+interface Login {
+  email: string;
+  password: string;
+}
+```
+2. JSON
+```json
+{
+  "email": "string",
+  "password": "string"
+}
+```
+3. Golang
+```go
+type Login struct {
+  Email    string `json:"email"`
+  Password string `json:"password"`
+}
+```
+- ### `RESPONSE` from backend:
+- - `FAIL` case
+3. Golang
+```go
+type ResponseError struct {
+  Type string `json:"type"`
+  ErrorText string `json:"errorText"`
+}
+```
+2. JSON
+```json
+{
+  "type": "error",
+  "errorText": "string"
+}
+```
+1. TypeScript
+```typescript
+interface ResponseError {
+  type: string;
+  errorText: string;
+}
+```
+- - `SUCCESS` case
+### To show profile data, redirect to ProfileView.vue
 
-- View posts
-  - Posts update real-time
-- View post with it's comments
-  - Comments update real-time
-- Create new posts
-- Create new comments
-- View registered users
-  - User status update real-time
-  - Users are sorted by last activity, then username
-- Chat with other users
-  - Recieve notification on new message
-  - Messages update real-time
-  - Scroll to load more messages (throttled)
-  - Display user typing status
-- View users' profiles
+---
 
-## Implementation
+## ProfileView.vue  
+### To show profile data, inside `onBeforeRouterEnter()` requests to backend, to fetch data before rendering page:  
 
-- **SQLite3** DB
-- **Go** backend (server, API, DB handling)
-- **JS** front-end, app
-- **HTML**, **CSS** styling
-
-## Deployment
-
-To run the server:
-
-```bash
-  go mod download
-  go run .
+- ### `REQUEST` (to get profile data) endpoint: `/api/user/profile`  
+- ### `RESPONSE` from backend:
+3. Golang
+```go
+type Profile struct {
+  Email     string `json:"email"`
+  FirstName string `json:"firstName"`
+  LastName  string `json:"lastName"`
+  Dob       string `json:"dob"`
+  Avatar    string `json:"avatar"`
+  Nickname  string `json:"nickname"`
+  AboutMe   string `json:"aboutMe"`
+  Public    bool   `json:"public"`
+}
+```
+2. JSON
+```json
+{
+  "email": "string",
+  "firstName": "string",
+  "lastName": "string",
+  "dob": "string",
+  "avatar": "string",
+  "nickname": "string",
+  "aboutMe": "string",
+  "public": false
+}
+```
+1. TypeScript
+```typescript
+interface Profile {
+  email: string;
+  firstName: string;
+  lastName: string;
+  dob: string;
+  avatar: string;
+  nickname: string;
+  aboutMe: string;
+  public: boolean;
+}
 ```
 
-To reset DB:
-
-```bash
-  go run . -db-reset
+- ### `REQUEST` (following users list) endpoint: `/api/user/following`
+- ### `RESPONSE` from backend:
+3. Golang
+```go
+type User struct {
+  Email    string `json:"email"`
+  FullName string `json:"fullName"`
+}
+type UserList struct {
+  Users []User `json:"users"`
+}
+```
+2. JSON
+```json
+{
+  "users": [
+    {
+      "email": "string",
+      "fullName": "string"
+    }
+  ]
+}
+```
+1. TypeScript
+```typescript
+interface User {
+  email: string;
+  fullName: string;
+}
+interface UserList {
+  users: User[];
+}
 ```
 
-The app will run on: <http://localhost:8080/>
+- ### `REQUEST` (followers users list) endpoint: `/api/user/followers`
+- ### `RESPONSE` from backend:
+SAME STRUCTURE AS FOR `/api/user/following`
 
-## Author
+- ### `REQUEST` (user's posts list) endpoint: `/api/user/posts`
+- ### `RESPONSE` from backend:
+3. Golang
+```go
+type Post struct {
+  Id        int    `json:"id"`
+  Title     string `json:"title"`
+  Tags      string `json:"tags"`
+  CreatedAt string `json:"createdAt"`
+  CreatorFullName string `json:"creatorFullName"`
+  CreatorEmail string `json:"creatorEmail"`
+}
+type PostList struct {
+  Posts []Post `json:"posts"`
+}
+```
+2. JSON
+```json
+{
+  "posts": [
+    {
+      "id": 0,
+      "title": "string",
+      "tags": "string",
+      "createdAt": "string",
+      "creatorFullName": "string",
+      "creatorEmail": "string"
+    }
+  ]
+}
+```
+1. TypeScript
+```typescript
+interface Post {
+  id: number;
+  title: string;
+  tags: string;
+  createdAt: string;
+  creatorFullName: string;
+  creatorEmail: string;
+}
+interface PostList {
+  posts: Post[];
+}
+```
 
-- [@Sagar Yadav](https://github.com/sagarishere)
+## User action requests and responses  
+- ### `REQUEST` (change profile privacy) engpoint: `/api/user/privacy`
+- ### `RESPONSE` from backend:
+- - `SUCCESS` case  
+3. Golang
+```go
+type Privacy struct {
+  Public bool `json:"public"`
+}
+```
+2. JSON
+```json
+{
+  "public": false
+}
+```
+1. TypeScript
+```typescript
+interface Privacy {
+  public: boolean;
+}
+```
+
+---
+## TargetView.vue  
+### To show target user profile data, inside `onBeforeRouterEnter()` requests to backend, to fetch data before rendering page:
+
+- ### `REQUEST` (target user profile check request status) endpoint: `/api/user/profile/request/{email}`
+- ### `RESPONSE` from backend:
+- - logged in user is `NOT FOLLOWER` of target user, and `PROFILE IS PRIVATE` and `REQUEST WAS NOT MADE` case
+Show the `Request To Follow` button.
+3. Golang
+```go
+type IsVisitorNotFollowerAndDidNotRequested struct {
+  IsVisitorNotFollowerAndDidNotRequested bool `json:"isVisitorNotFollowerAndDidNotRequested"`
+}
+```
+2. JSON
+```json
+{
+  "isVisitorNotFollowerAndDidNotRequested": true
+}
+```
+1. TypeScript
+```typescript
+interface IsVisitorNotFollowerAndDidNotRequested {
+  isVisitorNotFollowerAndDidNotRequested: boolean;
+}
+```
+
+
+isProfilePublicOrVisitorFollower
+- ### `REQUEST` (target user profile data) endpoint: `/api/user/follower/{email}`
+- ### `RESPONSE` from backend:
+- - SUCCESS case
+SAME STRUCTURE AS FOR `/api/user/profile`
+
+
+
+- ### `REQUEST` (target user following users list) endpoint: `/api/user/following/{email}`  
+- - logged in user is `NOT FOLLOWER` of target user, and `PROFILE IS PRIVATE` case  
+Redirect to `ProfileView.vue`. This is the case impossible using normal navigation.
+- - `SUCCESS` case
+SAME STRUCTURE AS FOR `/api/user/following`
+Also next endpoints responses structured the same way as for logged in user profile.
+
+- ### `REQUEST` (target user followers users list) endpoint: `/api/user/followers/{email}`  
+
+- ### `REQUEST` (target user posts list) endpoint: `/api/user/posts/{email}`  
+
+## User action requests and responses
+- ### `REQUEST` (follow target user) endpoint: `/api/user/follow/{email}`
+- ### `RESPONSE` from backend:
+- - `SUCCESS` case
+3. Golang
+```go
+type IsVisitorNotFollowerAndDidNotRequested struct {
+  IsVisitorNotFollowerAndDidNotRequested bool `json:"isVisitorNotFollowerAndDidNotRequested"`
+}
+```
+2. JSON
+```json
+{
+  "isVisitorNotFollowerAndDidNotRequested": false
+}
+```
+1. TypeScript
+```typescript
+interface IsVisitorNotFollowerAndDidNotRequested {
+  isVisitorNotFollowerAndDidNotRequested: boolean;
+}
+```
