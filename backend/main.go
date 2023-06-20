@@ -54,8 +54,13 @@ func main() {
 
 	// Migrate the database to the latest version
 	err = m.Up()
-	if err != nil {
-		log.Fatal(err)
+	if err != nil && err != migrate.ErrNoChange {
+		log.Printf("Could not migrate: %v\n", err)
+	}
+	if err == migrate.ErrNoChange {
+		log.Println("No migration needed")
+		version, _, _ := m.Version()
+		log.Printf("Latest migrated version: %d\n", version)
 	}
 
 	statementsCreation()

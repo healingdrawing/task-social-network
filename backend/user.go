@@ -156,7 +156,7 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	if data.Avatar == "" {
 		rn := randomNum(0, 5)
-		defaultAvatar, err := os.Open("./backend/assets/images/profile/defaults/" + strconv.Itoa(rn) + ".jpeg")
+		defaultAvatar, err := os.Open("./assets/images/profile/defaults/" + strconv.Itoa(rn) + ".jpeg")
 		if err != nil {
 			log.Println(err.Error())
 			w.WriteHeader(http.StatusFailedDependency)
@@ -168,6 +168,7 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		defer defaultAvatar.Close()
 		data.avatarBytes, err = ioutil.ReadAll(defaultAvatar)
+		defaultAvatar.Close()
 		if err != nil {
 			log.Println(err.Error())
 			w.WriteHeader(http.StatusFailedDependency)
@@ -177,6 +178,8 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write(jsonResponse)
 			return
 		}
+		// delete default avatar
+		_ = os.Remove(defaultAvatar.Name())
 	}
 
 	if data.Public == true {

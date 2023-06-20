@@ -34,7 +34,7 @@ func dbInit() {
 			id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
 			user_id INTEGER NOT NULL REFERENCES users (id),
 			post_id INTEGER NOT NULL REFERENCES post (id),
-			text VARCHAR NOT NULL
+			text VARCHAR NOT NULL,
 			create_time DATETIME NOT NULL
 			);
 		CREATE TABLE message (
@@ -66,6 +66,17 @@ func dbInit() {
 			PRIMARY KEY (group_id, member_id),
 			FOREIGN KEY (group_id) REFERENCES groups(id),
 			FOREIGN KEY (member_id) REFERENCES users(id)
+			);
+		CREATE TABLE category (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT
+			);
+		CREATE TABLE post_category (
+			post_id INTEGER NOT NULL,
+			category_id INTEGER,
+			PRIMARY KEY (post_id, category_id),
+			FOREIGN KEY (post_id) REFERENCES post(id),
+			FOREIGN KEY (category_id) REFERENCES category(id)
 			);`)
 
 		if err != nil {
