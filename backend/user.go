@@ -34,12 +34,25 @@ type signupData struct {
 }
 
 type ProfileData struct {
+	Email       string `json:"email"`
+	FirstName   string `json:"firstname"`
+	LastName    string `json:"lastname"`
+	Dob         string `json:"dob"`
+	Avatar      string `json:"avatar"`
+	avatarBytes []byte `sqlite3:"avatar"`
+	Nickname    string `json:"nickname"`
+	AboutMe     string `json:"aboutMe"`
+	Public      bool   `json:"public"`
+	Privacy     string `sqlite3:"privacy"`
+}
+
+type ProfileDTOtoFrontend struct {
 	Email     string `json:"email"`
 	FirstName string `json:"firstname"`
 	LastName  string `json:"lastname"`
 	Dob       string `json:"dob"`
 	Avatar    string `json:"avatar"`
-	Nickanme  string `json:"nickname"`
+	Nickname  string `json:"nickname"`
 	AboutMe   string `json:"aboutMe"`
 	Public    bool   `json:"public"`
 }
@@ -47,10 +60,6 @@ type ProfileData struct {
 type loginData struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
-}
-
-type UsernameData struct {
-	Username string `json:"username"`
 }
 
 type UUIDData struct {
@@ -69,21 +78,25 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write(jsonResponse)
 		}
 	}()
-	var data UsernameData
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	err := decoder.Decode(&data)
+
+	// get uuid from the cookie
+	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(400)
+		w.WriteHeader(401)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "Bad request",
+			"message": "User not found",
 		})
 		w.Write(jsonResponse)
 		return
 	}
+	uuid := cookie.Value
+
+	// get the ID of the user that is currently logged in
+	ID, err := getIDbyUUID(uuid)
+
 	var profile ProfileData
-	rows, err := statements["getUserProfile"].Query(data.Username)
+	rows, err := statements["getUserProfile"].Query(ID)
 	if err != nil {
 		log.Println(err.Error())
 		w.WriteHeader(401)
@@ -95,11 +108,27 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 	rows.Next()
-	rows.Scan(&profile.Nickanme, &profile.Dob, &profile.FirstName, &profile.LastName, &profile.Email)
+	rows.Scan(&profile.Email, &profile.FirstName, &profile.LastName, &profile.Dob,
+		&profile.avatarBytes, &profile.Nickname, &profile.AboutMe, &profile.Privacy)
 	rows.Close()
 
+	profileDTO := ProfileDTOtoFrontend{}
+
+	profileDTO.Email = profile.Email
+	profileDTO.FirstName = profile.FirstName
+	profileDTO.LastName = profile.LastName
+	profileDTO.Dob = profile.Dob
+	profileDTO.Avatar = base64.StdEncoding.EncodeToString(profile.avatarBytes)
+	profileDTO.Nickname = profile.Nickname
+	profileDTO.AboutMe = profile.AboutMe
+	if profile.Privacy == "public" {
+		profileDTO.Public = true
+	} else {
+		profileDTO.Public = false
+	}
+
 	w.WriteHeader(200)
-	jsonResponse, _ := json.Marshal(profile)
+	jsonResponse, _ := json.Marshal(profileDTO)
 	w.Write(jsonResponse)
 }
 

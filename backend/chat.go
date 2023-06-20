@@ -16,6 +16,10 @@ type MessagesRequest struct {
 	OtherUser string `json:"otheruser"`
 }
 
+type UsernameData struct {
+	Username string `json:"username"`
+}
+
 type MessagesResponse struct {
 	Messages []Message `json:"messages"`
 }
