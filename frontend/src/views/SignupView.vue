@@ -31,7 +31,7 @@
     </div>
     <div>
       <label for="avatar">Avatar:</label>
-      <input type="file" id="avatar" accept="image/*" @change="handleAvatarChange">
+      <input type="file" id="avatar" accept="image/jpeg, image/png, image/gif" @change="handleAvatarChange">
       <div class="optional">(optional)</div>
     </div>
     <div>
