@@ -109,6 +109,7 @@ func statementsCreation() {
 		"getUserID":          `SELECT id FROM users WHERE email = ?;`,
 		"getUserPrivacy":     `SELECT privacy FROM users WHERE id = ?;`,
 		"getUserCredentials": `SELECT email, password FROM users WHERE email = ?;`,
+		"updateUserPrivacy":  `UPDATE users SET privacy = ? WHERE id = ?;`,
 
 		"addSession":    `INSERT INTO session (uuid, user_id) VALUES (?, ?);`,
 		"getSession":    `SELECT * FROM session WHERE uuid = ?;`,

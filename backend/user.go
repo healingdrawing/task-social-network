@@ -66,6 +66,81 @@ type UUIDData struct {
 	UUID string `json:"UUID"`
 }
 
+func changePrivacyHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+			w.WriteHeader(500)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "internal server error",
+			})
+			w.Write(jsonResponse)
+		}
+	}()
+
+	cookie, err := r.Cookie("user_uuid")
+	if err != nil || cookie.Value == "" || cookie == nil {
+		w.WriteHeader(401)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "You are not logged in",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+
+	uuid := cookie.Value
+
+	ID, err := getIDbyUUID(uuid)
+	if err != nil {
+		w.WriteHeader(401)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "You are not logged in",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+
+	incomingData := map[string]any{}
+	// decode the request body into the DTO
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&incomingData)
+	if err != nil {
+		w.WriteHeader(400)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "bad request",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+	wantPublic := incomingData["public"].(bool)
+
+	privacyvalue := ""
+	if wantPublic == true {
+		privacyvalue = "public"
+	} else {
+		privacyvalue = "private"
+	}
+
+	_, err = statements["updateUserPrivacy"].Exec(privacyvalue, ID)
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(500)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "internal server error",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+
+	w.WriteHeader(200)
+	jsonResponse, _ := json.Marshal(map[string]string{
+		"message": "Privacy updated",
+	})
+	w.Write(jsonResponse)
+}
+
 func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {

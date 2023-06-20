@@ -93,6 +93,7 @@ func main() {
 	http.HandleFunc("/api/user/login", userLoginHandler)
 	http.HandleFunc("/api/user/logout", userLogoutHandler)
 	http.HandleFunc("/api/user/posts", userPostsHandler)
+	http.HandleFunc("/api/user/privacy", changePrivacyHandler)
 	http.HandleFunc("/api/user/profile", userProfileHandler)
 	http.HandleFunc("/api/user/register", userRegisterHandler)
 	http.HandleFunc("/api/user/unfollow", UnfollowHandler)
