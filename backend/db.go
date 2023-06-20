@@ -71,6 +71,20 @@ func dbInit() {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT
 			);
+		CREATE TABLE followers (
+			user_id INTEGER,
+			follower_id INTEGER,
+			PRIMARY KEY (user_id, follower_id),
+			FOREIGN KEY (user_id) REFERENCES users(id),
+			FOREIGN KEY (follower_id) REFERENCES users(id)
+			);
+		CREATE TABLE followers_pending (
+			user_id INTEGER,
+			follower_id INTEGER,
+			PRIMARY KEY (user_id, follower_id),
+			FOREIGN KEY (user_id) REFERENCES users(id),
+			FOREIGN KEY (follower_id) REFERENCES users(id)
+			);
 		CREATE TABLE post_category (
 			post_id INTEGER NOT NULL,
 			category_id INTEGER,
@@ -93,11 +107,13 @@ func statementsCreation() {
 		"getUserProfile":     `SELECT email, first_name, last_name, dob, avatar, nickname, about_me, privacy from users WHERE id = ?;`,
 		"getUserbyID":        `SELECT email, first_name, last_name, nickname FROM users WHERE id = ?;`,
 		"getUserID":          `SELECT id FROM users WHERE email = ?;`,
+		"getUserPrivacy":     `SELECT privacy FROM users WHERE id = ?;`,
 		"getUserCredentials": `SELECT email, password FROM users WHERE email = ?;`,
 
 		"addSession":    `INSERT INTO session (uuid, user_id) VALUES (?, ?);`,
 		"getSession":    `SELECT * FROM session WHERE uuid = ?;`,
 		"getIDbyUUID":   `SELECT id FROM session INNER JOIN users ON users.id=user_id WHERE uuid = ?;`,
+		"getIDbyEmail":  `SELECT id FROM users WHERE email = ?;`,
 		"removeSession": `DELETE FROM session WHERE uuid = ?;`,
 
 		"addPost":     `INSERT INTO post (user_id, title, categories, text) VALUES (?, ?, ?, ?);`,
@@ -114,6 +130,14 @@ func statementsCreation() {
 		"addGroupMember":      `INSERT INTO group_members (group_id, member_id) VALUES (?, ?);`,
 		"getGroupMembers":     `SELECT member_id FROM group_members WHERE group_id = ?;`,
 		"getGroupMembersInfo": `SELECT nickname, first_name, last_name FROM users WHERE id = ?;`,
+
+		"getFollowers":          `SELECT follower_id FROM followers WHERE user_id = ?;`,
+		"getFollowersPending":   `SELECT follower_id FROM followers_pending WHERE user_id = ?;`,
+		"addFollower":           `INSERT INTO followers (user_id, follower_id) VALUES (?, ?);`,
+		"addFollowerPending":    `INSERT INTO followers_pending (user_id, follower_id) VALUES (?, ?);`,
+		"removeFollower":        `DELETE FROM followers WHERE user_id = ? AND follower_id = ?;`,
+		"removeFollowerPending": `DELETE FROM followers_pending WHERE user_id = ? AND follower_id = ?;`,
+		"getFollowing":          `SELECT user_id FROM followers WHERE follower_id = ?;`,
 
 		"getGroupPendingMembers":     `SELECT member_id FROM group_pending_members WHERE group_id = ?;`,
 		"addGroupPendingMember":      `INSERT INTO group_pending_members (group_id, member_id) VALUES (?, ?);`,

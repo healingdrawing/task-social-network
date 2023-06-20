@@ -85,6 +85,10 @@ func main() {
 	http.HandleFunc("/api/chat/getmessages", chatMessagesHandler)
 	http.HandleFunc("/api/chat/newmessage", chatNewHandler)
 	http.HandleFunc("/api/chat/typing", chatTypingHandler)
+	http.HandleFunc("/api/user/following", FollowingHandler)
+	http.HandleFunc("/api/user/followers", FollowersHandler)
+	http.HandleFunc("/api/user/follow", FollowHandler)
+	http.HandleFunc("/api/user/unfollow", UnfollowHandler)
 	// Server
 	log.Fatal(http.ListenAndServe(":"+portHTTP, nil))
 }

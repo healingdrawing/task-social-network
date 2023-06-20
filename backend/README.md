@@ -60,12 +60,75 @@ To show profile data, inside `onBeforeRouterEnter()` requests to backend, to fet
   "public": false
 }
 ```
+
+<hr style="border:2px solid green">
+
+![request][request] `/api/user/follow` (follow this target user):
+
+```json
+{
+  "email": "string"
+}
+```
+
+![response][response]
+`SUCCESS`  
+
+if the target user was private:
+
+```json
+{
+  "message": "request sent to follow the user",
+}
+```
+
+if the target user was public:
+
+```json
+{
+  "message": "user followed",
+}
+```
   
+<hr style="border:2px solid green">
+
+![request][request] `/api/user/unfollow` (unfollow this target user):
+  
+  ```json
+  {
+    "email": "string"
+  }
+  ```
+
+![response][response]
+`SUCCESS`  
+
+```json
+{
+  "message": "user unfollowed",
+}
+```
+
 <hr style="border:2px solid green">
 
 ![request][request] `/api/user/following`  (following users list) :  
 
+> [x] We need to check the following list of other users also, whose profile we visit. So we need to make request to backend to get the list of following users.
+
+- If request has no data, returns list of following users of logged in user.
+
+- If request has JSON email property, then we can get the list of following users of user to whom the email belongs to.
+
+connects to handler `FollowingHandler`
+
+```json
+{
+  "email": "string",
+}
+```
+
 ![response][response] 
+
 ```json
 {
   "users": [
