@@ -33,7 +33,7 @@ func FollowingHandler(w http.ResponseWriter, r *http.Request) {
 		if err := recover(); err != nil {
 			w.WriteHeader(500)
 			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
+				"message": "internal server error, something went wrong",
 			})
 			w.Write(jsonResponse)
 		}
@@ -46,10 +46,11 @@ func FollowingHandler(w http.ResponseWriter, r *http.Request) {
 		data := struct {
 			Email string `json:"email"`
 		}{}
+		incomingData := map[string]any{}
 		// decode the request body into the DTO
 		decoder := json.NewDecoder(r.Body)
 		decoder.DisallowUnknownFields()
-		err := decoder.Decode(&data)
+		err := decoder.Decode(&incomingData)
 		if err != nil {
 			w.WriteHeader(400)
 			jsonResponse, _ := json.Marshal(map[string]string{
@@ -58,71 +59,77 @@ func FollowingHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write(jsonResponse)
 			return
 		}
-		// get the user id from the email
-
+		data.Email = incomingData["email"].(string)
 		err = statements["getIDbyEmail"].QueryRow(data.Email).Scan(&userID)
 		if err != nil {
 			w.WriteHeader(500)
 			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
+				"message": "internal server error, getIDbyEmail query failed",
 			})
 			w.Write(jsonResponse)
 			return
 		}
 	} else {
-		// get uuid of current user from cookies
 		cookie, err := r.Cookie("user_uuid")
 		if err != nil {
 			w.WriteHeader(400)
 			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "bad request",
+				"message": "bad request, could not get cookie",
 			})
 			w.Write(jsonResponse)
 			return
 		}
-		// get the user id from the uuid
 		err = statements["getIDbyUUID"].QueryRow(cookie.Value).Scan(&userID)
 		if err != nil {
 			w.WriteHeader(500)
 			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
+				"message": "internal server error, getIDbyUUID query failed",
 			})
 			w.Write(jsonResponse)
 			return
 		}
 	}
-	// get the list of users that the target userID is following
 	rows, err := statements["getFollowing"].Query(userID)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error, getFollowing query failed",
 		})
 		w.Write(jsonResponse)
 		return
 	}
-	// create a slice of Follower
-	var followings []Following
-	// iterate over the rows
+	allFollowingIds := []int{}
 	for rows.Next() {
-		// create a new Follower
-		var follower Following
-		// scan the row into the Follower
-		err := rows.Scan(&follower.id, &follower.Email, &follower.firstName, &follower.lastName)
+		var id int
+		err := rows.Scan(&id)
 		if err != nil {
 			w.WriteHeader(500)
 			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
+				"message": "internal server error, scan failed",
 			})
 			w.Write(jsonResponse)
 			return
 		}
-		// set the FullName of the Follower
-		follower.FullName = follower.firstName + " " + follower.lastName
-		// append the Follower to the slice
-		followings = append(followings, follower)
+		allFollowingIds = append(allFollowingIds, id)
 	}
-	// encode the slice into json
+
+	var followings []Following
+
+	for _, id := range allFollowingIds {
+		var nickname string
+		var followingProfile Following
+		err = statements["getUserbyID"].QueryRow(id).Scan(&followingProfile.Email, &followingProfile.firstName, &followingProfile.lastName, &nickname)
+		if err != nil {
+			w.WriteHeader(500)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "internal server error, getUserbyID query failed",
+			})
+			w.Write(jsonResponse)
+			return
+		}
+		followingProfile.FullName = followingProfile.firstName + " " + followingProfile.lastName
+		followings = append(followings, followingProfile)
+	}
 	jsonResponse, _ := json.Marshal(followings)
 	// write the response
 	w.Write(jsonResponse)
@@ -134,7 +141,7 @@ func FollowersHandler(w http.ResponseWriter, r *http.Request) {
 		if err := recover(); err != nil {
 			w.WriteHeader(500)
 			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
+				"message": "internal server error. Something went wrong",
 			})
 			w.Write(jsonResponse)
 		}
@@ -147,10 +154,11 @@ func FollowersHandler(w http.ResponseWriter, r *http.Request) {
 		data := struct {
 			Email string `json:"email"`
 		}{}
+		incomingData := map[string]any{}
 		// decode the request body into the DTO
 		decoder := json.NewDecoder(r.Body)
 		decoder.DisallowUnknownFields()
-		err := decoder.Decode(&data)
+		err := decoder.Decode(&incomingData)
 		if err != nil {
 			w.WriteHeader(400)
 			jsonResponse, _ := json.Marshal(map[string]string{
@@ -159,13 +167,14 @@ func FollowersHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write(jsonResponse)
 			return
 		}
+		data.Email = incomingData["email"].(string)
 		// get the user id from the email
 
 		err = statements["getIDbyEmail"].QueryRow(data.Email).Scan(&userID)
 		if err != nil {
 			w.WriteHeader(500)
 			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
+				"message": "internal server error. getIDbyEmail query failed",
 			})
 			w.Write(jsonResponse)
 			return
@@ -186,7 +195,7 @@ func FollowersHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(500)
 			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
+				"message": "internal server error, getIDbyUUID query failed",
 			})
 			w.Write(jsonResponse)
 			return
@@ -198,7 +207,7 @@ func FollowersHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error, getFollowers query failed",
 		})
 		w.Write(jsonResponse)
 		return
@@ -210,11 +219,22 @@ func FollowersHandler(w http.ResponseWriter, r *http.Request) {
 		// create a new Follower
 		var follower Following
 		// scan the row into the Follower
-		err := rows.Scan(&follower.id, &follower.Email, &follower.firstName, &follower.lastName)
+		err := rows.Scan(&follower.id)
 		if err != nil {
 			w.WriteHeader(500)
 			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
+				"message": "internal server error, scan failed",
+			})
+			w.Write(jsonResponse)
+			return
+		}
+		// get the email, first_name, last_name of the follower
+		var nickname string
+		err = statements["getUserbyID"].QueryRow(follower.id).Scan(&follower.Email, &follower.firstName, &follower.lastName, &nickname)
+		if err != nil {
+			w.WriteHeader(500)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "internal server error, getUserbyID query failed",
 			})
 			w.Write(jsonResponse)
 			return
@@ -243,7 +263,7 @@ func FollowHandler(w http.ResponseWriter, r *http.Request) {
 		if err := recover(); err != nil {
 			w.WriteHeader(500)
 			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
+				"message": "internal server error. Something went wrong",
 			})
 			w.Write(jsonResponse)
 		}
@@ -264,7 +284,7 @@ func FollowHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error. getIDbyUUID query failed",
 		})
 		w.Write(jsonResponse)
 		return
@@ -291,7 +311,7 @@ func FollowHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error. getIDbyEmail query failed",
 		})
 		w.Write(jsonResponse)
 		return
@@ -303,7 +323,7 @@ func FollowHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error. getUserPrivacy query failed",
 		})
 		w.Write(jsonResponse)
 		return

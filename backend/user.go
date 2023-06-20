@@ -159,6 +159,16 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// if dob is empty, return error
+	if data.Dob == "" {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "Invalid date of birth",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+
 	// check the avatar validity
 	if data.Avatar != "" {
 		avatarData, err := base64.StdEncoding.DecodeString(data.Avatar)
@@ -218,15 +228,17 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	onlyEnglishRegex := regexp.MustCompile(`^[a-zA-Z0-9]{2,15}$`)
 
-	if !onlyEnglishRegex.MatchString(data.Nickname) {
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": `Invalid nickname: ` + data.Nickname + `
+	if data.Nickname != "" {
+		if !onlyEnglishRegex.MatchString(data.Nickname) {
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": `Invalid nickname: ` + data.Nickname + `
 Nickname must only contain english letters and numbers.
 Nickname must be between 2 and 15 characters long.`,
-		})
-		w.Write(jsonResponse)
-		return
+			})
+			w.Write(jsonResponse)
+			return
+		}
 	}
 
 	if len(data.FirstName) < 1 || len(data.FirstName) > 32 {
@@ -469,20 +481,20 @@ func userLogoutHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write(jsonResponse)
 		}
 	}()
-	var data UUIDData
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	err := decoder.Decode(&data)
-	if err != nil {
-		log.Println(err.Error())
-		w.WriteHeader(400)
+
+	cookie, err := r.Cookie("user_uuid")
+	if err != nil || cookie.Value == "" || cookie == nil {
+		w.WriteHeader(200)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "Bad request",
+			"message": "You are not logged in",
 		})
 		w.Write(jsonResponse)
 		return
 	}
-	_, err = statements["removeSession"].Exec(data.UUID)
+
+	uuid := cookie.Value
+
+	_, err = statements["removeSession"].Exec(uuid)
 	if err != nil {
 		log.Println(err.Error())
 		w.WriteHeader(500)
