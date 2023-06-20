@@ -206,6 +206,8 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 		rows.Close()
 	}
 
+	log.Println(incomingEmail)
+
 	// get the ID of the user that we want to see
 	ID, err := getIDbyEmail(incomingEmail)
 	if err != nil {
@@ -491,7 +493,7 @@ Password must only contain english characters and numbers`,
 		w.Write(jsonResponse)
 		return
 	}
-	UUID, err := createSession(data.Nickname)
+	UUID, err := createSession(data.Email)
 	if err != nil {
 		log.Println(err.Error())
 		w.WriteHeader(500)
@@ -503,8 +505,8 @@ Password must only contain english characters and numbers`,
 	}
 	w.WriteHeader(200)
 	jsonResponse, _ := json.Marshal(map[string]string{
-		"UUID":     UUID,
-		"username": data.Nickname,
+		"UUID":  UUID,
+		"email": data.Email,
 	})
 	w.Write(jsonResponse)
 }
@@ -726,16 +728,16 @@ func getIDbyUUID(UUID string) (ID int, err error) {
 	return ID, nil
 }
 
-func getUsernamebyID(ID int) (username string, err error) {
-	rows, err := statements["getUserbyID"].Query(ID)
+func getUserEmailbyID(ID int) (email string, err error) {
+	rows, err := statements["getEmailByID"].Query(ID)
 	if err != nil {
 		return "", err
 	}
 	defer rows.Close()
 	rows.Next()
-	rows.Scan(&username)
+	rows.Scan(&email)
 	rows.Close()
-	return username, nil
+	return email, nil
 }
 
 func isImage(data []byte) bool {

@@ -68,6 +68,22 @@ json body only needs email property, because email is used as ID to identify use
   "public": false
 }
 ```
+<hr style="border:2px solid green">
+
+![request][request]  `api/followrequestlist` (follow request list, all pending follow requests to the current logged in user)
+
+No need to send any data in request, because user_id is taken from token.
+
+![response][response]  
+
+```json
+[
+  {
+    "email": "string",
+    "fullName": "string"
+  }
+]
+```
 
 <hr style="border:2px solid green">
 

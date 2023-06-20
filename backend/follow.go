@@ -239,15 +239,11 @@ func FollowersHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write(jsonResponse)
 			return
 		}
-		// set the FullName of the Follower
 		follower.FullName = follower.firstName + " " + follower.lastName
-		// append the Follower to the slice
 		followers = append(followers, follower)
 	}
 
-	// encode the slice into json
 	jsonResponse, _ := json.Marshal(followers)
-	// write the response
 	w.Write(jsonResponse)
 
 }
@@ -444,4 +440,77 @@ func UnfollowHandler(w http.ResponseWriter, r *http.Request) {
 	})
 	w.Write(jsonResponse)
 	return
+}
+
+// # FollowRequestListHandler returns a list of users that have sent a follow request to the current user
+//
+// - No JSON body is required
+func followRequestListHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	defer func() {
+		if err := recover(); err != nil {
+			w.WriteHeader(500)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "internal server error",
+			})
+			w.Write(jsonResponse)
+		}
+	}()
+	// get the uuid of the current user from the cookies
+	cookie, err := r.Cookie("user_uuid")
+	if err != nil {
+		w.WriteHeader(400)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "bad request",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+	// get the user id from the uuid
+	var userID int
+	err = statements["getIDbyUUID"].QueryRow(cookie.Value).Scan(&userID)
+	if err != nil {
+		w.WriteHeader(500)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "internal server error",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+	rows, err := statements["getFollowersPending"].Query(userID)
+	if err != nil {
+		w.WriteHeader(500)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "internal server error. getFollowersPending query failed",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+	var followers []Follower
+	for rows.Next() {
+		var follower Follower
+		err = rows.Scan(&follower.id)
+		if err != nil {
+			w.WriteHeader(500)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "internal server error. scan failed",
+			})
+			w.Write(jsonResponse)
+			return
+		}
+		var nickname string
+		err = statements["getUserbyID"].QueryRow(follower.id).Scan(&follower.Email, &follower.firstName, &follower.lastName, &nickname)
+		if err != nil {
+			w.WriteHeader(500)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "internal server error. getUserbyID query failed",
+			})
+			w.Write(jsonResponse)
+			return
+		}
+		follower.FullName = follower.firstName + " " + follower.lastName
+		followers = append(followers, follower)
+	}
+	jsonResponse, _ := json.Marshal(followers)
+	w.Write(jsonResponse)
 }

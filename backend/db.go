@@ -91,6 +91,13 @@ func dbInit() {
 			PRIMARY KEY (post_id, category_id),
 			FOREIGN KEY (post_id) REFERENCES post(id),
 			FOREIGN KEY (category_id) REFERENCES category(id)
+			);
+		CREATE TABLE almost_private (
+			user_id INTEGER,
+			post_id INTEGER,
+			PRIMARY KEY (user_id, post_id),
+			FOREIGN KEY (user_id) REFERENCES users(id),
+			FOREIGN KEY (post_id) REFERENCES post(id)
 			);`)
 
 		if err != nil {

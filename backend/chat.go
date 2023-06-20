@@ -143,7 +143,7 @@ func chatMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	rows.Close()
 	for i := 0; i < len(messages.Messages); i++ {
-		messages.Messages[i].UsernameFrom, err = getUsernamebyID(IDpairs[i][0])
+		messages.Messages[i].UsernameFrom, err = getUserEmailbyID(IDpairs[i][0])
 		if err != nil {
 			w.WriteHeader(500)
 			jsonResponse, _ := json.Marshal(map[string]string{
@@ -152,7 +152,7 @@ func chatMessagesHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write(jsonResponse)
 			return
 		}
-		messages.Messages[i].UsernameTo, err = getUsernamebyID(IDpairs[i][1])
+		messages.Messages[i].UsernameTo, err = getUserEmailbyID(IDpairs[i][1])
 		if err != nil {
 			w.WriteHeader(500)
 			jsonResponse, _ := json.Marshal(map[string]string{

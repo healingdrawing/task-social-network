@@ -82,6 +82,7 @@ func main() {
 
 	http.HandleFunc("/api/followrequest/reject", rejectFollowerHandler)
 	http.HandleFunc("/api/followrequest/accept", approveFollowerHandler)
+	http.HandleFunc("/api/followrequestlist", followRequestListHandler)
 
 	http.HandleFunc("/api/post/get", postGetHandler)
 	http.HandleFunc("/api/post/submit", postNewHandler)
