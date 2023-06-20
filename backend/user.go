@@ -45,7 +45,7 @@ type ProfileData struct {
 }
 
 type loginData struct {
-	Username string `json:"username"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
@@ -320,16 +320,16 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(400)
+		w.WriteHeader(http.StatusUnprocessableEntity)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "Bad request",
+			"message": "Bad request. The JSON body is not as expected",
 		})
 		w.Write(jsonResponse)
 		return
 	}
 
-	var username, hash string
-	rows, err := statements["getUserCredentials"].Query(data.Username, data.Username)
+	var email, hash string
+	rows, err := statements["getUserCredentials"].Query(data.Email)
 	if err != nil {
 		log.Println(err.Error())
 		w.WriteHeader(401)
@@ -341,13 +341,13 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 	rows.Next()
-	rows.Scan(&username, &hash)
+	rows.Scan(&email, &hash)
 	rows.Close()
 
-	if username == "" || hash == "" {
+	if email == "" || hash == "" {
 		w.WriteHeader(401)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "Invalid credentials",
+			"message": "Invalid credentials. Email or password is incorrect",
 		})
 		w.Write(jsonResponse)
 		return
@@ -364,7 +364,7 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	UUID, err := createSession(username)
+	UUID, err := createSession(email)
 
 	if err != nil {
 		log.Println(err.Error())
@@ -377,8 +377,8 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(200)
 	jsonResponse, _ := json.Marshal(map[string]string{
-		"UUID":     UUID,
-		"username": username,
+		"UUID":  UUID,
+		"email": email,
 	})
 	w.Write(jsonResponse)
 }

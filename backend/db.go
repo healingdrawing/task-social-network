@@ -93,7 +93,7 @@ func statementsCreation() {
 		"getUserProfile":     `SELECT email, first_name, last_name, dob, avatar, nickname, about_me, privacy from users WHERE id = ?;`,
 		"getUserbyID":        `SELECT email, first_name, last_name, nickname FROM users WHERE id = ?;`,
 		"getUserID":          `SELECT id FROM users WHERE email = ?;`,
-		"getUserCredentials": `SELECT first_name, last_name, nickname, password FROM users WHERE email = ?;`,
+		"getUserCredentials": `SELECT email, password FROM users WHERE email = ?;`,
 
 		"addSession":    `INSERT INTO session (uuid, user_id) VALUES (?, ?);`,
 		"getSession":    `SELECT * FROM session WHERE uuid = ?;`,
