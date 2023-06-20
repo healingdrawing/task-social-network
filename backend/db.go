@@ -35,13 +35,14 @@ func dbInit() {
 			user_id INTEGER NOT NULL REFERENCES users (id),
 			post_id INTEGER NOT NULL REFERENCES post (id),
 			text VARCHAR NOT NULL
+			create_time DATETIME NOT NULL
 			);
 		CREATE TABLE message (
 			id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
 			from_id INTEGER NOT NULL REFERENCES users (id),
 			to_id INTEGER NOT NULL REFERENCES users (id),
 			text VARCHAR NOT NULL,
-			time_sent DATETIME
+			time_sent DATETIME NOT NULL
 			);
 		CREATE TABLE groups (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,29 +50,22 @@ func dbInit() {
 			description TEXT,
 			creator INTEGER,
 			creation_date TIMESTAMP,
-			privacy TEXT
-			FOREIGN KEY (creator) REFERENCES members(id)
+			privacy TEXT,
+			FOREIGN KEY (creator) REFERENCES users (id)
 			);
 		CREATE TABLE group_members (
 			group_id INTEGER,
 			member_id INTEGER,
 			PRIMARY KEY (group_id, member_id),
 			FOREIGN KEY (group_id) REFERENCES groups(id),
-			FOREIGN KEY (member_id) REFERENCES members(id)
+			FOREIGN KEY (member_id) REFERENCES users(id)
 			);
 		CREATE TABLE group_pending_members (
 			group_id INTEGER,
 			member_id INTEGER,
 			PRIMARY KEY (group_id, member_id),
 			FOREIGN KEY (group_id) REFERENCES groups(id),
-			FOREIGN KEY (member_id) REFERENCES members(id)
-			);
-		CREATE TABLE group_images (
-			group_id INTEGER,
-			image_path TEXT,
-			header_image_path TEXT,
-			PRIMARY KEY (group_id, image),
-			FOREIGN KEY (group_id) REFERENCES groups(id)
+			FOREIGN KEY (member_id) REFERENCES users(id)
 			);`)
 
 		if err != nil {
@@ -83,12 +77,12 @@ func dbInit() {
 
 func statementsCreation() {
 	for key, query := range map[string]string{
-		"addUser":            `INSERT INTO users (username, age, gender, first_name, last_name, email, password) VALUES (?, ?, ?, ?, ?, ?, ?);`,
-		"getAllUsers":        `SELECT id, username from users`,
-		"getUserProfile":     `SELECT username, age, gender, first_name, last_name, email from users WHERE username=?`,
-		"getUserbyID":        `SELECT username FROM users WHERE id = ?;`,
-		"getUserID":          `SELECT id FROM users WHERE username = ?;`,
-		"getUserCredentials": `SELECT username, password FROM users WHERE username = ? OR email = ?;`,
+		"addUser":            `INSERT INTO users (email, password, first_name, last_name, dob, avatar, nickname, about_me, privacy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+		"getAllUsers":        `SELECT id, email, first_name, last_name, nickname from users;`,
+		"getUserProfile":     `SELECT email, first_name, last_name, dob, avatar, nickname, about_me, privacy from users WHERE id = ?;`,
+		"getUserbyID":        `SELECT email, first_name, last_name, nickname FROM users WHERE id = ?;`,
+		"getUserID":          `SELECT id FROM users WHERE email = ?;`,
+		"getUserCredentials": `SELECT first_name, last_name, nickname, password FROM users WHERE email = ?;`,
 
 		"addSession":    `INSERT INTO session (uuid, user_id) VALUES (?, ?);`,
 		"getSession":    `SELECT * FROM session WHERE uuid = ?;`,
@@ -96,9 +90,9 @@ func statementsCreation() {
 		"removeSession": `DELETE FROM session WHERE uuid = ?;`,
 
 		"addPost":     `INSERT INTO post (user_id, title, categories, text) VALUES (?, ?, ?, ?);`,
-		"getPosts":    `SELECT post.id, username, title, categories, text FROM post INNER JOIN users ON user_id=users.id ORDER BY post.id DESC;`,
+		"getPosts":    `SELECT post.id, first_name, last_name, nickname, title, categories, text FROM post INNER JOIN users ON user_id=users.id ORDER BY post.id DESC;`,
 		"addComment":  `INSERT INTO comment (user_id, post_id, text) VALUES (?, ?, ?);`,
-		"getComments": `SELECT username, text FROM comment INNER JOIN users ON user_id = users.id WHERE post_id = ? ORDER BY comment.id DESC;`,
+		"getComments": `SELECT nickname, text FROM comment INNER JOIN users ON user_id = users.id WHERE post_id = ? ORDER BY comment.id DESC;`,
 		"addMessage":  `INSERT INTO message (from_id, to_id, text, time_sent) VALUES (?, ?, ?, ?);`,
 		"getMessages": `SELECT from_id, to_id, text, time_sent FROM message WHERE (from_id = ? AND to_id = ?) OR (from_id = ? AND to_id = ?) ORDER BY time_sent DESC;`,
 
@@ -108,21 +102,18 @@ func statementsCreation() {
 
 		"addGroupMember":      `INSERT INTO group_members (group_id, member_id) VALUES (?, ?);`,
 		"getGroupMembers":     `SELECT member_id FROM group_members WHERE group_id = ?;`,
-		"getGroupMembersInfo": `SELECT username, first_name, last_name FROM users WHERE id = ?;`,
+		"getGroupMembersInfo": `SELECT nickname, first_name, last_name FROM users WHERE id = ?;`,
 
 		"getGroupPendingMembers":     `SELECT member_id FROM group_pending_members WHERE group_id = ?;`,
 		"addGroupPendingMember":      `INSERT INTO group_pending_members (group_id, member_id) VALUES (?, ?);`,
 		"removeGroupPendingMember":   `DELETE FROM group_pending_members WHERE group_id = ? AND member_id = ?;`,
 		"removeGroupMember":          `DELETE FROM group_members WHERE group_id = ? AND member_id = ?;`,
-		"getGroupPendingMembersInfo": `SELECT username, first_name, last_name FROM users WHERE id = ?;`,
+		"getGroupPendingMembersInfo": `SELECT nickname, first_name, last_name FROM users WHERE id = ?;`,
 
-		"getGroupImages":         `SELECT image_path, header_image_path FROM group_images WHERE group_id = ?;`,
-		"addGroupImage":          `INSERT INTO group_images (group_id, image_path, header_image_path) VALUES (?, ?, ?);`,
-		"removeGroupImage":       `DELETE FROM group_images WHERE group_id = ? AND image_path = ?;`,
-		"removeGroupHeaderImage": `DELETE FROM group_images WHERE group_id = ? AND header_image_path = ?;`,
-		"getGroupPosts":          `SELECT post.id, username, title, categories, text FROM post INNER JOIN users ON user_id=users.id WHERE post.id IN (SELECT post_id FROM post_category WHERE category_id = ?) ORDER BY post.id DESC;`,
-		"updateGroupImage":       `UPDATE group_images SET image_path = ? WHERE group_id = ? AND image_path = ?;`,
-		"updateGroupHeaderImage": `UPDATE group_images SET header_image_path = ? WHERE group_id = ? AND header_image_path = ?;`,
+		"getGroupPosts": `SELECT post.id, nickname, first_name, last_name, title, categories, text, created_at 
+							FROM post INNER JOIN users ON user_id=users.id WHERE post.id IN 
+							(SELECT post_id FROM post_category WHERE category_id = ?) 
+							ORDER BY created_at DESC;`,
 	} {
 		err := error(nil)
 		statements[key], err = db.Prepare(query)

@@ -98,7 +98,7 @@ func chatMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	ID1, err := getIDbyUsername(data.Username)
+	ID1, err := getIDbyEmail(data.Username)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -107,7 +107,7 @@ func chatMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	ID2, err := getIDbyUsername(data.OtherUser)
+	ID2, err := getIDbyEmail(data.OtherUser)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -205,7 +205,7 @@ func chatUsersHandler(w http.ResponseWriter, r *http.Request) {
 		users.Users = append(users.Users, user)
 	}
 	rows.Close()
-	ID1, err := getIDbyUsername(data.Username)
+	ID1, err := getIDbyEmail(data.Username)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -215,7 +215,7 @@ func chatUsersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	for i := 0; i < len(users.Users); i++ {
-		ID2, err := getIDbyUsername(users.Users[i].Username)
+		ID2, err := getIDbyEmail(users.Users[i].Username)
 		if err != nil {
 			w.WriteHeader(500)
 			jsonResponse, _ := json.Marshal(map[string]string{
@@ -283,7 +283,7 @@ func chatNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	fromID, err := getIDbyUsername(data.UsernameFrom)
+	fromID, err := getIDbyEmail(data.UsernameFrom)
 	if err != nil {
 		log.Println(err.Error())
 		w.WriteHeader(400)
@@ -293,7 +293,7 @@ func chatNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	toID, err := getIDbyUsername(data.UsernameTo)
+	toID, err := getIDbyEmail(data.UsernameTo)
 	if err != nil {
 		log.Println(err.Error())
 		w.WriteHeader(400)
