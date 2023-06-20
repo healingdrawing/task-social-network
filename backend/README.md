@@ -45,7 +45,15 @@ To show profile data, inside `onBeforeRouterEnter()` requests to backend, to fet
 
 <hr style="border:2px solid green">
 
-![request][request] `/api/user/profile` (to get profile data)  
+![request][request] `/api/user/profile` (to get profile data)
+
+json body only needs email property, because email is used as ID to identify user. If you want to check your own profile, even email property is not needed, because it is taken from token.
+
+```json
+{
+  "email": "string"
+}
+```
 
 ![response][response]  
 ```json

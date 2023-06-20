@@ -165,10 +165,58 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	uuid := cookie.Value
+	myuuid := cookie.Value
 
 	// get the ID of the user that is currently logged in
-	ID, err := getIDbyUUID(uuid)
+	myID, err := getIDbyUUID(myuuid)
+
+	// get the email from the json request
+	var incomingData map[string]any
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&incomingData)
+	if err != nil && err.Error() != "EOF" {
+		log.Println(err.Error())
+		w.WriteHeader(400)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "Bad request",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+	incomingEmail := ""
+	if incomingData != nil {
+		incomingEmail = incomingData["email"].(string)
+	}
+	if incomingEmail == "" {
+		// get the email of the user that is currently logged in
+		rows, err := statements["getEmailByID"].Query(myID)
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(401)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "User not found",
+			})
+			w.Write(jsonResponse)
+			return
+		}
+		defer rows.Close()
+		rows.Next()
+		rows.Scan(&incomingEmail)
+		rows.Close()
+	}
+
+	// get the ID of the user that we want to see
+	ID, err := getIDbyEmail(incomingEmail)
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(401)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "User not found",
+		})
+		w.Write(jsonResponse)
+		return
+	}
 
 	var profile ProfileData
 	rows, err := statements["getUserProfile"].Query(ID)
@@ -202,9 +250,54 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 		profileDTO.Public = false
 	}
 
+	if myID == ID {
+		w.WriteHeader(200)
+		jsonResponse, _ := json.Marshal(profileDTO)
+		w.Write(jsonResponse)
+		return
+	}
+
+	// if the profile is private, check if I am following the user
+	// if I am not following the user, return 401
+	if profile.Privacy == "private" {
+		following, err := isFollowing(myID, ID)
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(500)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "internal server error, doesSecondFollowFirst failed",
+			})
+			w.Write(jsonResponse)
+			return
+		}
+		if following == false {
+			w.WriteHeader(401)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "User is private, you cannot check their profile without following them",
+			})
+			w.Write(jsonResponse)
+			return
+		}
+	}
+
 	w.WriteHeader(200)
 	jsonResponse, _ := json.Marshal(profileDTO)
 	w.Write(jsonResponse)
+}
+
+func isFollowing(myID int, ID int) (bool, error) {
+	rows, err := statements["doesSecondFollowFirst"].Query(ID, myID)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	// check length of rows
+	// if length is 0, return false
+	// else return true
+	if rows.Next() {
+		return true, nil
+	}
+	return false, nil
 }
 
 func userRegisterHandler(w http.ResponseWriter, r *http.Request) {

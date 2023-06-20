@@ -110,6 +110,7 @@ func statementsCreation() {
 		"getUserPrivacy":     `SELECT privacy FROM users WHERE id = ?;`,
 		"getUserCredentials": `SELECT email, password FROM users WHERE email = ?;`,
 		"updateUserPrivacy":  `UPDATE users SET privacy = ? WHERE id = ?;`,
+		"getEmailByID":       `SELECT email FROM users WHERE id = ?;`,
 
 		"addSession":    `INSERT INTO session (uuid, user_id) VALUES (?, ?);`,
 		"getSession":    `SELECT * FROM session WHERE uuid = ?;`,
@@ -139,6 +140,7 @@ func statementsCreation() {
 		"removeFollower":        `DELETE FROM followers WHERE user_id = ? AND follower_id = ?;`,
 		"removeFollowerPending": `DELETE FROM followers_pending WHERE user_id = ? AND follower_id = ?;`,
 		"getFollowing":          `SELECT user_id FROM followers WHERE follower_id = ?;`,
+		"doesSecondFollowFirst": `SELECT * FROM followers WHERE user_id = ? AND follower_id = ? LIMIT 1;`,
 
 		"getGroupPendingMembers":     `SELECT member_id FROM group_pending_members WHERE group_id = ?;`,
 		"addGroupPendingMember":      `INSERT INTO group_pending_members (group_id, member_id) VALUES (?, ?);`,
