@@ -72,25 +72,30 @@ func main() {
 	http.HandleFunc("/ws", wsConnection)
 	log.Println("starting websocket at ws://localhost:" + portHTTP + "/ws")
 	// API
-	http.HandleFunc("/api/user/register", userRegisterHandler)
-	http.HandleFunc("/api/user/login", userLoginHandler)
-	http.HandleFunc("/api/user/check", sessionCheckHandler)
-	http.HandleFunc("/api/user/logout", userLogoutHandler)
-	http.HandleFunc("/api/user/profile", userProfileHandler)
-	http.HandleFunc("/api/post/submit", postNewHandler)
-	http.HandleFunc("/api/post/get", postGetHandler)
 	http.HandleFunc("/api/comment/submit", commentNewHandler)
 	http.HandleFunc("/api/comment/get", commentGetHandler)
-	http.HandleFunc("/api/chat/getusers", chatUsersHandler)
+
 	http.HandleFunc("/api/chat/getmessages", chatMessagesHandler)
+	http.HandleFunc("/api/chat/getusers", chatUsersHandler)
 	http.HandleFunc("/api/chat/newmessage", chatNewHandler)
 	http.HandleFunc("/api/chat/typing", chatTypingHandler)
+
+	http.HandleFunc("/api/followrequest/reject", rejectFollowerHandler)
+	http.HandleFunc("/api/followrequest/accept", approveFollowerHandler)
+
+	http.HandleFunc("/api/post/get", postGetHandler)
+	http.HandleFunc("/api/post/submit", postNewHandler)
+
+	http.HandleFunc("/api/user/check", sessionCheckHandler)
 	http.HandleFunc("/api/user/following", FollowingHandler)
 	http.HandleFunc("/api/user/followers", FollowersHandler)
 	http.HandleFunc("/api/user/follow", FollowHandler)
+	http.HandleFunc("/api/user/login", userLoginHandler)
+	http.HandleFunc("/api/user/logout", userLogoutHandler)
+	http.HandleFunc("/api/user/posts", userPostsHandler)
+	http.HandleFunc("/api/user/profile", userProfileHandler)
+	http.HandleFunc("/api/user/register", userRegisterHandler)
 	http.HandleFunc("/api/user/unfollow", UnfollowHandler)
-	http.HandleFunc("/api/followrequest/reject", rejectFollowerHandler)
-	http.HandleFunc("/api/followrequest/accept", approveFollowerHandler)
 	// Server
 	log.Fatal(http.ListenAndServe(":"+portHTTP, nil))
 }

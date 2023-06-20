@@ -10,7 +10,6 @@ import (
 )
 
 type PostRequest struct {
-	UUID       string `json:"UUID"`
 	Title      string `json:"title"`
 	Categories string `json:"categories"`
 	Text       string `json:"text"`
@@ -22,10 +21,20 @@ type Posts struct {
 
 type Post struct {
 	ID         int    `json:"ID"`
-	Username   string `json:"username"`
+	UserID     int    `json:"user_id"`
 	Title      string `json:"title"`
 	Categories string `json:"categories"`
 	Text       string `json:"text"`
+}
+
+type PostDTOelement struct {
+	ID              int    `json:"id"`
+	Title           string `json:"title"`
+	Text            string `json:"content"`
+	Categories      string `json:"categories"`
+	CreatorFullName string `json:"creatorFullName"`
+	CreatorEmail    string `json:"creatorEmail"`
+	CreatedAt       string `json:"createdAt"`
 }
 
 func postNewHandler(w http.ResponseWriter, r *http.Request) {
@@ -46,15 +55,25 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(400)
+		w.WriteHeader(http.StatusUnprocessableEntity)
 		jsonResponse, _ := json.Marshal(map[string]string{
 			"message": "Bad request",
 		})
 		w.Write(jsonResponse)
 		return
 	}
+	cookie, err := r.Cookie("user_uuid")
+	if err != nil || cookie.Value == "" || cookie == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "You are not logged in",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+	uuid := cookie.Value
 	data.Categories = sanitizeCategories(data.Categories)
-	ID, err := getIDbyUUID(data.UUID)
+	userID, err := getIDbyUUID(uuid)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -63,7 +82,7 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	_, err = statements["addPost"].Exec(ID, data.Title, data.Categories, data.Text)
+	_, err = statements["addPost"].Exec(userID, data.Title, data.Categories, data.Text)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -77,8 +96,9 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 		"message": "Post created",
 	})
 	w.Write(jsonResponse)
-	rows, err := statements["getPosts"].Query()
+	rows, err := statements["getPosts"].Query(userID)
 	if err != nil {
+		log.Println(err.Error())
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
 			"message": "internal server error",
@@ -88,7 +108,7 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var post Post
 	rows.Next()
-	rows.Scan(&post.ID, &post.Username, &post.Title, &post.Categories, &post.Text)
+	rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Text)
 	rows.Close()
 	sendPost(post)
 }
@@ -117,7 +137,7 @@ func postGetHandler(w http.ResponseWriter, r *http.Request) {
 	var posts Posts
 	for rows.Next() {
 		var post Post
-		rows.Scan(&post.ID, &post.Username, &post.Title, &post.Categories, &post.Text)
+		rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Text)
 		posts.Posts = append(posts.Posts, post)
 	}
 	rows.Close()
@@ -161,4 +181,92 @@ func generateRandomEmojiSequence() string {
 	mixedRounds := strings.Join(rounds, " ")
 
 	return mixedRounds
+}
+
+func userPostsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "internal server error. we could not get your posts",
+			})
+			w.Write(jsonResponse)
+		}
+	}()
+
+	// get the uuid of the current user from the cookies
+	cookie, err := r.Cookie("user_uuid")
+	if err != nil {
+		w.WriteHeader(400)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "bad request. Bad cookie, not tasty",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+
+	// get the user id from the uuid
+	userID, err := getIDbyUUID(cookie.Value)
+	if err != nil {
+		w.WriteHeader(401)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "unauthorized. You are not logged in",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+
+	// get the posts of the user
+	rows, err := statements["getPosts"].Query(userID)
+	if err != nil {
+		w.WriteHeader(500)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "internal server error. getPosts query failed",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+
+	log.Println("starting to iterate over the rows")
+
+	// create a slice of posts
+	var posts []PostDTOelement
+
+	// iterate over the rows and append the posts to the slice
+	for rows.Next() {
+		var post PostDTOelement
+		var firstName, lastName string
+		rows.Scan(&post.ID, &post.Title, &post.Text, &post.Categories, &firstName, &lastName, &post.CreatorEmail, &post.CreatedAt)
+		post.CreatorFullName = firstName + " " + lastName
+		posts = append(posts, post)
+	}
+
+	// close the rows
+	rows.Close()
+
+	// create a map to store the posts
+	var postsMap map[string][]PostDTOelement
+
+	// add the posts to the map
+	postsMap = map[string][]PostDTOelement{
+		"posts": posts,
+	}
+
+	// marshal the map into json
+	jsonResponse, err := json.Marshal(postsMap)
+	if err != nil {
+		w.WriteHeader(500)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "internal server error. we could not register you at this time",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+
+	// write the response
+	w.WriteHeader(200)
+	w.Write(jsonResponse)
+
 }

@@ -187,6 +187,27 @@ SAME STRUCTURE AS FOR `/api/user/following`
 
 <hr style="border:2px solid green">
 
+![request][request] `/api/post/submit` (add new post)
+  
+  ```json
+  {
+    "title": "string",
+    "text": "string",
+    "categories": "string"
+  }
+  ```
+
+![response][response]
+`SUCCESS`  
+
+```json
+{
+  "message": "Post created"
+}
+```
+
+<hr style="border:2px solid green">
+
 ![request][request] `/api/user/posts` (user's posts list)
 
 ![response][response]
@@ -197,7 +218,8 @@ SAME STRUCTURE AS FOR `/api/user/following`
     {
       "id": 0,
       "title": "string",
-      "tags": "string",
+      "content": "string",
+      "categories": "string",
       "createdAt": "string",
       "creatorFullName": "string",
       "creatorEmail": "string"

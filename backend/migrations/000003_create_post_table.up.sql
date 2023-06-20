@@ -1,7 +1,7 @@
 -- make the post TABLE, migrate up
 
 CREATE TABLE post (
-    id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL REFERENCES users (id),
     title VARCHAR NOT NULL,
     categories VARCHAR,
