@@ -46,6 +46,7 @@
     </div>
     <button type="submit">Submit</button>
   </form>
+  <div v-if="avatarStore.avatarError">{{ avatarStore.avatarError }}</div>
   </div>
 </template>
 
@@ -53,6 +54,7 @@
 import { Ref, ref } from 'vue';
 import router from '@/router/index'
 import { signupUser } from '@/api/methods'
+import { useAvatarStore } from '@/store/pinia';
 
 const email = ref('');
 const password = ref('');
@@ -63,7 +65,10 @@ const avatar: Ref<File | null> = ref(null); //todo: chat gpt solution, to fix nu
 const nickname = ref('');
 const aboutMe = ref('');
 
+
+const avatarStore = useAvatarStore();
 function handleAvatarChange(event: Event) {
+  avatarStore.handleAvatarUpload(event);
   avatar.value = (event.target as HTMLInputElement).files?.[0] ?? null;
 }
 
