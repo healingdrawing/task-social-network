@@ -6,5 +6,7 @@ CREATE TABLE post (
     title VARCHAR NOT NULL,
     categories VARCHAR,
     text VARCHAR NOT NULL,
+    group_id INTEGER NOT NULL REFERENCES groups (id),
+    privacy VARCHAR NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     );

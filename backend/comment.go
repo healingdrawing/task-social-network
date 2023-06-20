@@ -21,6 +21,10 @@ type Comment struct {
 	Text     string `json:"text"`
 }
 
+// # commentNewHandler creates a new comment on a post
+//
+// - @param postID
+// - @param text (comment text)
 func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
@@ -46,7 +50,18 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	ID, err := getIDbyUUID(data.UUID)
+	// get user id form the cookie
+	cookie, err := r.Cookie("user-uuid")
+	if err != nil {
+		w.WriteHeader(401)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "Unauthorized",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+	myuuid := cookie.Value
+	ID, err := getIDbyUUID(myuuid)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -85,6 +100,9 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 	sendComment(data.PostID, comment)
 }
 
+// # commentGetHandler returns all comments for a post
+//
+// - @param postID
 func commentGetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
