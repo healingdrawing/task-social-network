@@ -7,7 +7,7 @@ CREATE TABLE users (
     last_name VARCHAR NOT NULL,
     dob VARCHAR NOT NULL,
     avatar BLOB,
-    nickname VARCHAR UNIQUE NOT NULL,
+    nickname VARCHAR,
     about_me VARCHAR,
     privacy TEXT NOT NULL
     );

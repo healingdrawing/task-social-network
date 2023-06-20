@@ -178,8 +178,7 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write(jsonResponse)
 			return
 		}
-		// delete default avatar
-		_ = os.Remove(defaultAvatar.Name())
+		defaultAvatar.Close()
 	}
 
 	if data.Public == true {
@@ -265,7 +264,7 @@ Password must only contain english characters and numbers`,
 	}
 	_, err = statements["addUser"].Exec(data.Email, string(hash), data.FirstName, data.LastName, data.Dob, data.avatarBytes, data.Nickname, data.AboutMe, data.Privacy)
 	if err != nil {
-		if err.Error() == "UNIQUE constraint failed: user.email" {
+		if err.Error() == "UNIQUE constraint failed: users.email" {
 			log.Println(err.Error())
 			w.WriteHeader(http.StatusConflict)
 			jsonResponse, _ := json.Marshal(map[string]string{
@@ -356,9 +355,9 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	err = bcrypt.CompareHashAndPassword([]byte(hash), []byte(data.Password))
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(401) // http status code 401 - http.StatusUnauthorized
+		w.WriteHeader(http.StatusUnauthorized)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "Invalid credentials",
+			"message": "Invalid credentials. Forgot password?",
 		})
 		w.Write(jsonResponse)
 		return
