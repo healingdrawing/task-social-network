@@ -150,6 +150,43 @@ SAME STRUCTURE AS FOR `/api/user/following`
 
 <hr style="border:2px solid green">
 
+![request][request] `/api/followrequest/reject` (reject folllow request)
+
+```json
+{
+  "email": "string"
+}
+```
+
+![response][response]  
+
+```json
+{
+  "message": "you rejected the follow request",
+}
+```
+
+<hr style="border:2px solid green">
+
+![request][request] `/api/followrequest/accept` (accept folllow request)
+
+```json
+{
+  "email": "string"
+}
+```
+
+![response][response]  
+
+```json
+{
+  "message": "you accepted the follow request",
+}
+```
+
+
+<hr style="border:2px solid green">
+
 ![request][request] `/api/user/posts` (user's posts list)
 
 ![response][response]

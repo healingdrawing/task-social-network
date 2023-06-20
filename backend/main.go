@@ -89,6 +89,8 @@ func main() {
 	http.HandleFunc("/api/user/followers", FollowersHandler)
 	http.HandleFunc("/api/user/follow", FollowHandler)
 	http.HandleFunc("/api/user/unfollow", UnfollowHandler)
+	http.HandleFunc("/api/followrequest/reject", rejectFollowerHandler)
+	http.HandleFunc("/api/followrequest/accept", approveFollowerHandler)
 	// Server
 	log.Fatal(http.ListenAndServe(":"+portHTTP, nil))
 }
