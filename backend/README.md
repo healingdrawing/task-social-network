@@ -1,8 +1,12 @@
 # DTO (Data Transfer Object) for  
 
-1. frontend(TypeScript)  
-2. JSON(Transfer)  
-3. backend(Golang)  
+[request]: https://i.postimg.cc/C5c0SmRN/requestww.jpg "Request"
+[response]: https://i.postimg.cc/RhVRwFqd/responsew.jpg "Response"
+
+request is denoted by symbol ![request][request]  
+response is denoted by symbol ![response][response]
+
+<hr style="border:2px solid green">
 
 - `ResponseError` used for error handling from backend to frontend.  
 - Avatar image not managed properly in dummy code(it is just link to assets at the moment)
@@ -11,104 +15,39 @@ Except `LoginView.vue` and `SignupView.vue`.
 - `Èmail` is used as `ID` for user identification, because email is unique and used for login.
 - `Nickname` is optional, so not used to identify user.
 
----
+<hr style="border:4px solid green">
 
-## LoginView.vue requests and responses
+## LoginView.vue
 
-request is denoted by symbol ![request][request]
-response is denoted by symbol ![response][response]
+<hr style="border:2px solid green">
 
-![request][request] Login
-
-1. TypeScript
-
-```typescript
-interface Login {
-  email: string;
-  password: string;
-}
-```
-
-2. JSON
-
+![request][request] endpoint: `/api/login`
 ```json
 {
   "email": "string",
   "password": "string"
 }
 ```
-
-3. Golang
-
-```go
-type Login struct {
-  Email    string `json:"email"`
-  Password string `json:"password"`
-}
-```
-
 ![response][response]
-
-  - - `FAIL` case
-
-3. Golang
-
-```go
-type ResponseError struct {
-  Type string `json:"type"`
-  ErrorText string `json:"errorText"`
-}
-```
-
-2. JSON
-
+`FAIL`
 ```json
 {
   "type": "error",
   "errorText": "string"
 }
 ```
+`SUCCESS` - to show profile data, redirect to ProfileView.vue
 
-1. TypeScript
-
-```typescript
-interface ResponseError {
-  type: string;
-  errorText: string;
-}
-```
-
-  - - `SUCCESS` case
-
-### To show profile data, redirect to ProfileView.vue
-
----
+<hr style="border:4px solid green">  
 
 ## ProfileView.vue  
+To show profile data, inside `onBeforeRouterEnter()` requests to backend, to fetch data before rendering page  
 
-### To show profile data, inside `onBeforeRouterEnter()` requests to backend, to fetch data before rendering page  
+<hr style="border:2px solid green">
 
-- ![request][request] (to get profile data) endpoint: `/api/user/profile`  
+![request][request] `/api/user/profile` (to get profile data)  
 
-- ![response][response]
-
-3. Golang
-
-```go
-type Profile struct {
-  Email     string `json:"email"`
-  FirstName string `json:"firstName"`
-  LastName  string `json:"lastName"`
-  Dob       string `json:"dob"`
-  Avatar    string `json:"avatar"`
-  Nickname  string `json:"nickname"`
-  AboutMe   string `json:"aboutMe"`
-  Public    bool   `json:"public"`
-}
-```
-
-2. JSON
-
+![response][response]  
 ```json
 {
   "email": "string",
@@ -121,40 +60,12 @@ type Profile struct {
   "public": false
 }
 ```
+  
+<hr style="border:2px solid green">
 
-1. TypeScript
+![request][request] `/api/user/following`  (following users list) :  
 
-```typescript
-interface Profile {
-  email: string;
-  firstName: string;
-  lastName: string;
-  dob: string;
-  avatar: string;
-  nickname: string;
-  aboutMe: string;
-  public: boolean;
-}
-```
-
-- ![request][request] (following users list) endpoint: `/api/user/following`
-
-- ![response][response] from backend
-
-3. Golang
-
-```go
-type User struct {
-  Email    string `json:"email"`
-  FullName string `json:"fullName"`
-}
-type UserList struct {
-  Users []User `json:"users"`
-}
-```
-
-2. JSON
-
+![response][response] 
 ```json
 {
   "users": [
@@ -166,45 +77,19 @@ type UserList struct {
 }
 ```
 
-1. TypeScript
+<hr style="border:2px solid green">
 
-```typescript
-interface User {
-  email: string;
-  fullName: string;
-}
-interface UserList {
-  users: User[];
-}
-```
+![request][request] `/api/user/followers` (followers users list)
 
-- ### `REQUEST` (followers users list) endpoint: `/api/user/followers`
-
-- ### `RESPONSE` from backend
+![response][response]  
 
 SAME STRUCTURE AS FOR `/api/user/following`
 
-- ### `REQUEST` (user's posts list) endpoint: `/api/user/posts`
+<hr style="border:2px solid green">
 
-- ### `RESPONSE` from backend
+![request][request] `/api/user/posts` (user's posts list)
 
-3. Golang
-
-```go
-type Post struct {
-  Id        int    `json:"id"`
-  Title     string `json:"title"`
-  Tags      string `json:"tags"`
-  CreatedAt string `json:"createdAt"`
-  CreatorFullName string `json:"creatorFullName"`
-  CreatorEmail string `json:"creatorEmail"`
-}
-type PostList struct {
-  Posts []Post `json:"posts"`
-}
-```
-
-2. JSON
+![response][response]
 
 ```json
 {
@@ -221,38 +106,12 @@ type PostList struct {
 }
 ```
 
-1. TypeScript
+## User action requests and responses in ProfileView.vue 
 
-```typescript
-interface Post {
-  id: number;
-  title: string;
-  tags: string;
-  createdAt: string;
-  creatorFullName: string;
-  creatorEmail: string;
-}
-interface PostList {
-  posts: Post[];
-}
-```
+![request][request] `/api/user/privacy` (change profile privacy)
 
-## User action requests and responses  
-
-- ### `REQUEST` (change profile privacy) engpoint: `/api/user/privacy`
-
-- ### `RESPONSE` from backend
-    - - `SUCCESS` case  
-
-3. Golang
-
-```go
-type Privacy struct {
-  Public bool `json:"public"`
-}
-```
-
-2. JSON
+![response][response]
+`SUCCESS`  
 
 ```json
 {
@@ -260,84 +119,62 @@ type Privacy struct {
 }
 ```
 
-1. TypeScript
-
-```typescript
-interface Privacy {
-  public: boolean;
-}
-```
-
----
+<hr style="border:4px solid green">
 
 ## TargetView.vue  
+To show target user profile data, inside `onBeforeRouterEnter()` requests to backend, to fetch data before rendering page
 
-### To show target user profile data, inside `onBeforeRouterEnter()` requests to backend, to fetch data before rendering page
+<hr style="border:2px solid green">
 
-- ### `REQUEST` (target user profile check request status) endpoint: `/api/user/profile/request/{email}`
+![request][request] `/api/user/profile/request/{email}` (target user profile check request status, to manage button)
 
-- ### `RESPONSE` from backend
-
-    - - logged in user is `NOT FOLLOWER` of target user, and `PROFILE IS PRIVATE` and `REQUEST WAS NOT MADE` case
-Show the `Request To Follow` button.
-
-3. Golang
-
-```go
-type IsVisitorNotFollowerAndDidNotRequested struct {
-  IsVisitorNotFollowerAndDidNotRequested bool `json:"isVisitorNotFollowerAndDidNotRequested"`
+![response][response]
+`IF` logged in user is NOT FOLLOWER of target user, and the target user PROFILE IS PRIVATE and following to target user REQUEST WAS NOT MADE `THEN` show the `Request To Follow` button.
+```json
+{
+  "isVisitorNotFollowerAndDidNotRequested": true,
 }
 ```
 
-2. JSON
+<hr style="border:2px solid green">
+
+![request][request] `api/user/profile/public/{email}` (target user profile check following/public, to hide/show profile info).  
+`IF` target profile is public or the visitor is follower `THEN` allow to show the profile section  
+![response][response] 
 
 ```json
 {
-  "isVisitorNotFollowerAndDidNotRequested": true
+  "isProfilePublicOrVisitorFollower": true
 }
 ```
 
-1. TypeScript
+<hr style="border:2px solid green">
 
-```typescript
-interface IsVisitorNotFollowerAndDidNotRequested {
-  isVisitorNotFollowerAndDidNotRequested: boolean;
-}
-```
+`IF` profile can be displayed `THEN` make `REQUEST/S` to get data for target profile view.  
+`IF` logged in user is `NOT FOLLOWER` of target user, and `PROFILE IS PRIVATE` but requests still happen `THEN` 
+Redirect to `ProfileView.vue`. This is the cases impossible using normal navigation(experimentators activity).
 
-isProfilePublicOrVisitorFollower
+<hr style="border:2px solid green">
 
-- SUCCESS case
+![request][request] `api/user/profile/{email}`
+SAME JSON AS FOR `/api/user/profile`
 
-SAME STRUCTURE AS FOR `/api/user/profile`
+<hr style="border:2px solid green">
 
+![request][request] `/api/user/following/{email}` (target user following users list)  
+![response][response] SAME STRUCTURE AS FOR `/api/user/following`  
 
-![request][request] (target user following users list) endpoint: `/api/user/following/{email}`  
-  - logged in user is `NOT FOLLOWER` of target user, and `PROFILE IS PRIVATE` case  
-Redirect to `ProfileView.vue`. This is the case impossible using normal navigation.
-  - `SUCCESS` case
-SAME STRUCTURE AS FOR `/api/user/following`
-Also next endpoints responses structured the same way as for logged in user profile.
+Also next two endpoints responses structured the same way as for logged in user own profile.
 
-![request][request] (target user followers users list) endpoint: `/api/user/followers/{email}`  
+![request][request] `/api/user/followers/{email}` (target user followers users list)  
 
-- `REQUEST` (target user posts list) endpoint: `/api/user/posts/{email}`  
+![request][request]  `/api/user/posts/{email}` (target user posts list) endpoint:   
 
 ## User action follow requests and responses
 
-![request][request] (follow target user) endpoint: `/api/user/follow/{email}`
+![request][request] `/api/user/follow/{email}` (follow target user)
 
-![response][response] `SUCCESS` case :
-
-3. Golang
-
-```go
-type IsVisitorNotFollowerAndDidNotRequested struct {
-  IsVisitorNotFollowerAndDidNotRequested bool `json:"isVisitorNotFollowerAndDidNotRequested"`
-}
-```
-
-2. JSON
+![response][response]
 
 ```json
 {
@@ -345,39 +182,13 @@ type IsVisitorNotFollowerAndDidNotRequested struct {
 }
 ```
 
-1. TypeScript
-
-```typescript
-interface IsVisitorNotFollowerAndDidNotRequested {
-  isVisitorNotFollowerAndDidNotRequested: boolean;
-}
-```
-
----
+<hr style="border:4px solid green">
 
 ## SignupView.vue  
 
-- (signup new user) endpoint: `/api/signup`
+<hr style="border:2px solid green">
 
-![request][request]
-
-1. TypeScript
-
-```typescript
-interface User {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  dob: string;
-  avatar: File | null;
-  nickname: string;
-  aboutMe: string;
-  public: boolean;
-}
-```
-
-2. JSON
+![request][request] `/api/signup` (signup new user)
 
 ```json
 {
@@ -393,28 +204,10 @@ interface User {
 }
 ```
 
-3. Golang
-
-```go
-type User struct {
-  Email    string `json:"email"`
-  Password string `json:"password"`
-  FirstName string `json:"firstName"`
-  LastName string `json:"lastName"`
-  Dob string `json:"dob"`
-  Avatar string `json:"avatar"`
-  Nickname string `json:"nickname"`
-  AboutMe string `json:"aboutMe"`
-  Public bool `json:"public"`
-}
-```
-
 ![response][response]
-
-- `SUCCESS` case:
 Redirect to `LoginView.vue`. Perhaps will be better to sign in user automatically and redirect to `ProfileView.vue`.
 
----
+<hr style="border:2px solid green">
 
 # TODO: sergei see this and make them alright, make them go at the right place int he readme. Below this line is rought work
 
@@ -437,6 +230,3 @@ Redirect to `LoginView.vue`. Perhaps will be better to sign in user automaticall
   "member_id": 1
 }
 ```
-
-[request]: https://i.postimg.cc/C5c0SmRN/requestww.jpg "Request"
-[response]: https://i.postimg.cc/RhVRwFqd/responsew.jpg "Response"
