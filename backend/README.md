@@ -280,6 +280,7 @@ SAME STRUCTURE AS FOR `/api/user/following`
       "title": "string",
       "content": "string",
       "categories": "string",
+      "picture": "base64encodeBlobTo - string",
       "createdAt": "string",
       "creatorFullName": "string",
       "creatorEmail": "string"
@@ -287,6 +288,8 @@ SAME STRUCTURE AS FOR `/api/user/following`
   ]
 }
 ```
+
+<hr style="border:2px solid green">
 
 ![request][request] "/api/comment/submit" (add new comment)
 

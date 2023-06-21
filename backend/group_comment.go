@@ -1,15 +1,16 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"log"
 	"net/http"
 )
 
 type GroupCommentRequest struct {
-	UUID        string `json:"UUID"`
 	GroupPostID int    `json:"group_post_id"`
 	Content     string `json:"content"`
+	Picture     string `json:"picture"`
 }
 
 type GroupComments struct {
@@ -18,8 +19,9 @@ type GroupComments struct {
 
 // todo: Finally on frontend side, the "Username" data should be cummulative of first name and last name plus email in round brackets, cause nickname is not unique. And for "comment.go" too. To provide clickable link on user profile. Or you can not make following request etc.
 type GroupComment struct {
-	Username string `json:"username"`
+	Fullname string `json:"username"`
 	Content  string `json:"content"`
+	Picture  string `json:"picture"`
 }
 
 // # groupCommentNewHandler creates a new comment on a group post
@@ -68,7 +70,7 @@ func groupCommentNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	_, err = statements["addGroupComment"].Exec(ID, data.GroupPostID, data.Content)
+	_, err = statements["addGroupComment"].Exec(ID, data.GroupPostID, data.Content, data.Picture)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -94,7 +96,11 @@ func groupCommentNewHandler(w http.ResponseWriter, r *http.Request) {
 	// todo: 99% it must be remastered too, but 1% still exists :D . Check it precisely
 	var comment Comment
 	rows.Next()
-	rows.Scan(&comment.Username, &comment.Content)
+	var firstName, lastName, nickname string
+	var pictureBlob []byte
+	rows.Scan(&comment.Email, &firstName, &lastName, &nickname, &comment.Content, &pictureBlob)
+	comment.Fullname = firstName + " " + lastName
+	comment.Picture = base64.StdEncoding.EncodeToString(pictureBlob)
 	rows.Close()
 	sendComment(data.GroupPostID, comment)
 }
@@ -144,7 +150,11 @@ func groupCommentGetHandler(w http.ResponseWriter, r *http.Request) {
 	var comments Comments
 	for rows.Next() {
 		var comment Comment
-		rows.Scan(&comment.Username, &comment.Content)
+		var firstName, lastName, nickname string
+		var pictureBlob []byte
+		rows.Scan(&comment.Email, &firstName, &lastName, &nickname, &comment.Content, &pictureBlob)
+		comment.Fullname = firstName + " " + lastName
+		comment.Picture = base64.StdEncoding.EncodeToString(pictureBlob)
 		comments.Comments = append(comments.Comments, comment)
 	}
 	rows.Close()

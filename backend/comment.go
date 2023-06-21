@@ -19,8 +19,10 @@ type Comments struct {
 }
 
 type Comment struct {
-	Username string `json:"username"`
+	Email    string `json:"email"`
+	Fullname string `json:"fullname"`
 	Content  string `json:"content"`
+	Picture  string `json:"picture"`
 }
 
 // # commentNewHandler creates a new comment on a post
@@ -125,14 +127,14 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 	// }
 	var comment Comment
 	rows.Next()
-	rows.Scan(&comment.Username, &comment.Content)
+	rows.Scan(&comment.Fullname, &comment.Content)
 	rows.Close()
 	sendComment(data.PostID, comment)
 }
 
 // # commentGetHandler returns all comments for a post
 //
-// - @param postID
+// - @param postID int
 func commentGetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
@@ -172,7 +174,11 @@ func commentGetHandler(w http.ResponseWriter, r *http.Request) {
 	var comments Comments
 	for rows.Next() {
 		var comment Comment
-		rows.Scan(&comment.Username, &comment.Content)
+		var firstName, lastName string
+		var pictureBlob []byte
+		rows.Scan(&firstName, &lastName, &comment.Content, &pictureBlob)
+		comment.Fullname = firstName + " " + lastName
+		comment.Picture = base64.StdEncoding.EncodeToString(pictureBlob)
 		comments.Comments = append(comments.Comments, comment)
 	}
 	rows.Close()

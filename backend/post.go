@@ -30,6 +30,7 @@ type Post struct {
 	Title      string `json:"title"`
 	Categories string `json:"categories"`
 	Content    string `json:"content"`
+	Picture    string `json:"picture"`
 }
 
 type PostDTOelement struct {
@@ -37,6 +38,7 @@ type PostDTOelement struct {
 	Title           string `json:"title"`
 	Content         string `json:"content"`
 	Categories      string `json:"categories"`
+	Picture         string `json:"picture"`
 	CreatorFullName string `json:"creatorFullName"`
 	CreatorEmail    string `json:"creatorEmail"`
 	CreatedAt       string `json:"createdAt"`
@@ -169,7 +171,9 @@ func postGetHandler(w http.ResponseWriter, r *http.Request) {
 	var posts Posts
 	for rows.Next() {
 		var post Post
-		rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Content)
+		pictureBlob := []byte{}
+		rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Content, &pictureBlob)
+		post.Picture = base64.StdEncoding.EncodeToString(pictureBlob)
 		posts.Posts = append(posts.Posts, post)
 	}
 	rows.Close()
@@ -270,8 +274,10 @@ func userPostsHandler(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var post PostDTOelement
 		var firstName, lastName string
-		rows.Scan(&post.ID, &post.Title, &post.Content, &post.Categories, &firstName, &lastName, &post.CreatorEmail, &post.CreatedAt)
+		var pictureBlob []byte
+		rows.Scan(&post.ID, &post.Title, &post.Content, &post.Categories, &pictureBlob, &firstName, &lastName, &post.CreatorEmail, &post.CreatedAt)
 		post.CreatorFullName = firstName + " " + lastName
+		post.Picture = base64.StdEncoding.EncodeToString(pictureBlob)
 		posts = append(posts, post)
 	}
 

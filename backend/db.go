@@ -127,9 +127,9 @@ func statementsCreation() {
 		"removeSession": `DELETE FROM session WHERE uuid = ?;`,
 
 		"addPost":     `INSERT INTO post (user_id, title, categories, content, privacy, picture, created_at) VALUES (?, ?, ?, ?, ?, ?, ?);`,
-		"getPosts":    `SELECT post.id, title, content, categories, first_name, last_name, email, created_at FROM post INNER JOIN users ON user_id=? ORDER BY created_at DESC;`,
+		"getPosts":    `SELECT post.id, title, content, categories, picture, first_name, last_name, email, created_at FROM post INNER JOIN users ON user_id=? ORDER BY created_at DESC;`,
 		"addComment":  `INSERT INTO comment (user_id, post_id, content, picture, created_at) VALUES (?, ?, ?, ?, ?);`,
-		"getComments": `SELECT nickname, content FROM comment INNER JOIN users ON user_id = users.id WHERE post_id = ? ORDER BY comment.id DESC;`,
+		"getComments": `SELECT first_name, last_name, content, picture FROM comment INNER JOIN users ON user_id = users.id WHERE post_id = ? ORDER BY comment.id DESC;`,
 		"addMessage":  `INSERT INTO message (from_id, to_id, content, created_at) VALUES (?, ?, ?, ?);`,
 		"getMessages": `SELECT from_id, to_id, content, created_at FROM message WHERE (from_id = ? AND to_id = ?) OR (from_id = ? AND to_id = ?) ORDER BY created_at DESC;`,
 
@@ -160,8 +160,8 @@ func statementsCreation() {
 		"addGroupPostMembership": `INSERT INTO group_post_membership (group_id, group_post_id) VALUES (?, ?);`,
 		"getGroupPosts":          `SELECT group_post.id, title, content, categories, first_name, last_name, email, created_at FROM group_post JOIN group_post_membership ON group_post.id = group_post_membership.group_post_id JOIN users ON group_post.user_id = users.id ORDER BY created_at DESC;`,
 
-		"addGroupComment":  `INSERT INTO group_comment (user_id, group_post_id, content) VALUES (?, ?, ?);`,
-		"getGroupComments": `SELECT email, first_name, last_name, nickname, content FROM group_comment INNER JOIN users ON users.id = user_id WHERE group_post_id = ? ORDER BY group_comment.id DESC;`,
+		"addGroupComment":  `INSERT INTO group_comment (user_id, group_post_id, content, picture) VALUES (?, ?, ?, ?);`,
+		"getGroupComments": `SELECT email, first_name, last_name, nickname, content, picture FROM group_comment INNER JOIN users ON users.id = user_id WHERE group_post_id = ? ORDER BY group_comment.id DESC;`,
 	} {
 		err := error(nil)
 		statements[key], err = db.Prepare(query)
