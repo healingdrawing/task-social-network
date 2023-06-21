@@ -10,10 +10,9 @@ response is denoted by symbol ![response][response]
 
 - `ResponseError` used for error handling from backend to frontend.  
 - Avatar image not managed properly in dummy code(it is just link to assets at the moment)
-- `POST` requests should be used, because lot of `FUNCTIONALITY AVAILABLE ONLY FOR LOGGED IN USER`.  
+- `FUNCTIONALITY AVAILABLE ONLY FOR LOGGED IN USER`.  
 Except `LoginView.vue` and `SignupView.vue`.
 - `Èmail` is used as `ID` for user identification, because email is unique and used for login.
-- `Nickname` is optional, so not used to identify user.
 
 <hr style="border:4px solid green">
 
@@ -22,20 +21,24 @@ Except `LoginView.vue` and `SignupView.vue`.
 <hr style="border:2px solid green">
 
 ![request][request] endpoint: `/api/login`
+
 ```json
 {
   "email": "string",
   "password": "string"
 }
 ```
+
 ![response][response]
 `FAIL`
+
 ```json
 {
   "type": "error",
   "errorText": "string"
 }
 ```
+
 `SUCCESS` - to show profile data, redirect to ProfileView.vue
 
 <hr style="border:4px solid green">  
@@ -56,6 +59,7 @@ json body only needs email property, because email is used as ID to identify use
 ```
 
 ![response][response]  
+
 ```json
 {
   "email": "string",
@@ -68,6 +72,7 @@ json body only needs email property, because email is used as ID to identify use
   "public": false
 }
 ```
+
 <hr style="border:2px solid green">
 
 ![request][request]  `api/followrequestlist` (follow request list, all pending follow requests to the current logged in user)
@@ -151,7 +156,7 @@ connects to handler `FollowingHandler`
 }
 ```
 
-![response][response] 
+![response][response]
 
 ```json
 {
@@ -276,6 +281,7 @@ To show target user profile data, inside `onBeforeRouterEnter()` requests to bac
 
 ![response][response]
 `IF` logged in user is NOT FOLLOWER of target user, and the target user PROFILE IS PRIVATE and following to target user REQUEST WAS NOT MADE `THEN` show the `Request To Follow` button.
+
 ```json
 {
   "isVisitorNotFollowerAndDidNotRequested": true,
@@ -286,7 +292,7 @@ To show target user profile data, inside `onBeforeRouterEnter()` requests to bac
 
 ![request][request] `api/user/profile/public/{email}` (target user profile check following/public, to hide/show profile info).  
 `IF` target profile is public or the visitor is follower `THEN` allow to show the profile section  
-![response][response] 
+![response][response]
 
 ```json
 {
