@@ -35,6 +35,7 @@ func dbInit() {
 			user_id INTEGER NOT NULL REFERENCES users (id),
 			post_id INTEGER NOT NULL REFERENCES post (id),
 			content VARCHAR NOT NULL,
+			picture BLOB,
 			created_at DATETIME NOT NULL
 			);
 		CREATE TABLE message (
@@ -127,7 +128,7 @@ func statementsCreation() {
 
 		"addPost":     `INSERT INTO post (user_id, title, categories, content, privacy, created_at) VALUES (?, ?, ?, ?, ?, ?);`,
 		"getPosts":    `SELECT post.id, title, content, categories, first_name, last_name, email, created_at FROM post INNER JOIN users ON user_id=? ORDER BY created_at DESC;`,
-		"addComment":  `INSERT INTO comment (user_id, post_id, content, created_at) VALUES (?, ?, ?, ?);`,
+		"addComment":  `INSERT INTO comment (user_id, post_id, content, picture, created_at) VALUES (?, ?, ?, ?, ?);`,
 		"getComments": `SELECT nickname, content FROM comment INNER JOIN users ON user_id = users.id WHERE post_id = ? ORDER BY comment.id DESC;`,
 		"addMessage":  `INSERT INTO message (from_id, to_id, content, created_at) VALUES (?, ?, ?, ?);`,
 		"getMessages": `SELECT from_id, to_id, content, created_at FROM message WHERE (from_id = ? AND to_id = ?) OR (from_id = ? AND to_id = ?) ORDER BY created_at DESC;`,

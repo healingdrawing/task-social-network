@@ -292,7 +292,8 @@ SAME STRUCTURE AS FOR `/api/user/following`
 ```json
 {
   "postId": "number",
-  "content": "string"
+  "content": "string",
+  "picture": "base64encodeBlobTo - string"
 }
 ```
 

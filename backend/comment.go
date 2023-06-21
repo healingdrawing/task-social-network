@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 type CommentRequest struct {
 	PostID  int    `json:"postID"`
 	Content string `json:"content"`
+	Picture string `json:"picture"`
 }
 
 type Comments struct {
@@ -71,7 +73,32 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	_, err = statements["addComment"].Exec(ID, data.PostID, data.Content, time.Now().Format("2006-01-02 15:04:05"))
+	// convert data.Picture to blob for sqlite
+	pictureBlob := []byte{}
+	// check the avatar validity
+	if data.Picture != "" {
+		avatarData, err := base64.StdEncoding.DecodeString(data.Picture)
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "Invalid avatar",
+			})
+			w.Write(jsonResponse)
+			return
+		}
+		if !isImage(avatarData) {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusUnsupportedMediaType)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "avatar is not a valid image",
+			})
+			w.Write(jsonResponse)
+			return
+		}
+		pictureBlob = avatarData
+	}
+	_, err = statements["addComment"].Exec(ID, data.PostID, data.Content, pictureBlob, time.Now().Format("2006-01-02 15:04:05"))
 	if err != nil {
 		log.Println(err.Error())
 		w.WriteHeader(500)
