@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 )
 
 type CommentRequest struct {
-	UUID    string `json:"UUID"`
 	PostID  int    `json:"postID"`
 	Content string `json:"content"`
 }
@@ -21,11 +21,10 @@ type Comment struct {
 	Content  string `json:"content"`
 }
 
-// todo: remove later, wtf is this? :D @sagarishere . it looks like CommentRequest interface description. is it? i change at least @param text to @param content, after my refactoring
 // # commentNewHandler creates a new comment on a post
 //
 // - @param postID
-// - @param text (comment text)
+// - @param content
 func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
@@ -52,7 +51,7 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// get user id form the cookie
-	cookie, err := r.Cookie("user-uuid")
+	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
 		w.WriteHeader(401)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -64,18 +63,20 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 	myuuid := cookie.Value
 	ID, err := getIDbyUUID(myuuid)
 	if err != nil {
+		log.Println(err.Error())
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error, could not get user id",
 		})
 		w.Write(jsonResponse)
 		return
 	}
-	_, err = statements["addComment"].Exec(ID, data.PostID, data.Content)
+	_, err = statements["addComment"].Exec(ID, data.PostID, data.Content, time.Now().Format("2006-01-02 15:04:05"))
 	if err != nil {
+		log.Println(err.Error())
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error, addComment query failed",
 		})
 		w.Write(jsonResponse)
 		return
@@ -86,14 +87,15 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 	})
 	w.Write(jsonResponse)
 	rows, err := statements["getComments"].Query(data.PostID)
-	if err != nil {
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
-		})
-		w.Write(jsonResponse)
-		return
-	}
+	// TODO: superfulous error return to http client, need to fix by having error return to client overr websockets
+	// if err != nil {
+	// 	w.WriteHeader(500)
+	// 	jsonResponse, _ := json.Marshal(map[string]string{
+	// 		"message": "internal server error",
+	// 	})
+	// 	w.Write(jsonResponse)
+	// 	return
+	// }
 	var comment Comment
 	rows.Next()
 	rows.Scan(&comment.Username, &comment.Content)

@@ -35,21 +35,21 @@ func dbInit() {
 			user_id INTEGER NOT NULL REFERENCES users (id),
 			post_id INTEGER NOT NULL REFERENCES post (id),
 			content VARCHAR NOT NULL,
-			create_time DATETIME NOT NULL
+			created_at DATETIME NOT NULL
 			);
 		CREATE TABLE message (
 			id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
 			from_id INTEGER NOT NULL REFERENCES users (id),
 			to_id INTEGER NOT NULL REFERENCES users (id),
 			content VARCHAR NOT NULL,
-			time_sent DATETIME NOT NULL
+			created_at DATETIME NOT NULL
 			);
 		CREATE TABLE groups (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT,
 			description TEXT,
 			creator INTEGER,
-			creation_date TIMESTAMP,
+			created_at TIMESTAMP,
 			privacy TEXT,
 			FOREIGN KEY (creator) REFERENCES users (id)
 			);
@@ -127,14 +127,14 @@ func statementsCreation() {
 
 		"addPost":     `INSERT INTO post (user_id, title, categories, content, privacy, created_at) VALUES (?, ?, ?, ?, ?, ?);`,
 		"getPosts":    `SELECT post.id, title, content, categories, first_name, last_name, email, created_at FROM post INNER JOIN users ON user_id=? ORDER BY created_at DESC;`,
-		"addComment":  `INSERT INTO comment (user_id, post_id, content) VALUES (?, ?, ?);`,
+		"addComment":  `INSERT INTO comment (user_id, post_id, content, created_at) VALUES (?, ?, ?, ?);`,
 		"getComments": `SELECT nickname, content FROM comment INNER JOIN users ON user_id = users.id WHERE post_id = ? ORDER BY comment.id DESC;`,
-		"addMessage":  `INSERT INTO message (from_id, to_id, content, time_sent) VALUES (?, ?, ?, ?);`,
-		"getMessages": `SELECT from_id, to_id, content, time_sent FROM message WHERE (from_id = ? AND to_id = ?) OR (from_id = ? AND to_id = ?) ORDER BY time_sent DESC;`,
+		"addMessage":  `INSERT INTO message (from_id, to_id, content, created_at) VALUES (?, ?, ?, ?);`,
+		"getMessages": `SELECT from_id, to_id, content, created_at FROM message WHERE (from_id = ? AND to_id = ?) OR (from_id = ? AND to_id = ?) ORDER BY created_at DESC;`,
 
-		"addGroup":  `INSERT INTO groups (name, description, creator, creation_date, privacy) VALUES (?, ?, ?, ?, ?);`,
-		"getGroups": `SELECT id, name, description, creator, creation_date, privacy FROM groups ORDER BY creation_date DESC;`,
-		"getGroup":  `SELECT id, name, description, creator, creation_date, privacy FROM groups WHERE id = ?;`,
+		"addGroup":  `INSERT INTO groups (name, description, creator, created_at, privacy) VALUES (?, ?, ?, ?, ?);`,
+		"getGroups": `SELECT id, name, description, creator, created_at, privacy FROM groups ORDER BY created_at DESC;`,
+		"getGroup":  `SELECT id, name, description, creator, created_at, privacy FROM groups WHERE id = ?;`,
 
 		"addGroupMember":      `INSERT INTO group_members (group_id, member_id) VALUES (?, ?);`,
 		"getGroupMembers":     `SELECT member_id FROM group_members WHERE group_id = ?;`,
