@@ -413,6 +413,12 @@ Redirect to `LoginView.vue`. Perhaps will be better to sign in user automaticall
 
 ![erd](https://github.com/healingdrawing/task-social-network/assets/5121817/65864202-78f7-4345-9c9f-f011fd40e572)
 
+## To create base64 encoded string from image file, required for testing
+
+I recommend this website
+
+<https://elmah.io/tools/base64-image-encoder>
+
 
 # TODO: sergei see this and make them alright, make them go at the right place int he readme. Below this line is rought work
 
