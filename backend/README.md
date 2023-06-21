@@ -413,7 +413,7 @@ Redirect to `LoginView.vue`. Perhaps will be better to sign in user automaticall
 
 ## ERD for database
 
-![erd](https://github.com/healingdrawing/task-social-network/assets/5121817/65864202-78f7-4345-9c9f-f011fd40e572)
+![erd](https://github.com/healingdrawing/task-social-network/assets/5121817/068d6eb5-d8b2-421b-a380-11ff30964d8e)
 
 ## To create base64 encoded string from image file, required for testing
 

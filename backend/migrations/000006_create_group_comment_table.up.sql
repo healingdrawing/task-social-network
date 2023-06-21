@@ -5,5 +5,6 @@ CREATE TABLE group_comment (
     user_id INTEGER NOT NULL REFERENCES users (id),
     group_post_id INTEGER NOT NULL REFERENCES group_post (id),
     content VARCHAR NOT NULL,
+    picture BLOB,
     created_at DATETIME NOT NULL
     );
