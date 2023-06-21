@@ -398,6 +398,7 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	onlyEnglishRegex := regexp.MustCompile(`^[a-zA-Z0-9]{2,15}$`)
 
+	// todo: it looks like not required(but not sure), because of nickname being optional, and does not provide way to login anymore
 	if data.Nickname != "" {
 		if !onlyEnglishRegex.MatchString(data.Nickname) {
 			w.WriteHeader(http.StatusUnprocessableEntity)
