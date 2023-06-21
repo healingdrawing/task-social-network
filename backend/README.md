@@ -252,6 +252,7 @@ SAME STRUCTURE AS FOR `/api/user/following`
     "title": "string",
     "content": "string",
     "categories": "string",
+    "picture": "base64encodeBlobTo - string",
     "privacy": "private/public - string"
   }
   ```

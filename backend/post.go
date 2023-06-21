@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"log"
 	"math/big"
@@ -15,6 +16,7 @@ type PostRequest struct {
 	Categories string `json:"categories"`
 	Content    string `json:"content"`
 	Privacy    string `json:"privacy"`
+	Picture    string `json:"picture"`
 	CreatedAt  string `json:"created_at"`
 }
 
@@ -86,8 +88,33 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
+	// process the picture
+	commentPicture := []byte{}
+	if data.Picture != "" {
+		avatarData, err := base64.StdEncoding.DecodeString(data.Picture)
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "Invalid avatar",
+			})
+			w.Write(jsonResponse)
+			return
+		}
+		if !isImage(avatarData) {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusUnsupportedMediaType)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "avatar is not a valid image",
+			})
+			w.Write(jsonResponse)
+			return
+		}
+		commentPicture = avatarData
+	}
+
 	data.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
-	_, err = statements["addPost"].Exec(userID, data.Title, data.Categories, data.Content, data.Privacy, data.CreatedAt)
+	_, err = statements["addPost"].Exec(userID, data.Title, data.Categories, data.Content, data.Privacy, commentPicture, data.CreatedAt)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{

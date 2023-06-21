@@ -7,5 +7,6 @@ CREATE TABLE post (
     categories VARCHAR,
     content VARCHAR NOT NULL,
     privacy VARCHAR NOT NULL,
+    picture BLOB,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
