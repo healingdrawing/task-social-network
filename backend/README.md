@@ -251,7 +251,9 @@ SAME STRUCTURE AS FOR `/api/user/following`
   {
     "title": "string",
     "content": "string",
-    "categories": "string"
+    "categories": "string",
+    "privacy": "string",
+    "created_at": "string"
   }
   ```
 

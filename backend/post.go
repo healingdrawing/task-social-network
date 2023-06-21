@@ -13,6 +13,8 @@ type PostRequest struct {
 	Title      string `json:"title"`
 	Categories string `json:"categories"`
 	Content    string `json:"content"`
+	Privacy    string `json:"privacy"`
+	CreatedAt  string `json:"created_at"`
 }
 
 type Posts struct {
@@ -62,11 +64,12 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
+	// get user id from cookie
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil || cookie.Value == "" || cookie == nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "You are not logged in",
+			"message": "desired cookie not present",
 		})
 		w.Write(jsonResponse)
 		return
@@ -77,16 +80,16 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "You are not logged in",
+			"message": "You are not logged in, or your cookie is invalid",
 		})
 		w.Write(jsonResponse)
 		return
 	}
-	_, err = statements["addPost"].Exec(userID, data.Title, data.Categories, data.Content)
+	_, err = statements["addPost"].Exec(userID, data.Title, data.Categories, data.Content, data.Privacy, data.CreatedAt)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error, addPost query failed",
 		})
 		w.Write(jsonResponse)
 		return
@@ -101,7 +104,7 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error, getPosts query failed",
 		})
 		w.Write(jsonResponse)
 		return
