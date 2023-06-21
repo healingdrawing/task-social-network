@@ -32,7 +32,7 @@ Except `LoginView.vue` and `SignupView.vue`.
   "avatar": "base64encodeBlobTo - string",
   "nickname": "string",
   "aboutMe": "string",
-  "public": "private/public - string"
+  "public": boolean
 }
 ```
 
@@ -98,7 +98,7 @@ json body only needs email property, because email is used as ID to identify use
   "avatar": "string",
   "nickname": "string",
   "aboutMe": "string",
-  "privacy": "private/public - string"
+  "privacy": boolean
 }
 ```
 
