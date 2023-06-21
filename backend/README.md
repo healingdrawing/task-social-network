@@ -20,7 +20,36 @@ Except `LoginView.vue` and `SignupView.vue`.
 
 <hr style="border:2px solid green">
 
-![request][request] endpoint: `/api/login`
+![request][request] `/api/user/register`
+
+```json
+{
+  "email": "string",
+  "firstName": "string",
+  "lastName": "string",
+  "password": "string",
+  "dob": "string",
+  "avatar": "base64encodeBlobTo-string",
+  "nickname": "string",
+  "aboutMe": "string",
+  "public": boolean
+}
+```
+
+![response][response]
+`SUCCESS`
+
+```json
+{
+    "UUID": "string",
+    "email": "string"
+}
+```
+
+
+<hr style="border:2px solid green">
+
+![request][request] `/api/login`
 
 ```json
 {
