@@ -1,6 +1,6 @@
--- make the post TABLE, migrate up
+-- make the group_post TABLE, migrate up
 
-CREATE TABLE post (
+CREATE TABLE group_post (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL REFERENCES users (id),
     title VARCHAR NOT NULL,

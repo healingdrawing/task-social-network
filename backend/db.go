@@ -34,14 +34,14 @@ func dbInit() {
 			id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
 			user_id INTEGER NOT NULL REFERENCES users (id),
 			post_id INTEGER NOT NULL REFERENCES post (id),
-			text VARCHAR NOT NULL,
+			content VARCHAR NOT NULL,
 			create_time DATETIME NOT NULL
 			);
 		CREATE TABLE message (
 			id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
 			from_id INTEGER NOT NULL REFERENCES users (id),
 			to_id INTEGER NOT NULL REFERENCES users (id),
-			text VARCHAR NOT NULL,
+			content VARCHAR NOT NULL,
 			time_sent DATETIME NOT NULL
 			);
 		CREATE TABLE groups (
@@ -125,12 +125,12 @@ func statementsCreation() {
 		"getIDbyEmail":  `SELECT id FROM users WHERE email = ?;`,
 		"removeSession": `DELETE FROM session WHERE uuid = ?;`,
 
-		"addPost":     `INSERT INTO post (user_id, title, categories, text) VALUES (?, ?, ?, ?);`,
-		"getPosts":    `SELECT post.id, title, text, categories, first_name, last_name, email, created_at FROM post INNER JOIN users ON user_id=? ORDER BY created_at DESC;`,
-		"addComment":  `INSERT INTO comment (user_id, post_id, text) VALUES (?, ?, ?);`,
-		"getComments": `SELECT nickname, text FROM comment INNER JOIN users ON user_id = users.id WHERE post_id = ? ORDER BY comment.id DESC;`,
-		"addMessage":  `INSERT INTO message (from_id, to_id, text, time_sent) VALUES (?, ?, ?, ?);`,
-		"getMessages": `SELECT from_id, to_id, text, time_sent FROM message WHERE (from_id = ? AND to_id = ?) OR (from_id = ? AND to_id = ?) ORDER BY time_sent DESC;`,
+		"addPost":     `INSERT INTO post (user_id, title, categories, content) VALUES (?, ?, ?, ?);`,
+		"getPosts":    `SELECT post.id, title, content, categories, first_name, last_name, email, created_at FROM post INNER JOIN users ON user_id=? ORDER BY created_at DESC;`,
+		"addComment":  `INSERT INTO comment (user_id, post_id, content) VALUES (?, ?, ?);`,
+		"getComments": `SELECT nickname, content FROM comment INNER JOIN users ON user_id = users.id WHERE post_id = ? ORDER BY comment.id DESC;`,
+		"addMessage":  `INSERT INTO message (from_id, to_id, content, time_sent) VALUES (?, ?, ?, ?);`,
+		"getMessages": `SELECT from_id, to_id, content, time_sent FROM message WHERE (from_id = ? AND to_id = ?) OR (from_id = ? AND to_id = ?) ORDER BY time_sent DESC;`,
 
 		"addGroup":  `INSERT INTO groups (name, description, creator, creation_date, privacy) VALUES (?, ?, ?, ?, ?);`,
 		"getGroups": `SELECT id, name, description, creator, creation_date, privacy FROM groups ORDER BY creation_date DESC;`,
@@ -155,15 +155,24 @@ func statementsCreation() {
 		"removeGroupMember":          `DELETE FROM group_members WHERE group_id = ? AND member_id = ?;`,
 		"getGroupPendingMembersInfo": `SELECT nickname, first_name, last_name FROM users WHERE id = ?;`,
 
-		"getGroupPosts": `SELECT post.id, nickname, first_name, last_name, title, categories, text, created_at 
-							FROM post INNER JOIN users ON user_id=users.id WHERE post.id IN 
-							(SELECT post_id FROM post_category WHERE category_id = ?) 
-							ORDER BY created_at DESC;`,
+		"addGroupPost":           `INSERT INTO group_post (user_id, title, categories, content) VALUES (?, ?, ?, ?);`,
+		"addGroupPostMembership": `INSERT INTO group_post_membership (group_id, group_post_id) VALUES (?, ?);`,
+		"getGroupPosts":          `SELECT group_post.id, title, content, categories, first_name, last_name, email, created_at FROM group_post JOIN group_post_membership ON group_post.id = group_post_membership.group_post_id JOIN users ON group_post.user_id = users.id ORDER BY created_at DESC;`,
+
+		"addGroupComment":  `INSERT INTO group_comment (user_id, group_post_id, content) VALUES (?, ?, ?);`,
+		"getGroupComments": `SELECT email, first_name, last_name, nickname, content FROM group_comment INNER JOIN users ON users.id = user_id WHERE group_post_id = ? ORDER BY group_comment.id DESC;`,
 	} {
 		err := error(nil)
 		statements[key], err = db.Prepare(query)
 		if err != nil {
+			log.Print("Error preparing query: " + key)
 			log.Fatal(err.Error())
 		}
 	}
 }
+
+// it was last added by @sagarishere, just moved it here, perhaps it better and will be used
+// "getGroupPosts": `SELECT post.id, nickname, first_name, last_name, title, categories, content, created_at
+// 							FROM post INNER JOIN users ON user_id=users.id WHERE post.id IN
+// 							(SELECT post_id FROM post_category WHERE category_id = ?)
+// 							ORDER BY created_at DESC;`,

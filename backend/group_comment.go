@@ -6,27 +6,24 @@ import (
 	"net/http"
 )
 
-type CommentRequest struct {
-	UUID    string `json:"UUID"`
-	PostID  int    `json:"postID"`
-	Content string `json:"content"`
+type GroupCommentRequest struct {
+	UUID        string `json:"UUID"`
+	GroupPostID int    `json:"group_post_id"`
+	Content     string `json:"content"`
 }
 
-type Comments struct {
-	Comments []Comment `json:"comments"`
+type GroupComments struct {
+	GroupComments []GroupComment `json:"group_comments"`
 }
 
-type Comment struct {
+// todo: Finally on frontend side, the "Username" data should be cummulative of first name and last name plus email in round brackets, cause nickname is not unique. And for "comment.go" too. To provide clickable link on user profile. Or you can not make following request etc.
+type GroupComment struct {
 	Username string `json:"username"`
 	Content  string `json:"content"`
 }
 
-// todo: remove later, wtf is this? :D @sagarishere . it looks like CommentRequest interface description. is it? i change at least @param text to @param content, after my refactoring
-// # commentNewHandler creates a new comment on a post
-//
-// - @param postID
-// - @param text (comment text)
-func commentNewHandler(w http.ResponseWriter, r *http.Request) {
+// # groupCommentNewHandler creates a new comment on a group post
+func groupCommentNewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
 		if err := recover(); err != nil {
@@ -38,7 +35,7 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write(jsonResponse)
 		}
 	}()
-	var data CommentRequest
+	var data GroupCommentRequest
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
 	err := decoder.Decode(&data)
@@ -51,7 +48,7 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	// get user id form the cookie
+	// get user id from the cookie
 	cookie, err := r.Cookie("user-uuid")
 	if err != nil {
 		w.WriteHeader(401)
@@ -71,7 +68,7 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	_, err = statements["addComment"].Exec(ID, data.PostID, data.Content)
+	_, err = statements["addGroupComment"].Exec(ID, data.GroupPostID, data.Content)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -85,7 +82,7 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 		"message": "Comment created",
 	})
 	w.Write(jsonResponse)
-	rows, err := statements["getComments"].Query(data.PostID)
+	rows, err := statements["getGroupComments"].Query(data.GroupPostID)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -94,17 +91,19 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
+	// todo: 99% it must be remastered too, but 1% still exists :D . Check it precisely
 	var comment Comment
 	rows.Next()
 	rows.Scan(&comment.Username, &comment.Content)
 	rows.Close()
-	sendComment(data.PostID, comment)
+	sendComment(data.GroupPostID, comment)
 }
 
-// # commentGetHandler returns all comments for a post
+// todo: these comments look little bit strange, but let it be here , like in "comment.go"
+// # groupCommentGetHandler returns all comments for a post
 //
 // - @param postID
-func commentGetHandler(w http.ResponseWriter, r *http.Request) {
+func groupCommentGetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
 		if err := recover(); err != nil {
@@ -117,7 +116,7 @@ func commentGetHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 	var data struct {
-		PostID int `json:"postID"`
+		GroupPostID int `json:"group_post_id"`
 	}
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -131,7 +130,7 @@ func commentGetHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	rows, err := statements["getComments"].Query(data.PostID)
+	rows, err := statements["getComments"].Query(data.GroupPostID)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -140,6 +139,8 @@ func commentGetHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
+
+	// todo: 99% it must be remastered too, but 1% still exists :D . Check it precisely
 	var comments Comments
 	for rows.Next() {
 		var comment Comment

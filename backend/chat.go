@@ -27,7 +27,7 @@ type MessagesResponse struct {
 type Message struct {
 	UsernameFrom string    `json:"usernameFrom"`
 	UsernameTo   string    `json:"usernameTo"`
-	Text         string    `json:"text"`
+	Content      string    `json:"content"`
 	Time         time.Time `json:"time"`
 }
 
@@ -137,7 +137,7 @@ func chatMessagesHandler(w http.ResponseWriter, r *http.Request) {
 			IDFrom int
 			IDTo   int
 		)
-		rows.Scan(&IDFrom, &IDTo, &message.Text, &message.Time)
+		rows.Scan(&IDFrom, &IDTo, &message.Content, &message.Time)
 		IDpairs = append(IDpairs, [2]int{IDFrom, IDTo})
 		messages.Messages = append(messages.Messages, message)
 	}
@@ -308,7 +308,7 @@ func chatNewHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	data.Time = time.Now()
-	_, err = statements["addMessage"].Exec(fromID, toID, data.Text, data.Time)
+	_, err = statements["addMessage"].Exec(fromID, toID, data.Content, data.Time)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
