@@ -252,7 +252,7 @@ SAME STRUCTURE AS FOR `/api/user/following`
     "title": "string",
     "content": "string",
     "categories": "string",
-    "privacy": "string"
+    "privacy": "private/public - string"
   }
   ```
 

@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type PostRequest struct {
@@ -85,6 +86,7 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
+	data.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
 	_, err = statements["addPost"].Exec(userID, data.Title, data.Categories, data.Content, data.Privacy, data.CreatedAt)
 	if err != nil {
 		w.WriteHeader(500)
