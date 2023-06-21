@@ -7,9 +7,9 @@ import (
 )
 
 type CommentRequest struct {
-	UUID   string `json:"UUID"`
-	PostID int    `json:"postID"`
-	Text   string `json:"text"`
+	UUID    string `json:"UUID"`
+	PostID  int    `json:"postID"`
+	Content string `json:"content"`
 }
 
 type Comments struct {
@@ -18,7 +18,7 @@ type Comments struct {
 
 type Comment struct {
 	Username string `json:"username"`
-	Text     string `json:"text"`
+	Content  string `json:"content"`
 }
 
 // # commentNewHandler creates a new comment on a post
@@ -70,7 +70,7 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	_, err = statements["addComment"].Exec(ID, data.PostID, data.Text)
+	_, err = statements["addComment"].Exec(ID, data.PostID, data.Content)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -95,7 +95,7 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var comment Comment
 	rows.Next()
-	rows.Scan(&comment.Username, &comment.Text)
+	rows.Scan(&comment.Username, &comment.Content)
 	rows.Close()
 	sendComment(data.PostID, comment)
 }
@@ -142,7 +142,7 @@ func commentGetHandler(w http.ResponseWriter, r *http.Request) {
 	var comments Comments
 	for rows.Next() {
 		var comment Comment
-		rows.Scan(&comment.Username, &comment.Text)
+		rows.Scan(&comment.Username, &comment.Content)
 		comments.Comments = append(comments.Comments, comment)
 	}
 	rows.Close()

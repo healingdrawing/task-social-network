@@ -12,7 +12,7 @@ import (
 type PostRequest struct {
 	Title      string `json:"title"`
 	Categories string `json:"categories"`
-	Text       string `json:"text"`
+	Content    string `json:"content"`
 }
 
 type Posts struct {
@@ -24,13 +24,13 @@ type Post struct {
 	UserID     int    `json:"user_id"`
 	Title      string `json:"title"`
 	Categories string `json:"categories"`
-	Text       string `json:"text"`
+	Content    string `json:"content"`
 }
 
 type PostDTOelement struct {
 	ID              int    `json:"id"`
 	Title           string `json:"title"`
-	Text            string `json:"content"`
+	Content         string `json:"content"`
 	Categories      string `json:"categories"`
 	CreatorFullName string `json:"creatorFullName"`
 	CreatorEmail    string `json:"creatorEmail"`
@@ -82,7 +82,7 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	_, err = statements["addPost"].Exec(userID, data.Title, data.Categories, data.Text)
+	_, err = statements["addPost"].Exec(userID, data.Title, data.Categories, data.Content)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -108,7 +108,7 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var post Post
 	rows.Next()
-	rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Text)
+	rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Content)
 	rows.Close()
 	sendPost(post)
 }
@@ -137,7 +137,7 @@ func postGetHandler(w http.ResponseWriter, r *http.Request) {
 	var posts Posts
 	for rows.Next() {
 		var post Post
-		rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Text)
+		rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Content)
 		posts.Posts = append(posts.Posts, post)
 	}
 	rows.Close()
@@ -238,7 +238,7 @@ func userPostsHandler(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var post PostDTOelement
 		var firstName, lastName string
-		rows.Scan(&post.ID, &post.Title, &post.Text, &post.Categories, &firstName, &lastName, &post.CreatorEmail, &post.CreatedAt)
+		rows.Scan(&post.ID, &post.Title, &post.Content, &post.Categories, &firstName, &lastName, &post.CreatorEmail, &post.CreatedAt)
 		post.CreatorFullName = firstName + " " + lastName
 		posts = append(posts, post)
 	}

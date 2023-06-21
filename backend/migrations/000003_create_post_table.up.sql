@@ -5,8 +5,7 @@ CREATE TABLE post (
     user_id INTEGER NOT NULL REFERENCES users (id),
     title VARCHAR NOT NULL,
     categories VARCHAR,
-    text VARCHAR NOT NULL,
-    group_id INTEGER NOT NULL REFERENCES groups (id),
+    content VARCHAR NOT NULL,
     privacy VARCHAR NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
