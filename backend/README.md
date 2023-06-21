@@ -361,6 +361,11 @@ Redirect to `LoginView.vue`. Perhaps will be better to sign in user automaticall
 
 <hr style="border:2px solid green">
 
+## ERD for database
+
+![erd](https://github.com/healingdrawing/task-social-network/assets/5121817/db7023f8-0681-4eb8-8df5-097b42fd6637)
+
+
 # TODO: sergei see this and make them alright, make them go at the right place int he readme. Below this line is rought work
 
 // Incoming JSON DTO for group creation over handler groupCreateHandler
