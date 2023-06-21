@@ -250,7 +250,7 @@ SAME STRUCTURE AS FOR `/api/user/following`
   ```json
   {
     "title": "string",
-    "text": "string",
+    "content": "string",
     "categories": "string"
   }
   ```
