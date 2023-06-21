@@ -258,6 +258,7 @@ func userPostsHandler(w http.ResponseWriter, r *http.Request) {
 	jsonResponse, err := json.Marshal(postsMap)
 	if err != nil {
 		w.WriteHeader(500)
+		// todo: the message bottom looks too strange, for the "userPostsHandler" function
 		jsonResponse, _ := json.Marshal(map[string]string{
 			"message": "internal server error. we could not register you at this time",
 		})

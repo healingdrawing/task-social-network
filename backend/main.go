@@ -87,6 +87,12 @@ func main() {
 	http.HandleFunc("/api/post/get", postGetHandler)
 	http.HandleFunc("/api/post/submit", postNewHandler)
 
+	// todo: remove later. New HandleFunc for group posts/comments, and plural form looks weird for me f.e. api/group/post/get, because it looks like returns the list of posts. And above too for api/post/get @sagarishere
+	http.HandleFunc("/api/group/post/get", groupPostGetHandler)
+	http.HandleFunc("/api/group/post/submit", groupPostNewHandler)
+	http.HandleFunc("/api/group/comment/submit", groupCommentNewHandler)
+	http.HandleFunc("/api/group/comment/get", groupCommentGetHandler)
+
 	http.HandleFunc("/api/user/check", sessionCheckHandler)
 	http.HandleFunc("/api/user/following", FollowingHandler)
 	http.HandleFunc("/api/user/followers", FollowersHandler)

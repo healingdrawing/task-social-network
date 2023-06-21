@@ -155,15 +155,24 @@ func statementsCreation() {
 		"removeGroupMember":          `DELETE FROM group_members WHERE group_id = ? AND member_id = ?;`,
 		"getGroupPendingMembersInfo": `SELECT nickname, first_name, last_name FROM users WHERE id = ?;`,
 
-		"getGroupPosts": `SELECT post.id, nickname, first_name, last_name, title, categories, content, created_at 
-							FROM post INNER JOIN users ON user_id=users.id WHERE post.id IN 
-							(SELECT post_id FROM post_category WHERE category_id = ?) 
-							ORDER BY created_at DESC;`,
+		"addGroupPost":           `INSERT INTO group_post (user_id, title, categories, content) VALUES (?, ?, ?, ?);`,
+		"addGroupPostMembership": `INSERT INTO group_post_membership (group_id, group_post_id) VALUES (?, ?);`,
+		"getGroupPosts":          `SELECT group_post.id, title, content, categories, first_name, last_name, email, created_at FROM group_post JOIN group_post_membership ON group_post.id = group_post_membership.group_post_id JOIN users ON group_post.user_id = users.id ORDER BY created_at DESC;`,
+
+		"addGroupComment":  `INSERT INTO group_comment (user_id, group_post_id, content) VALUES (?, ?, ?);`,
+		"getGroupComments": `SELECT email, first_name, last_name, nickname, content FROM group_comment INNER JOIN users ON users.id = user_id WHERE group_post_id = ? ORDER BY group_comment.id DESC;`,
 	} {
 		err := error(nil)
 		statements[key], err = db.Prepare(query)
 		if err != nil {
+			log.Print("Error preparing query: " + key)
 			log.Fatal(err.Error())
 		}
 	}
 }
+
+// it was last added by @sagarishere, just moved it here, perhaps it better and will be used
+// "getGroupPosts": `SELECT post.id, nickname, first_name, last_name, title, categories, content, created_at
+// 							FROM post INNER JOIN users ON user_id=users.id WHERE post.id IN
+// 							(SELECT post_id FROM post_category WHERE category_id = ?)
+// 							ORDER BY created_at DESC;`,
