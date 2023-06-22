@@ -86,7 +86,7 @@ func approveGroupMembershipHandler(w http.ResponseWriter, r *http.Request) {
 	group := Group{}
 
 	for rows.Next() {
-		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.Creator, &group.CreationDate, &group.Privacy)
+		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.CreatorId, &group.CreationDate, &group.Privacy)
 		if err != nil {
 			log.Println(err.Error())
 			w.WriteHeader(500)
@@ -99,7 +99,7 @@ func approveGroupMembershipHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	if group.Creator != LoggedinUserID {
+	if group.CreatorId != LoggedinUserID {
 		w.WriteHeader(http.StatusUnauthorized)
 		jsonResponse, _ := json.Marshal(map[string]string{
 			"message": "unauthorized",
@@ -208,7 +208,7 @@ func rejectGroupMembershipHandler(w http.ResponseWriter, r *http.Request) {
 	group := Group{}
 
 	for rows.Next() {
-		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.Creator, &group.CreationDate, &group.Privacy)
+		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.CreatorId, &group.CreationDate, &group.Privacy)
 		if err != nil {
 			log.Println(err.Error())
 			w.WriteHeader(500)
@@ -220,7 +220,7 @@ func rejectGroupMembershipHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if group.Creator != LoggedinUserID {
+	if group.CreatorId != LoggedinUserID {
 		w.WriteHeader(http.StatusUnauthorized)
 		jsonResponse, _ := json.Marshal(map[string]string{
 			"message": "unauthorized",

@@ -61,6 +61,8 @@ func main() {
 		}
 		if err == migrate.ErrNoChange {
 			log.Println("No migration needed")
+		} else {
+			log.Println("Migration successful")
 		}
 		// if migration is successful, then print the latest version
 		version, _, _ := m.Version()

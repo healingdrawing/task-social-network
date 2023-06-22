@@ -147,11 +147,11 @@ if the target user was public:
   "message": "user followed",
 }
 ```
-  
+
 <hr style="border:2px solid green">
 
 ![request][request] `/api/user/unfollow` (unfollow this target user):
-  
+
   ```json
   {
     "email": "string"
@@ -332,7 +332,8 @@ SAME STRUCTURE AS FOR `/api/user/following`
 {
   "name": "string",
   "description": "string",
-  "privacy": "public/private"
+  "privacy": "public/private",
+  "invited": "string"
 }
 ```
 
@@ -395,7 +396,7 @@ Also next two endpoints responses structured the same way as for logged in user 
 
 ![request][request] `/api/user/followers/{email}` (target user followers users list)  
 
-![request][request]  `/api/user/posts/{email}` (target user posts list) endpoint:   
+![request][request]  `/api/user/posts/{email}` (target user posts list) endpoint:
 
 ## User action follow requests and responses
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -12,7 +13,7 @@ type Group struct {
 	ID           int       `json:"ID"`
 	Name         string    `json:"name"`
 	Description  string    `json:"description"`
-	Creator      int       `json:"creator"`
+	CreatorId    int       `json:"creator"`
 	CreationDate time.Time `json:"creation_date"`
 	Privacy      string    `json:"privacy"`
 }
@@ -27,6 +28,7 @@ type GroupCreationDTO struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Privacy     string `json:"privacy"`
+	Invited     string `json:"invited"`
 }
 
 func groupNewHandler(w http.ResponseWriter, r *http.Request) {
@@ -71,7 +73,7 @@ func groupNewHandler(w http.ResponseWriter, r *http.Request) {
 	data.Name = strings.TrimSpace(incomingData.Name)
 	data.Description = strings.TrimSpace(incomingData.Description)
 	data.Privacy = strings.TrimSpace(incomingData.Privacy)
-	data.Creator, err = getIDbyUUID(incomingData.UUID)
+	data.CreatorId, err = getIDbyUUID(incomingData.UUID)
 	if data.Name == "" || data.Description == "" || data.Privacy == "" {
 		w.WriteHeader(400)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -80,12 +82,12 @@ func groupNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	result, err := statements["addGroup"].Exec(data.Name, data.Description, data.Creator, time.Now().Format("2006-01-02 15:04:05"), data.Privacy)
+	result, err := statements["addGroup"].Exec(data.Name, data.Description, data.CreatorId, time.Now().Format("2006-01-02 15:04:05"), data.Privacy)
 	if err != nil {
 		log.Println(err.Error())
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error, addGroup query failed",
 		})
 		w.Write(jsonResponse)
 		return
@@ -100,12 +102,40 @@ func groupNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	_, err = statements["addGroupMember"].Exec(groupID, data.Creator)
+	invitedUsersEmails := strings.Split(incomingData.Invited, " ")
+	for _, email := range invitedUsersEmails {
+		// get the user id from the email
+		var invitedUserID int
+		err = statements["getUserID"].QueryRow(email).Scan(&invitedUserID)
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(404)
+			errorMsg := fmt.Sprintf("user with email %s not found", email)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": errorMsg,
+			})
+			w.Write(jsonResponse)
+			return
+		}
+		// add the invited user to the groupPendingMembers table
+		_, err = statements["addGroupInvitedUser"].Exec(invitedUserID, groupID, data.CreatorId, time.Now().Format("2006-01-02 15:04:05"))
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(500)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "internal server error, failed to add user to group pending members",
+			})
+			w.Write(jsonResponse)
+			return
+		}
+	}
+	// add group creator to group members
+	_, err = statements["addGroupMember"].Exec(groupID, data.CreatorId)
 	if err != nil {
 		log.Println(err.Error())
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error, failed to add group creator as group member",
+			"message": "addGroupMember query failed to add creator to group membership",
 		})
 		w.Write(jsonResponse)
 		return
@@ -144,7 +174,7 @@ func groupJoinHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// check ig group is private
 	var group Group
-	err = statements["getGroup"].QueryRow(data.GroupID).Scan(&group.ID, &group.Name, &group.Description, &group.Creator, &group.CreationDate, &group.Privacy)
+	err = statements["getGroup"].QueryRow(data.GroupID).Scan(&group.ID, &group.Name, &group.Description, &group.CreatorId, &group.CreationDate, &group.Privacy)
 	if err != nil {
 		log.Println(err.Error())
 		w.WriteHeader(404)

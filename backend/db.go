@@ -139,9 +139,17 @@ func statementsCreation() {
 		"getGroups": `SELECT id, name, description, creator, created_at, privacy FROM groups ORDER BY created_at DESC;`,
 		"getGroup":  `SELECT id, name, description, creator, created_at, privacy FROM groups WHERE id = ?;`,
 
-		"addGroupMember":      `INSERT INTO group_members (group_id, member_id) VALUES (?, ?);`,
-		"getGroupMembers":     `SELECT member_id FROM group_members WHERE group_id = ?;`,
-		"getGroupMembersInfo": `SELECT nickname, first_name, last_name FROM users WHERE id = ?;`,
+		"addGroupMember":             `INSERT INTO group_members (group_id, member_id) VALUES (?, ?);`,
+		"getGroupMembers":            `SELECT member_id FROM group_members WHERE group_id = ?;`,
+		"getGroupMembersInfo":        `SELECT nickname, first_name, last_name FROM users WHERE id = ?;`,
+		"getGroupPendingMembers":     `SELECT member_id FROM group_pending_members WHERE group_id = ?;`,
+		"addGroupPendingMember":      `INSERT INTO group_pending_members (group_id, member_id) VALUES (?, ?);`,
+		"removeGroupPendingMember":   `DELETE FROM group_pending_members WHERE group_id = ? AND member_id = ?;`,
+		"removeGroupMember":          `DELETE FROM group_members WHERE group_id = ? AND member_id = ?;`,
+		"getGroupPendingMembersInfo": `SELECT nickname, first_name, last_name FROM users WHERE id = ?;`,
+
+		"addGroupInvitedUser":  `INSERT INTO group_invited_users (user_id, group_id, inviter_id, created_at) VALUES (?, ?, ?, ?);`,
+		"getGroupInvitedUsers": `SELECT user_id, group_id, inviter_id, created_at FROM group_invited_users WHERE group_id = ?;`,
 
 		"getFollowers":          `SELECT follower_id FROM followers WHERE user_id = ?;`,
 		"getFollowersPending":   `SELECT follower_id FROM followers_pending WHERE user_id = ?;`,
@@ -151,12 +159,6 @@ func statementsCreation() {
 		"removeFollowerPending": `DELETE FROM followers_pending WHERE user_id = ? AND follower_id = ?;`,
 		"getFollowing":          `SELECT user_id FROM followers WHERE follower_id = ?;`,
 		"doesSecondFollowFirst": `SELECT * FROM followers WHERE user_id = ? AND follower_id = ? LIMIT 1;`,
-
-		"getGroupPendingMembers":     `SELECT member_id FROM group_pending_members WHERE group_id = ?;`,
-		"addGroupPendingMember":      `INSERT INTO group_pending_members (group_id, member_id) VALUES (?, ?);`,
-		"removeGroupPendingMember":   `DELETE FROM group_pending_members WHERE group_id = ? AND member_id = ?;`,
-		"removeGroupMember":          `DELETE FROM group_members WHERE group_id = ? AND member_id = ?;`,
-		"getGroupPendingMembersInfo": `SELECT nickname, first_name, last_name FROM users WHERE id = ?;`,
 
 		"addGroupPost":           `INSERT INTO group_post (user_id, title, categories, content) VALUES (?, ?, ?, ?);`,
 		"addGroupPostMembership": `INSERT INTO group_post_membership (group_id, group_post_id) VALUES (?, ?);`,
