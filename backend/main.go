@@ -52,13 +52,17 @@ func main() {
 		log.Printf("Could not create migrate instance: %v\n", err)
 	}
 
-	// Migrate the database to the latest version
-	err = m.Up()
-	if err != nil && err != migrate.ErrNoChange {
-		log.Printf("Could not migrate: %v\n", err)
-	}
-	if err == migrate.ErrNoChange {
-		log.Println("No migration needed")
+	if err == nil {
+		// New migration initialized
+		// Migrate the database to the latest version
+		err = m.Up()
+		if err != nil && err != migrate.ErrNoChange {
+			log.Printf("Could not migrate: %v\n", err)
+		}
+		if err == migrate.ErrNoChange {
+			log.Println("No migration needed")
+		}
+		// if migration is successful, then print the latest version
 		version, _, _ := m.Version()
 		log.Printf("Latest migrated version: %d\n", version)
 	}
