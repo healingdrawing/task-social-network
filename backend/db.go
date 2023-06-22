@@ -147,8 +147,9 @@ func statementsCreation() {
 		"removeGroupPendingMember": `DELETE FROM group_pending_members WHERE group_id = ? AND member_id = ?;`,
 		"removeGroupMember":        `DELETE FROM group_members WHERE group_id = ? AND member_id = ?;`,
 
-		"addGroupInvitedUser":  `INSERT INTO group_invited_users (user_id, group_id, inviter_id, created_at) VALUES (?, ?, ?, ?);`,
-		"getGroupInvitedUsers": `SELECT user_id, group_id, inviter_id, created_at FROM group_invited_users WHERE group_id = ?;`,
+		"addGroupInvitedUser":    `INSERT INTO group_invited_users (user_id, group_id, inviter_id, created_at) VALUES (?, ?, ?, ?);`,
+		"getGroupInvitedUsers":   `SELECT user_id, group_id, inviter_id, created_at FROM group_invited_users WHERE group_id = ?;`,
+		"removeGroupInvitedUser": `DELETE FROM group_invited_users WHERE user_id = ? AND group_id = ?;`,
 
 		"getFollowers":          `SELECT follower_id FROM followers WHERE user_id = ?;`,
 		"getFollowersPending":   `SELECT follower_id FROM followers_pending WHERE user_id = ?;`,

@@ -488,3 +488,163 @@ func rejectFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResponse)
 	return
 }
+
+// groupInviteAcceptHandler is the handler for accepting a group invite
+//
+// @r.param {group_id int}
+func groupInviteAcceptHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+			w.WriteHeader(500)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "internal server error",
+			})
+			w.Write(jsonResponse)
+		}
+	}()
+
+	// get the id of the request sender
+	cookie, err := r.Cookie("user_uuid")
+	if err != nil {
+		w.WriteHeader(401)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "unauthorized",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+	requestorId, err := getIDbyUUID(cookie.Value)
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(500)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "internal server error, failed to get id of request sender",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+	var data struct {
+		GroupId int `json:"group_id"`
+	}
+
+	// get the group id from the request body
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&data)
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(400)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "bad request, failed to get group id from request body",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+
+	// add the person to the group_members table
+	_, err = statements["addGroupMember"].Exec(data.GroupId, requestorId)
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(500)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "failed to add person to group_members table",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+
+	// remove the person from the group_invited_users table
+	_, err = statements["removeGroupInvitedUser"].Exec(requestorId, data.GroupId)
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(500)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "failed to remove person from group_invited_users table",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+
+	w.WriteHeader(200)
+	jsonResponse, _ := json.Marshal(map[string]string{
+		"message": "success: you accepted the group invite",
+	})
+	w.Write(jsonResponse)
+	return
+}
+
+// groupInviteRejectHandler is the handler for rejecting a group invite
+//
+// @r.param {group_id int}
+func groupInviteRejectHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+			w.WriteHeader(500)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "internal server error",
+			})
+			w.Write(jsonResponse)
+		}
+	}()
+
+	// get the id of the request sender
+	cookie, err := r.Cookie("user_uuid")
+	if err != nil {
+		w.WriteHeader(401)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "unauthorized",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+	requestorId, err := getIDbyUUID(cookie.Value)
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(500)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "internal server error, failed to get id of request sender",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+	var data struct {
+		GroupId int `json:"group_id"`
+	}
+
+	// get the group id from the request body
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&data)
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(400)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "bad request, failed to get group id from request body",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+
+	// remove the person from the group_invited_users table
+	_, err = statements["removeGroupInvitedUser"].Exec(requestorId, data.GroupId)
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(500)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "failed to remove person from group_invited_users table",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+
+	w.WriteHeader(200)
+	jsonResponse, _ := json.Marshal(map[string]string{
+		"message": "success: you rejected the group invite",
+	})
+	w.Write(jsonResponse)
+	return
+}

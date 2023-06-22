@@ -115,7 +115,6 @@ func groupNewHandler(w http.ResponseWriter, r *http.Request) {
 	invitedUsersEmailsString := strings.TrimSpace(incomingData.Invited)
 	if invitedUsersEmailsString != "" {
 		invitedUsersEmails := strings.Split(invitedUsersEmailsString, " ")
-		log.Println(len(invitedUsersEmails), invitedUsersEmails)
 		for _, email := range invitedUsersEmails {
 			// get the user id from the email
 			var invitedUserID int

@@ -245,6 +245,42 @@ SAME STRUCTURE AS FOR `/api/user/following`
 
 <hr style="border:2px solid green">
 
+![request][request]  `api/group/invite/accept` (accept group invitation)
+
+```json
+{
+  "group_id": "number"
+}
+```
+
+![response][response]  
+
+```json
+{
+  "message": "success: you accepted the group invite"
+}
+```
+
+<hr style="border:2px solid green">
+
+![request][request]  `api/group/invite/reject` (reject group invitation)
+
+```json
+{
+  "group_id": "number"
+}
+```
+
+![response][response]  
+
+```json
+{
+  "message": "success: you rejected the group invite"
+}
+```
+
+<hr style="border:2px solid green">
+
 ![request][request] `/api/post/submit` (add new post)
   
   ```json
