@@ -14,6 +14,9 @@ export const useAvatarStore = defineStore({
   getters: {
     getAvatarError(): string {
       return this.avatarError;
+    },
+    getAvatarBlob(): Blob | null {
+      return this.avatarBlob;
     }
   },
   actions: {
