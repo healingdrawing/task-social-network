@@ -2,15 +2,18 @@ package main
 
 import (
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 )
 
 type GroupPostRequest struct {
 	Title      string `json:"title"`
 	Categories string `json:"categories"`
 	Content    string `json:"content"`
+	Picture    string `json:"picture"`
 	GroupID    int    `json:"group_id"`
 }
 
@@ -36,6 +39,9 @@ type GroupPostDTOelement struct {
 	CreatedAt       string `json:"createdAt"`
 }
 
+// # groupPostNewHandler create a new group post
+//
+// @r.param {group_id int, title string, categories string, content string, picture string}
 func groupPostNewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
@@ -65,7 +71,7 @@ func groupPostNewHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil || cookie.Value == "" || cookie == nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "You are not logged in",
+			"message": "You are not logged in, named cookie not present",
 		})
 		w.Write(jsonResponse)
 		return
@@ -82,12 +88,37 @@ func groupPostNewHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// blob the picture
+	postPicture := []byte{}
+	if data.Picture != "" {
+		avatarData, err := base64.StdEncoding.DecodeString(data.Picture)
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "Invalid avatar",
+			})
+			w.Write(jsonResponse)
+			return
+		}
+		if !isImage(avatarData) {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusUnsupportedMediaType)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "avatar is not a valid image",
+			})
+			w.Write(jsonResponse)
+			return
+		}
+		postPicture = avatarData
+	}
+
 	var result sql.Result
-	result, err = statements["addGroupPost"].Exec(userID, data.Title, data.Categories, data.Content)
+	result, err = statements["addGroupPost"].Exec(userID, data.Title, data.Categories, data.Content, postPicture, time.Now().Format("2006-01-02 15:04:05"))
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error, addGroupPost failed",
 		})
 		w.Write(jsonResponse)
 		return
@@ -98,7 +129,7 @@ func groupPostNewHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error, LastInsertId failed",
 		})
 		w.Write(jsonResponse)
 		return
@@ -110,7 +141,7 @@ func groupPostNewHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error, addGroupPostMembership failed",
 		})
 		w.Write(jsonResponse)
 		return
@@ -121,23 +152,25 @@ func groupPostNewHandler(w http.ResponseWriter, r *http.Request) {
 		"message": "Post created",
 	})
 	w.Write(jsonResponse)
-	rows, err := statements["getGroupPosts"].Query(userID, groupID)
-	if err != nil {
-		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
-		})
-		w.Write(jsonResponse)
-		return
-	}
+	// todo: do the websocket sending group_posts with GroupPost type
+	// rows, err := statements["getGroupPosts"].Query(userID, groupID)
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	w.WriteHeader(500)
+	// 	jsonResponse, _ := json.Marshal(map[string]string{
+	// 		"message": "internal server error, getGroupPosts failed",
+	// 	})
+	// 	w.Write(jsonResponse)
+	// 	return
+	// }
+	// todo: make post picture into encoded string and send it
 
 	// todo: 99% it must be remastered too, but 1% still exists :D . Check it precisely
-	var post Post
-	rows.Next()
-	rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Content)
-	rows.Close()
-	sendPost(post)
+	// var post Post
+	// rows.Next()
+	// rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Content)
+	// rows.Close()
+	// sendPost(post)
 }
 
 func groupPostGetHandler(w http.ResponseWriter, r *http.Request) {

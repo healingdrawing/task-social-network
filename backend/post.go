@@ -92,7 +92,7 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	data.Categories = sanitizeCategories(data.Categories)
 	// process the picture
-	commentPicture := []byte{}
+	postPicture := []byte{}
 	if data.Picture != "" {
 		avatarData, err := base64.StdEncoding.DecodeString(data.Picture)
 		if err != nil {
@@ -113,11 +113,11 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write(jsonResponse)
 			return
 		}
-		commentPicture = avatarData
+		postPicture = avatarData
 	}
 
 	data.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
-	result, err := statements["addPost"].Exec(userID, data.Title, data.Categories, data.Content, data.Privacy, commentPicture, data.CreatedAt)
+	result, err := statements["addPost"].Exec(userID, data.Title, data.Categories, data.Content, data.Privacy, postPicture, data.CreatedAt)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{

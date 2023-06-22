@@ -160,7 +160,7 @@ func statementsCreation() {
 		"getFollowing":          `SELECT user_id FROM followers WHERE follower_id = ?;`,
 		"doesSecondFollowFirst": `SELECT * FROM followers WHERE user_id = ? AND follower_id = ? LIMIT 1;`,
 
-		"addGroupPost":           `INSERT INTO group_post (user_id, title, categories, content) VALUES (?, ?, ?, ?);`,
+		"addGroupPost":           `INSERT INTO group_post (user_id, title, categories, content, picture, created_at) VALUES (?, ?, ?, ?, ?, ?);`,
 		"addGroupPostMembership": `INSERT INTO group_post_membership (group_id, group_post_id) VALUES (?, ?);`,
 		"getGroupPosts":          `SELECT group_post.id, title, content, categories, first_name, last_name, email, created_at FROM group_post JOIN group_post_membership ON group_post.id = group_post_membership.group_post_id JOIN users ON group_post.user_id = users.id ORDER BY created_at DESC;`,
 

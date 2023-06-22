@@ -281,6 +281,28 @@ SAME STRUCTURE AS FOR `/api/user/following`
 
 <hr style="border:2px solid green">
 
+![request][request]  `/api/group/post/submit`
+
+```json
+{
+  "group_id": "number",
+  "title": "string",
+  "content": "string",
+  "categories": "string",
+  "picture": "base64encodeBlobTo - string",
+}
+```
+
+![response][response] `SUCCESS`
+
+```json
+{
+    "message": "Post created"
+}
+```
+
+<hr style="border:2px solid green">
+
 ![request][request]  `/api/group/request/accept`
 
 ```json
