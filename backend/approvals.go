@@ -7,19 +7,18 @@ import (
 )
 
 type GroupMemberRequest struct {
-	GroupID  int `json:"group_id"`
-	MemberID int `json:"member_id"`
+	GroupID int    `json:"group_id"`
+	Email   string `json:"member_email"`
 }
 
 type UserFollowerRequest struct {
 	Email string `json:"email"` // the user who wants to follow you
 }
 
-// place to receive requests and approve requests
-// to join groups
-// to follow users
-
-func approveGroupMembershipHandler(w http.ResponseWriter, r *http.Request) {
+// # groupRequestAcceptHandler is the handler for accepting a group request
+//
+// @rparam {group_id int, member_email string}
+func groupRequestAcceptHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
 		if err := recover(); err != nil {
@@ -31,24 +30,18 @@ func approveGroupMembershipHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write(jsonResponse)
 		}
 	}()
-	// get the logged in user id from the uuid in cookies
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
 		if err == http.ErrNoCookie {
-			// If the cookie is not set, return an unauthorized status
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		// For any other type of error, return a bad request status
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	// Get the UUID value from the cookie
 	uuid := cookie.Value
-	// incoming DTO GroupMember
 	data := GroupMemberRequest{}
-	// decode the request body into the DTO
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&data)
@@ -70,15 +63,16 @@ func approveGroupMembershipHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	// check if the user is the creator of the group
-	// use the getGroup statement
+
+	memberID, err := getIDbyEmail(data.Email)
+
 	rows, err := statements["getGroup"].Query(data.GroupID)
 	defer rows.Close()
 	if err != nil {
 		log.Println(err.Error())
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error, getGroup query failed",
 		})
 		w.Write(jsonResponse)
 		return
@@ -91,41 +85,40 @@ func approveGroupMembershipHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println(err.Error())
 			w.WriteHeader(500)
 			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
+				"message": "internal server error, failed to scan group",
 			})
 			w.Write(jsonResponse)
 			return
 		}
-
 	}
 
 	if group.CreatorId != LoggedinUserID {
 		w.WriteHeader(http.StatusUnauthorized)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "unauthorized",
+			"message": "unauthorized, you are not the creator of the group",
 		})
 		w.Write(jsonResponse)
 		return
 	}
 
-	_, err = statements["addGroupMember"].Exec(data.GroupID, data.MemberID)
+	_, err = statements["addGroupMember"].Exec(data.GroupID, memberID)
 	if err != nil {
 		log.Println(err.Error())
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error, addGroupMember query failed",
 		})
 		w.Write(jsonResponse)
 		return
 	}
 
 	// remove it from the group_pending_members table
-	_, err = statements["removeGroupPendingMember"].Exec(data.GroupID, data.MemberID)
+	_, err = statements["removeGroupPendingMember"].Exec(data.GroupID, memberID)
 	if err != nil {
 		log.Println(err.Error())
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error, removeGroupPendingMember query failed",
 		})
 		w.Write(jsonResponse)
 		return
@@ -139,7 +132,10 @@ func approveGroupMembershipHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func rejectGroupMembershipHandler(w http.ResponseWriter, r *http.Request) {
+// # groupRequestRejectHandler is the handler for rejecting a group request
+//
+// @rparam {group_id int, member_email string}
+func groupRequestRejectHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
 		if err := recover(); err != nil {
@@ -151,7 +147,6 @@ func rejectGroupMembershipHandler(w http.ResponseWriter, r *http.Request) {
 			w.Write(jsonResponse)
 		}
 	}()
-
 	// get the logged in user id from the uuid in cookies
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
@@ -167,7 +162,6 @@ func rejectGroupMembershipHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get the UUID value from the cookie
 	uuid := cookie.Value
-
 	// incoming DTO GroupMember
 	data := GroupMemberRequest{}
 	// decode the request body into the DTO
@@ -192,6 +186,10 @@ func rejectGroupMembershipHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
+
+	// from member_email get the member_id
+	memberID, err := getIDbyEmail(data.Email)
+
 	// check if the user is the creator of the group
 	// use the getGroup statement
 	rows, err := statements["getGroup"].Query(data.GroupID)
@@ -223,14 +221,14 @@ func rejectGroupMembershipHandler(w http.ResponseWriter, r *http.Request) {
 	if group.CreatorId != LoggedinUserID {
 		w.WriteHeader(http.StatusUnauthorized)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "unauthorized",
+			"message": "unauthorized, you are not the creator of the group",
 		})
 		w.Write(jsonResponse)
 		return
 	}
 
 	// remove it from the group_pending_members table
-	_, err = statements["removeGroupPendingMember"].Exec(data.GroupID, data.MemberID)
+	_, err = statements["removeGroupPendingMember"].Exec(data.GroupID, memberID)
 	if err != nil {
 		log.Println(err.Error())
 		w.WriteHeader(500)
@@ -240,12 +238,13 @@ func rejectGroupMembershipHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	// return success
+
 	w.WriteHeader(http.StatusOK)
 	jsonResponse, _ := json.Marshal(map[string]string{
 		"message": "success: you rejected the group membership",
 	})
 	w.Write(jsonResponse)
+	return
 }
 
 func approveFollowerHandler(w http.ResponseWriter, r *http.Request) {

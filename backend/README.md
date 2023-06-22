@@ -281,6 +281,27 @@ SAME STRUCTURE AS FOR `/api/user/following`
 
 <hr style="border:2px solid green">
 
+![request][request]  `api/group/requests` (list of group joining pending requests)
+
+```json
+{
+  "group_id": "number"
+}
+```
+
+![response][response]  `SUCCESS`
+
+```json
+ [
+    {
+      "full_name": "string",
+      "email": "string"
+    }
+  ]
+```
+
+<hr style="border:2px solid green">
+
 ![request][request] `/api/post/submit` (add new post)
   
   ```json

@@ -105,9 +105,9 @@ func main() {
 	http.HandleFunc("/api/group/invited", groupInvitedHandler)
 	http.HandleFunc("/api/group/invite/accept", groupInviteAcceptHandler)
 	http.HandleFunc("/api/group/invite/reject", groupInviteRejectHandler)
-	// http.HandleFunc("/api/group/requests", groupRequestsHandler)
-	// http.HandleFunc("/api/group/request/accept", groupRequestAcceptHandler)
-	// http.HandleFunc("/api/group/request/reject", groupRequestRejectHandler)
+	http.HandleFunc("/api/group/requests", groupRequestsHandler)
+	http.HandleFunc("/api/group/request/accept", groupRequestAcceptHandler)
+	http.HandleFunc("/api/group/request/reject", groupRequestRejectHandler)
 
 	http.HandleFunc("/api/user/check", sessionCheckHandler)
 	http.HandleFunc("/api/user/following", FollowingHandler)

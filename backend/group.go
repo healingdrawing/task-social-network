@@ -566,3 +566,136 @@ func groupInvitedHandler(w http.ResponseWriter, r *http.Request) {
 	jsonResponse, _ := json.Marshal(invitedUsersInfo)
 	w.Write(jsonResponse)
 }
+
+// # groupRequestsHandler gets a list of all the requests to join the group from group_pending_members table
+//
+// @r.params: {group_id : int}
+func groupRequestsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+			w.WriteHeader(500)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "internal server error",
+			})
+			w.Write(jsonResponse)
+		}
+	}()
+
+	// get the id of the request sender
+	cookie, err := r.Cookie("user_uuid")
+	if err != nil {
+		w.WriteHeader(401)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "unauthorized, malformed cookie",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+	requestSenderID, err := getIDbyUUID(cookie.Value)
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(500)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "internal server error, failed to get id of request sender",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+	// check if request sender is the group creator
+	var data struct {
+		GroupID int `json:"group_id"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&data)
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(400)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "bad request",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+
+	var group Group
+	err = statements["getGroup"].QueryRow(data.GroupID).Scan(&group.ID, &group.Name, &group.Description, &group.CreatorId, &group.CreationDate, &group.Privacy)
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(404)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "group not found",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+
+	if group.CreatorId != requestSenderID {
+		w.WriteHeader(403)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "only group creator can view requests",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+
+	// get the list of users invited to the group
+	type pendingUserData struct {
+		PendingUserID int
+	}
+	var pendingUsers []pendingUserData
+	rows, err := statements["getGroupPendingMembers"].Query(data.GroupID)
+	if err != nil {
+		log.Println(err.Error())
+		w.WriteHeader(500)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "getGroupPendingMembers query failed",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+	for rows.Next() {
+		var pendingUser pendingUserData
+		err = rows.Scan(&pendingUser.PendingUserID)
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(500)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "failed to scan pending user id",
+			})
+			w.Write(jsonResponse)
+			return
+		}
+		pendingUsers = append(pendingUsers, pendingUser)
+	}
+	// send the array of name and email of the pending users as response
+	type outgoingData struct {
+		FullName string `json:"full_name"`
+		Email    string `json:"email"`
+	}
+	// get the full name and email of the pending users
+	pendingUsersInfo := []outgoingData{}
+	for _, pendingUserID := range pendingUsers {
+		var pendingUserInfo outgoingData
+		var pendingFirstName, pendingLastName, pendingNick string
+		err = statements["getUserbyID"].QueryRow(pendingUserID.PendingUserID).Scan(&pendingUserInfo.Email, &pendingFirstName, &pendingLastName, &pendingNick)
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(500)
+			jsonResponse, _ := json.Marshal(map[string]string{
+				"message": "getUserbyID query failed",
+			})
+			w.Write(jsonResponse)
+			return
+		}
+		pendingUserInfo.FullName = pendingFirstName + " " + pendingLastName
+		pendingUsersInfo = append(pendingUsersInfo, pendingUserInfo)
+	}
+
+	w.WriteHeader(200)
+	jsonResponse, _ := json.Marshal(pendingUsersInfo)
+	w.Write(jsonResponse)
+}
