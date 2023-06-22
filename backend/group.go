@@ -55,6 +55,19 @@ func groupNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
+
+	// get user id from the cookie
+	cookie, err := r.Cookie("user_uuid")
+	if err != nil {
+		w.WriteHeader(401)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "unauthorized",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+	incomingData.UUID = cookie.Value
+
 	data.Name = strings.TrimSpace(incomingData.Name)
 	data.Description = strings.TrimSpace(incomingData.Description)
 	data.Privacy = strings.TrimSpace(incomingData.Privacy)
