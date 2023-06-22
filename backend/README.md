@@ -374,6 +374,45 @@ SAME STRUCTURE AS FOR `/api/user/following`
 
 <hr style="border:4px solid green">
 
+![request][request] '/api/group/invite' (invite single user to group)
+  
+  ```json
+  {
+    "group_id": "number",
+    "member_email": "string"
+  }
+  ```
+
+![response][response]
+
+```json
+{
+    "message": "user invited to the group"
+}
+```
+
+<hr style="border:4px solid green">
+
+![request][request] '/api/group/join' (join as a member of a group)
+
+In case the group is public, you join straight away, in case of private group, you send a request to join.
+
+  ```json
+  {
+    "groupId": "number"
+  }
+  ```
+
+![response][response]
+
+```json
+{
+  "message": "group joined / group joining request sent to group creator, waiting for approval"
+}
+```
+
+<hr style="border:4px solid green">
+
 ## TargetView.vue  
 To show target user profile data, inside `onBeforeRouterEnter()` requests to backend, to fetch data before rendering page
 
@@ -467,31 +506,6 @@ Redirect to `LoginView.vue`. Perhaps will be better to sign in user automaticall
 
 ![erd](https://github.com/healingdrawing/task-social-network/assets/5121817/4b8354f7-c165-4e31-aa63-de0f6fe7a89b)
 
-## To create base64 encoded string from image file, required for testing
-
-I recommend this website
+## To create base64 encoded string from image file, for testing, website recommended is
 
 <https://elmah.io/tools/base64-image-encoder>
-
-
-# TODO: sergei see this and make them alright, make them go at the right place int he readme. Below this line is rought work
-
-// Incoming JSON DTO for group creation over handler groupCreateHandler
-
-```json
-{
-  "UUID": 1,
-  "name": "group name",
-  "description": "group description",
-  "privacy": "public"
-}
-```
-
-// Incoming JSON DTO for group joining over handler groupJoinHandler
-
-```json
-{
-  "group_id": 1,
-  "member_id": 1
-}
-```

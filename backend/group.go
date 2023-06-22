@@ -112,31 +112,35 @@ func groupNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	invitedUsersEmails := strings.Split(incomingData.Invited, " ")
-	for _, email := range invitedUsersEmails {
-		// get the user id from the email
-		var invitedUserID int
-		err = statements["getUserIDByEmail"].QueryRow(email).Scan(&invitedUserID)
-		if err != nil {
-			log.Println(err.Error())
-			w.WriteHeader(404)
-			errorMsg := fmt.Sprintf("user with email %s not found", email)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": errorMsg,
-			})
-			w.Write(jsonResponse)
-			return
-		}
-		// add the invited user to the groupPendingMembers table
-		_, err = statements["addGroupInvitedUser"].Exec(invitedUserID, groupID, data.CreatorId, time.Now().Format("2006-01-02 15:04:05"))
-		if err != nil {
-			log.Println(err.Error())
-			w.WriteHeader(500)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error, failed to add user to group pending members",
-			})
-			w.Write(jsonResponse)
-			return
+	invitedUsersEmailsString := strings.TrimSpace(incomingData.Invited)
+	if invitedUsersEmailsString != "" {
+		invitedUsersEmails := strings.Split(invitedUsersEmailsString, " ")
+		log.Println(len(invitedUsersEmails), invitedUsersEmails)
+		for _, email := range invitedUsersEmails {
+			// get the user id from the email
+			var invitedUserID int
+			err = statements["getUserIDByEmail"].QueryRow(email).Scan(&invitedUserID)
+			if err != nil {
+				log.Println(err.Error())
+				w.WriteHeader(404)
+				errorMsg := fmt.Sprintf("user with email %s not found", email)
+				jsonResponse, _ := json.Marshal(map[string]string{
+					"message": errorMsg,
+				})
+				w.Write(jsonResponse)
+				return
+			}
+			// add the invited user to the groupPendingMembers table
+			_, err = statements["addGroupInvitedUser"].Exec(invitedUserID, groupID, data.CreatorId, time.Now().Format("2006-01-02 15:04:05"))
+			if err != nil {
+				log.Println(err.Error())
+				w.WriteHeader(500)
+				jsonResponse, _ := json.Marshal(map[string]string{
+					"message": "internal server error, failed to add user to group pending members",
+				})
+				w.Write(jsonResponse)
+				return
+			}
 		}
 	}
 	// add group creator to group members
