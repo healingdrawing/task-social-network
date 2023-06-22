@@ -1,29 +1,29 @@
 import { defineStore } from "pinia";
 
-interface AvatarState {
-  avatarError: string;
-  avatarBlob: Blob | null;
+interface PictureState {
+  pictureError: string;
+  pictureBlob: Blob | null;
 }
 
-export const useAvatarStore = defineStore({
-  id: "avatar",
-  state: (): AvatarState => ({
-    avatarError: "",
-    avatarBlob: null,
+export const usePictureStore = defineStore({
+  id: "picture",
+  state: (): PictureState => ({
+    pictureError: "",
+    pictureBlob: null,
   }),
   getters: {
-    getAvatarError(): string {
-      return this.avatarError;
+    getPictureError(): string {
+      return this.pictureError;
     },
-    getAvatarBlob(): Blob | null {
-      return this.avatarBlob;
+    getPictureBlob(): Blob | null {
+      return this.pictureBlob;
     }
   },
   actions: {
-    setAvatarError(avatarError: string) {
-      this.avatarError = avatarError;
+    setPictureError(pictureError: string) {
+      this.pictureError = pictureError;
     },
-    handleAvatarUpload(event: Event) {
+    handlePictureUpload(event: Event) {
       const file = (event.target as HTMLInputElement).files?.[0];
       if (!file) return;
 
@@ -42,13 +42,13 @@ export const useAvatarStore = defineStore({
 
           if (width > height) {
             if (width > MAX_WIDTH) {
-              alert('store/avatar.ts width > height && width > MAX_WIDTH');
+              alert('store/picture.ts width > height && width > MAX_WIDTH');
               height *= MAX_WIDTH / width;
               width = MAX_WIDTH;
             }
           } else {
             if (height > MAX_HEIGHT) {
-              alert('store/avatar.ts height > MAX_HEIGHT');
+              alert('store/picture.ts height > MAX_HEIGHT');
               width *= MAX_HEIGHT / height;
               height = MAX_HEIGHT;
             }
@@ -63,14 +63,14 @@ export const useAvatarStore = defineStore({
             if (!blob) return;
 
             if (blob.size > 500000) {
-              this.avatarError = 'The image must be less than 500 KB.';
+              this.pictureError = 'The image must be less than 500 KB.';
             } else if (!['image/jpeg', 'image/png'].includes(blob.type)) {
-              this.avatarError = 'The image must be in JPEG or PNG format.';
+              this.pictureError = 'The image must be in JPEG or PNG format.';
             } else if (width !== img.width || height !== img.height) {
-              this.avatarError = 'The image must be less than or equal to 500 pixels in width and height.';
+              this.pictureError = 'The image must be less than or equal to 500 pixels in width and height.';
             } else {
-              this.avatarBlob = blob;
-              this.avatarError = '';
+              this.pictureBlob = blob;
+              this.pictureError = '';
             }
           }, 'image/jpeg', 0.8);
         };
