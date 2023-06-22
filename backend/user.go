@@ -700,7 +700,7 @@ func createSession(email string) (UUID string, err error) {
 }
 
 func getIDbyEmail(email string) (ID int, err error) {
-	rows, err := statements["getUserID"].Query(email)
+	rows, err := statements["getUserIDByEmail"].Query(email)
 	if err != nil {
 		return 0, err
 	}

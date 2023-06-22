@@ -333,7 +333,7 @@ SAME STRUCTURE AS FOR `/api/user/following`
   "name": "string",
   "description": "string",
   "privacy": "public/private",
-  "invited": "string"
+  "invited": "user-emails sep by space - string"
 }
 ```
 
@@ -343,6 +343,32 @@ SAME STRUCTURE AS FOR `/api/user/following`
 ```json
 {
   "message": "Group created"
+}
+```
+
+<hr style="border:4px solid green">
+
+![request][request] '/api/group/invited' (list of users invited to group)
+  
+  ```json
+  {
+    "groupId": "number"
+  }
+  ```
+
+![response][response]
+
+```json
+{
+  "users": [
+    {
+      "full_name": "string",
+      "email": "string",
+      "inviter_full_name": "string",
+      "inviter_email": "string",
+      "invitation_time": "string",
+    }
+  ]
 }
 ```
 
