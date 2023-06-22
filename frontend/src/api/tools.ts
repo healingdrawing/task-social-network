@@ -4,6 +4,7 @@ interface ResizedImage {
   height: number;
 }
 
+// todo: remove later. not used at the moment. not tested.
 export function resizeImage(file: File, maxSizeKb: number, maxWidthPx: number, maxHeightPx: number): Promise<ResizedImage> {
   return new Promise((resolve, reject) => {
     const img = new Image();
