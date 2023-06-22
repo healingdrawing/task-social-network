@@ -18,6 +18,7 @@ type PostRequest struct {
 	Privacy    string `json:"privacy"`
 	Picture    string `json:"picture"`
 	CreatedAt  string `json:"created_at"`
+	AbleToSee  string `json:"able_to_see"`
 }
 
 type Posts struct {
@@ -80,7 +81,6 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	uuid := cookie.Value
-	data.Categories = sanitizeCategories(data.Categories)
 	userID, err := getIDbyUUID(uuid)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -90,6 +90,7 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
+	data.Categories = sanitizeCategories(data.Categories)
 	// process the picture
 	commentPicture := []byte{}
 	if data.Picture != "" {
@@ -116,7 +117,7 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
-	_, err = statements["addPost"].Exec(userID, data.Title, data.Categories, data.Content, data.Privacy, commentPicture, data.CreatedAt)
+	result, err := statements["addPost"].Exec(userID, data.Title, data.Categories, data.Content, data.Privacy, commentPicture, data.CreatedAt)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -125,6 +126,45 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
+
+	postId, err := result.LastInsertId()
+	if err != nil {
+		w.WriteHeader(500)
+		jsonResponse, _ := json.Marshal(map[string]string{
+			"message": "internal server error, LastInsertId of addPost query failed",
+		})
+		w.Write(jsonResponse)
+		return
+	}
+	// privacy check and able to see
+	if data.Privacy == "almost private" {
+		if data.AbleToSee != "" {
+			listOfEmails := strings.Split(data.AbleToSee, " ")
+			for _, email := range listOfEmails {
+				// get the id of the user from the email
+				userID, err := getIDbyEmail(email)
+				if err != nil {
+					w.WriteHeader(http.StatusUnprocessableEntity)
+					jsonResponse, _ := json.Marshal(map[string]string{
+						"message": "Invalid email",
+					})
+					w.Write(jsonResponse)
+					return
+				}
+				// add the post to the almost_private table (user_id, post_id)
+				_, err = statements["addAlmostPrivate"].Exec(userID, postId)
+				if err != nil {
+					w.WriteHeader(500)
+					jsonResponse, _ := json.Marshal(map[string]string{
+						"message": "internal server error, addAlmostPrivate query failed",
+					})
+					w.Write(jsonResponse)
+					return
+				}
+			}
+		}
+	}
+
 	w.WriteHeader(200)
 	jsonResponse, _ := json.Marshal(map[string]string{
 		"message": "Post created",

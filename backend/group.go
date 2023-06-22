@@ -29,7 +29,7 @@ type GroupCreationDTO struct {
 	Privacy     string `json:"privacy"`
 }
 
-func groupCreateHandler(w http.ResponseWriter, r *http.Request) {
+func groupNewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
 		if err := recover(); err != nil {
@@ -50,7 +50,7 @@ func groupCreateHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		w.WriteHeader(400)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "bad request",
+			"message": "bad request, malformed json",
 		})
 		w.Write(jsonResponse)
 		return
@@ -62,12 +62,12 @@ func groupCreateHandler(w http.ResponseWriter, r *http.Request) {
 	if data.Name == "" || data.Description == "" || data.Privacy == "" {
 		w.WriteHeader(400)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "bad request",
+			"message": "bad request, missing fields",
 		})
 		w.Write(jsonResponse)
 		return
 	}
-	result, err := statements["addGroup"].Exec(data.Name, data.Description, data.Creator, time.Now(), data.Privacy)
+	result, err := statements["addGroup"].Exec(data.Name, data.Description, data.Creator, time.Now().Format("2006-01-02 15:04:05"), data.Privacy)
 	if err != nil {
 		log.Println(err.Error())
 		w.WriteHeader(500)
@@ -82,7 +82,7 @@ func groupCreateHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error, failed to get last insert id of group creation",
 		})
 		w.Write(jsonResponse)
 		return
@@ -92,7 +92,7 @@ func groupCreateHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
+			"message": "internal server error, failed to add group creator as group member",
 		})
 		w.Write(jsonResponse)
 		return

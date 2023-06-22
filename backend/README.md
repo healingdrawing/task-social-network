@@ -253,7 +253,8 @@ SAME STRUCTURE AS FOR `/api/user/following`
     "content": "string",
     "categories": "string",
     "picture": "base64encodeBlobTo - string",
-    "privacy": "private/public - string"
+    "privacy": "private/public/almost private - string",
+    "able_to_see": "string"
   }
   ```
 
@@ -320,6 +321,27 @@ SAME STRUCTURE AS FOR `/api/user/following`
 ```json
 {
   "public": false
+}
+```
+
+<hr style="border:4px solid green">
+
+![request][request] /api/group/submit (add new group)
+
+```json
+{
+  "name": "string",
+  "description": "string",
+  "privacy": "public/private"
+}
+```
+
+![response][response]
+`SUCCESS`  
+
+```json
+{
+  "message": "Group created"
 }
 ```
 

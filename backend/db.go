@@ -126,6 +126,8 @@ func statementsCreation() {
 		"getIDbyEmail":  `SELECT id FROM users WHERE email = ?;`,
 		"removeSession": `DELETE FROM session WHERE uuid = ?;`,
 
+		"addAlmostPrivate": `INSERT INTO almost_private (user_id, post_id) VALUES (?, ?);`,
+
 		"addPost":     `INSERT INTO post (user_id, title, categories, content, privacy, picture, created_at) VALUES (?, ?, ?, ?, ?, ?, ?);`,
 		"getPosts":    `SELECT post.id, title, content, categories, picture, first_name, last_name, email, created_at FROM post INNER JOIN users ON user_id=? ORDER BY created_at DESC;`,
 		"addComment":  `INSERT INTO comment (user_id, post_id, content, picture, created_at) VALUES (?, ?, ?, ?, ?);`,
