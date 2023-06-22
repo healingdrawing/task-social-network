@@ -281,6 +281,44 @@ SAME STRUCTURE AS FOR `/api/user/following`
 
 <hr style="border:2px solid green">
 
+![request][request]  `/api/group/request/accept`
+
+```json
+{
+  "group_id": "number",
+  "member_email": "string"
+}
+```
+
+![response][response] `SUCCESS`
+
+```json
+{
+    "message": "success: you accepted the group membership"
+}
+```
+
+  <hr style="border:2px solid green">
+
+![request][request]  `/api/group/request/reject`
+
+```json
+{
+  "group_id": "number",
+  "member_email": "string"
+}
+```
+
+![response][response] `SUCCESS`
+
+```json
+{
+    "message": "success: you rejected the group membership"
+}
+```
+
+<hr style="border:2px solid green">
+
 ![request][request]  `api/group/requests` (list of group joining pending requests)
 
 ```json
