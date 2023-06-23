@@ -94,7 +94,10 @@ func sendPost(post Post) {
 	}
 	clients.Range(func(key, value interface{}) bool {
 		if c, ok := key.(*websocket.Conn); ok {
-			c.WriteMessage(websocket.TextMessage, output)
+			err = c.WriteMessage(websocket.TextMessage, output)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 		return true
 	})
@@ -108,7 +111,10 @@ func sendComment(postID int, comment Comment) {
 	}
 	clients.Range(func(key, value interface{}) bool {
 		if c, ok := key.(*websocket.Conn); ok {
-			c.WriteMessage(websocket.TextMessage, output)
+			err = c.WriteMessage(websocket.TextMessage, output)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 		return true
 	})
@@ -122,7 +128,10 @@ func sendStatus(username string, online bool) {
 	}
 	clients.Range(func(key, value interface{}) bool {
 		if value.(string) != "" {
-			key.(*websocket.Conn).WriteMessage(websocket.TextMessage, output)
+			err = key.(*websocket.Conn).WriteMessage(websocket.TextMessage, output) // todo: CHECK IT! err was added, not sure it is correct
+			if err != nil {
+				log.Println(err)
+			}
 		}
 		return true
 	})
@@ -136,7 +145,10 @@ func sendMessage(message Message) {
 	}
 	clients.Range(func(key, value interface{}) bool {
 		if value.(string) == message.UsernameFrom || value.(string) == message.UsernameTo {
-			key.(*websocket.Conn).WriteMessage(websocket.TextMessage, output)
+			err = key.(*websocket.Conn).WriteMessage(websocket.TextMessage, output) // todo: CHECK IT! err was added, not sure it is correct
+			if err != nil {
+				log.Println(err)
+			}
 		}
 		return true
 	})
@@ -150,7 +162,10 @@ func sendTyping(typing Typing) {
 	}
 	clients.Range(func(key, value interface{}) bool {
 		if value.(string) == typing.UsernameTo {
-			key.(*websocket.Conn).WriteMessage(websocket.TextMessage, output)
+			err = key.(*websocket.Conn).WriteMessage(websocket.TextMessage, output) // todo: CHECK IT! err was added, not sure it is correct
+			if err != nil {
+				log.Println(err)
+			}
 		}
 		return true
 	})
