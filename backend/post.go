@@ -51,11 +51,7 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			w.WriteHeader(500)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - postNewHandler")
 		}
 	}()
 	var data PostRequest
@@ -64,31 +60,19 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "Bad request",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusBadRequest, "")
 		return
 	}
 	// get user id from cookie
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil || cookie.Value == "" || cookie == nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "desired cookie not present",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusUnauthorized, "cannot find cookie")
 		return
 	}
 	uuid := cookie.Value
 	userID, err := getIDbyUUID(uuid)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "You are not logged in, or your cookie is invalid",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusUnauthorized, "getIDbyUUID failed")
 		return
 	}
 	data.Categories = sanitizeCategories(data.Categories)
@@ -98,20 +82,12 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 		avatarData, err := base64.StdEncoding.DecodeString(data.Picture)
 		if err != nil {
 			log.Println(err.Error())
-			w.WriteHeader(http.StatusUnprocessableEntity)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "Invalid avatar",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusUnprocessableEntity, "Invalid avatar")
 			return
 		}
 		if !isImage(avatarData) {
 			log.Println(err.Error())
-			w.WriteHeader(http.StatusUnsupportedMediaType)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "avatar is not a valid image",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusUnsupportedMediaType, "avatar is not a valid image")
 			return
 		}
 		postPicture = avatarData
@@ -120,21 +96,13 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 	data.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
 	result, err := statements["addPost"].Exec(userID, data.Title, data.Categories, data.Content, data.Privacy, postPicture, data.CreatedAt)
 	if err != nil {
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error, addPost query failed",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "addPost query failed")
 		return
 	}
 
 	postId, err := result.LastInsertId()
 	if err != nil {
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error, LastInsertId of addPost query failed",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "LastInsertId of addPost query failed")
 		return
 	}
 	// privacy check and able to see
@@ -145,82 +113,75 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 				// get the id of the user from the email
 				userID, err := getIDbyEmail(email)
 				if err != nil {
-					w.WriteHeader(http.StatusUnprocessableEntity)
-					jsonResponse, _ := json.Marshal(map[string]string{
-						"message": "Invalid email",
-					})
-					w.Write(jsonResponse)
+					jsonResponseWriterManager(w, http.StatusUnprocessableEntity, "Invalid email")
 					return
 				}
 				// add the post to the almost_private table (user_id, post_id)
 				_, err = statements["addAlmostPrivate"].Exec(userID, postId)
 				if err != nil {
-					w.WriteHeader(500)
-					jsonResponse, _ := json.Marshal(map[string]string{
-						"message": "internal server error, addAlmostPrivate query failed",
-					})
-					w.Write(jsonResponse)
+					jsonResponseWriterManager(w, http.StatusInternalServerError, "addAlmostPrivate query failed")
 					return
 				}
 			}
 		}
 	}
 
-	w.WriteHeader(200)
-	jsonResponse, _ := json.Marshal(map[string]string{
-		"message": "Post created",
-	})
-	w.Write(jsonResponse)
+	jsonResponseWriterManager(w, http.StatusOK, "Post created")
+
 	rows, err := statements["getPosts"].Query(userID)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error, getPosts query failed",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "getPosts query failed")
 		return
 	}
 	var post Post
 	rows.Next()
-	rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Content)
+	err = rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Content)
+	if err != nil {
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "post scan failed")
+		return
+	}
 	rows.Close()
 	sendPost(post)
 }
 
-func postGetHandler(w http.ResponseWriter, r *http.Request) {
+func postsGetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			w.WriteHeader(500)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - postGetHandler")
 		}
 	}()
 	rows, err := statements["getPosts"].Query()
 	if err != nil {
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "getPosts query failed")
 		return
 	}
 	var posts Posts
 	for rows.Next() {
 		var post Post
 		pictureBlob := []byte{}
-		rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Content, &pictureBlob)
+		err = rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Content, &pictureBlob)
+		if err != nil {
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "post scan failed")
+			return
+		}
 		post.Picture = base64.StdEncoding.EncodeToString(pictureBlob)
 		posts.Posts = append(posts.Posts, post)
 	}
 	rows.Close()
 	w.WriteHeader(200)
-	jsonResponse, _ := json.Marshal(posts)
-	w.Write(jsonResponse)
+	jsonResponse, err := json.Marshal(posts)
+	if err != nil {
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "json.Marshal failed")
+		return
+	}
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "w.Write(jsonResponse)<-posts failed")
+		return
+	}
 }
 
 func sanitizeCategories(data string) string {
@@ -265,44 +226,28 @@ func userPostsHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error. we could not get your posts",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - userPostsHandler")
 		}
 	}()
 
 	// get the uuid of the current user from the cookies
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
-		w.WriteHeader(400)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "bad request. Bad cookie, not tasty",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusBadRequest, "cookie not found")
 		return
 	}
 
 	// get the user id from the uuid
 	userID, err := getIDbyUUID(cookie.Value)
 	if err != nil {
-		w.WriteHeader(401)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "unauthorized. You are not logged in",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusUnauthorized, " You are not logged in")
 		return
 	}
 
 	// get the posts of the user
 	rows, err := statements["getPosts"].Query(userID)
 	if err != nil {
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error. getPosts query failed",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "getPosts query failed")
 		return
 	}
 
@@ -316,7 +261,11 @@ func userPostsHandler(w http.ResponseWriter, r *http.Request) {
 		var post PostDTOelement
 		var firstName, lastName string
 		var pictureBlob []byte
-		rows.Scan(&post.ID, &post.Title, &post.Content, &post.Categories, &pictureBlob, &firstName, &lastName, &post.CreatorEmail, &post.CreatedAt)
+		err = rows.Scan(&post.ID, &post.Title, &post.Content, &post.Categories, &pictureBlob, &firstName, &lastName, &post.CreatorEmail, &post.CreatedAt)
+		if err != nil {
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "post scan failed")
+			return
+		}
 		post.CreatorFullName = firstName + " " + lastName
 		post.Picture = base64.StdEncoding.EncodeToString(pictureBlob)
 		posts = append(posts, post)
@@ -326,27 +275,32 @@ func userPostsHandler(w http.ResponseWriter, r *http.Request) {
 	rows.Close()
 
 	// create a map to store the posts
-	var postsMap map[string][]PostDTOelement
+	// var postsMap map[string][]PostDTOelement
 
 	// add the posts to the map
-	postsMap = map[string][]PostDTOelement{
+	postsMap := map[string][]PostDTOelement{
 		"posts": posts,
 	}
 
 	// marshal the map into json
 	jsonResponse, err := json.Marshal(postsMap)
 	if err != nil {
-		w.WriteHeader(500)
-		// todo: the message bottom looks too strange, for the "userPostsHandler" function
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error. we could not register you at this time",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "json.Marshal(postsMap) failed")
+		// w.WriteHeader(500)
+		// // todo: the message bottom looks too strange, for the "userPostsHandler" function
+		// jsonResponse, _ := json.Marshal(map[string]string{
+		// 	"message": "internal server error. we could not register you at this time",
+		// })
+		// w.Write(jsonResponse)
 		return
 	}
 
 	// write the response
 	w.WriteHeader(200)
-	w.Write(jsonResponse)
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "w.Write(jsonResponse)<-postsMap failed")
+		return
+	}
 
 }

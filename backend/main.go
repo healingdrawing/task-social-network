@@ -79,7 +79,7 @@ func main() {
 	log.Println("starting websocket at ws://localhost:" + portHTTP + "/ws")
 	// API
 	http.HandleFunc("/api/comment/submit", commentNewHandler)
-	http.HandleFunc("/api/comment/get", commentGetHandler)
+	http.HandleFunc("/api/comments/get", commentsGetHandler)
 
 	http.HandleFunc("/api/chat/getmessages", chatMessagesHandler)
 	http.HandleFunc("/api/chat/getusers", chatUsersHandler)
@@ -90,7 +90,7 @@ func main() {
 	http.HandleFunc("/api/followrequest/accept", approveFollowerHandler)
 	http.HandleFunc("/api/followrequestlist", followRequestListHandler)
 
-	http.HandleFunc("/api/post/get", postGetHandler)
+	http.HandleFunc("/api/posts/get", postsGetHandler)
 	http.HandleFunc("/api/post/submit", postNewHandler)
 
 	// todo: remove later. New HandleFunc for group posts/comments, and plural form looks weird for me f.e. api/group/post/get, because it looks like returns the list of posts. And above too for api/post/get @sagarishere
@@ -110,16 +110,16 @@ func main() {
 	http.HandleFunc("/api/group/request/reject", groupRequestRejectHandler)
 
 	http.HandleFunc("/api/user/check", sessionCheckHandler)
-	http.HandleFunc("/api/user/following", FollowingHandler)
-	http.HandleFunc("/api/user/followers", FollowersHandler)
-	http.HandleFunc("/api/user/follow", FollowHandler)
+	http.HandleFunc("/api/user/following", followingHandler)
+	http.HandleFunc("/api/user/followers", followersHandler)
+	http.HandleFunc("/api/user/follow", followHandler)
 	http.HandleFunc("/api/user/login", userLoginHandler)
 	http.HandleFunc("/api/user/logout", userLogoutHandler)
 	http.HandleFunc("/api/user/posts", userPostsHandler)
 	http.HandleFunc("/api/user/privacy", changePrivacyHandler)
 	http.HandleFunc("/api/user/profile", userProfileHandler)
 	http.HandleFunc("/api/user/register", userRegisterHandler)
-	http.HandleFunc("/api/user/unfollow", UnfollowHandler)
+	http.HandleFunc("/api/user/unfollow", unfollowHandler)
 	// Server
 	log.Fatal(http.ListenAndServe(":"+portHTTP, nil))
 }
