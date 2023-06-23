@@ -23,11 +23,7 @@ func groupRequestAcceptHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			w.WriteHeader(500)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
 		}
 	}()
 	cookie, err := r.Cookie("user_uuid")
@@ -47,34 +43,26 @@ func groupRequestAcceptHandler(w http.ResponseWriter, r *http.Request) {
 	err = decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(400)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "bad request",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusBadRequest, "")
 		return
 	}
 	LoggedinUserID, err := getIDbyUUID(uuid)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "unauthorized",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusUnauthorized, "")
 		return
 	}
 
 	memberID, err := getIDbyEmail(data.Email)
+	if err != nil {
+		jsonResponseWriterManager(w, http.StatusBadRequest, "") // todo: fresh handling, in old version was just skipped
+		return
+	}
 
 	rows, err := statements["getGroup"].Query(data.GroupID)
-	defer rows.Close()
+	defer rows.Close() // todo: it says this should be after error checking, but it is only warning
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error, getGroup query failed",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "getGroup query failed")
 		return
 	}
 	group := Group{}
@@ -83,52 +71,32 @@ func groupRequestAcceptHandler(w http.ResponseWriter, r *http.Request) {
 		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.CreatorId, &group.CreationDate, &group.Privacy)
 		if err != nil {
 			log.Println(err.Error())
-			w.WriteHeader(500)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error, failed to scan group",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "failed to scan group")
 			return
 		}
 	}
 
 	if group.CreatorId != LoggedinUserID {
-		w.WriteHeader(http.StatusUnauthorized)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "unauthorized, you are not the creator of the group",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusUnauthorized, "you are not the creator of the group")
 		return
 	}
 
 	_, err = statements["addGroupMember"].Exec(data.GroupID, memberID)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error, addGroupMember query failed",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "addGroupMember query failed")
 		return
 	}
 
-	// remove it from the group_pending_members table
+	// remove it from the group_pending_members table //todo: "remove it ..." remove what? :D
 	_, err = statements["removeGroupPendingMember"].Exec(data.GroupID, memberID)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error, removeGroupPendingMember query failed",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "removeGroupPendingMember query failed")
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	jsonResponse, _ := json.Marshal(map[string]string{
-		"message": "success: you approved the group membership",
-	})
-	w.Write(jsonResponse)
+	jsonResponseWriterManager(w, http.StatusOK, "success: you approved the group membership")
 	return
 }
 
@@ -140,11 +108,7 @@ func groupRequestRejectHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			w.WriteHeader(500)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
 		}
 	}()
 	// get the logged in user id from the uuid in cookies
@@ -170,37 +134,29 @@ func groupRequestRejectHandler(w http.ResponseWriter, r *http.Request) {
 	err = decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(400)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "bad request",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusBadRequest, "")
 		return
 	}
 	LoggedinUserID, err := getIDbyUUID(uuid)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "unauthorized",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusUnauthorized, "")
 		return
 	}
 
 	// from member_email get the member_id
 	memberID, err := getIDbyEmail(data.Email)
+	if err != nil {
+		jsonResponseWriterManager(w, http.StatusBadRequest, "") // todo: fresh handling, in old version was just skipped
+		return
+	}
 
 	// check if the user is the creator of the group
 	// use the getGroup statement
 	rows, err := statements["getGroup"].Query(data.GroupID)
-	defer rows.Close()
+	defer rows.Close() // todo: it says this should be after error checking, but it is only warning
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "getGroup query failed")
 		return
 	}
 	group := Group{}
@@ -209,21 +165,13 @@ func groupRequestRejectHandler(w http.ResponseWriter, r *http.Request) {
 		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.CreatorId, &group.CreationDate, &group.Privacy)
 		if err != nil {
 			log.Println(err.Error())
-			w.WriteHeader(500)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "failed to scan group")
 			return
 		}
 	}
 
 	if group.CreatorId != LoggedinUserID {
-		w.WriteHeader(http.StatusUnauthorized)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "unauthorized, you are not the creator of the group",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusUnauthorized, "you are not the creator of the group")
 		return
 	}
 
@@ -231,19 +179,11 @@ func groupRequestRejectHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = statements["removeGroupPendingMember"].Exec(data.GroupID, memberID)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "removeGroupPendingMember query failed")
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	jsonResponse, _ := json.Marshal(map[string]string{
-		"message": "success: you rejected the group membership",
-	})
-	w.Write(jsonResponse)
+	jsonResponseWriterManager(w, http.StatusOK, "success: you rejected the group membership")
 	return
 }
 
@@ -252,11 +192,7 @@ func approveFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			w.WriteHeader(500)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
 		}
 	}()
 	// get the logged in user id from the uuid in cookies
@@ -283,19 +219,20 @@ func approveFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	err = decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(400)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "bad request",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusBadRequest, "")
 		return
 	}
 
 	fanID, err := getIDbyEmail(data.Email)
+	if err != nil {
+		jsonResponseWriterManager(w, http.StatusBadRequest, "") // todo: fresh handling, in old version was just skipped
+		return
+	}
 
 	LoggedinUserID, err := getIDbyUUID(uuid)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
+		jsonResponseWriterManager(w, http.StatusUnauthorized, "")
+		// w.WriteHeader(http.StatusUnauthorized) // todo: CHECK IT, WAS REPLACED BY THE LINE ABOVE
 		return
 	}
 	// check if the user has the follower in the followers_pending table
@@ -304,11 +241,7 @@ func approveFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "getFollowersPending query failed")
 		return
 	}
 	var followerID int
@@ -317,11 +250,7 @@ func approveFollowerHandler(w http.ResponseWriter, r *http.Request) {
 		err = rows.Scan(&followerID)
 		if err != nil {
 			log.Println(err.Error())
-			w.WriteHeader(500)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "failed to scan followers pending")
 			return
 		}
 		followersPending = append(followersPending, followerID)
@@ -336,39 +265,24 @@ func approveFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !found {
-		w.WriteHeader(http.StatusUnauthorized)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "unauthorized",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusBadRequest, "the user is not in the list of followers pending")
 		return
 	}
 	// add the follower to the followers table
 	_, err = statements["addFollower"].Exec(LoggedinUserID, fanID)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "addFollower query failed")
 		return
 	}
 	// remove it from the followers_pending table
 	_, err = statements["removeFollowerPending"].Exec(LoggedinUserID, fanID)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error. could not remove follower from followers_pending table",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "removeFollowerPending query failed")
+		return // todo: CHECK IT! Was added , before it was just continue of the flow, to next line
 	}
-	w.WriteHeader(http.StatusOK)
-	jsonResponse, _ := json.Marshal(map[string]string{
-		"message": "you accepted the follow request",
-	})
-	w.Write(jsonResponse)
+	jsonResponseWriterManager(w, http.StatusOK, "success: you accepted the follow request")
 	return
 }
 
@@ -377,11 +291,7 @@ func rejectFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			w.WriteHeader(500)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
 		}
 	}()
 	// get the logged in user id from the uuid in cookies
@@ -408,19 +318,20 @@ func rejectFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	err = decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(400)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "bad request",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusBadRequest, "")
 		return
 	}
 
 	fanID, err := getIDbyEmail(data.Email)
+	if err != nil {
+		jsonResponseWriterManager(w, http.StatusBadRequest, "") // todo: fresh handling, in old version was just skipped
+		return
+	}
 
 	LoggedinUserID, err := getIDbyUUID(uuid)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
+		jsonResponseWriterManager(w, http.StatusUnauthorized, "")
+		// w.WriteHeader(http.StatusUnauthorized) // todo: CHECK IT, WAS REPLACED BY THE LINE ABOVE
 		return
 	}
 
@@ -430,11 +341,7 @@ func rejectFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "getFollowersPending query failed")
 		return
 	}
 	var followerID int
@@ -443,11 +350,7 @@ func rejectFollowerHandler(w http.ResponseWriter, r *http.Request) {
 		err = rows.Scan(&followerID)
 		if err != nil {
 			log.Println(err.Error())
-			w.WriteHeader(500)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "failed to scan followers pending")
 			return
 		}
 		followersPending = append(followersPending, followerID)
@@ -462,11 +365,7 @@ func rejectFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !found {
-		w.WriteHeader(http.StatusUnauthorized)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "unauthorized. the target user was not found in the followers_pending table",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusBadRequest, "the user is not in the list of followers pending")
 		return
 	}
 
@@ -474,17 +373,10 @@ func rejectFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = statements["removeFollowerPending"].Exec(LoggedinUserID, fanID)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error. could not remove follower from followers_pending table",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "removeFollowerPending query failed")
+		return // todo: CHECK IT! Was added , before it was just continue of the flow, to next line
 	}
-	w.WriteHeader(http.StatusOK)
-	jsonResponse, _ := json.Marshal(map[string]string{
-		"message": "you rejected the follow request",
-	})
-	w.Write(jsonResponse)
+	jsonResponseWriterManager(w, http.StatusOK, "success: you rejected the follow request")
 	return
 }
 
@@ -496,32 +388,20 @@ func groupInviteAcceptHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			w.WriteHeader(500)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
 		}
 	}()
 
 	// get the id of the request sender
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
-		w.WriteHeader(401)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "unauthorized",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusUnauthorized, "")
 		return
 	}
 	requestorId, err := getIDbyUUID(cookie.Value)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error, failed to get id of request sender",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "failed to get id of request sender")
 		return
 	}
 	var data struct {
@@ -534,11 +414,7 @@ func groupInviteAcceptHandler(w http.ResponseWriter, r *http.Request) {
 	err = decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(400)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "bad request, failed to get group id from request body",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusBadRequest, "failed to get group id from request body")
 		return
 	}
 
@@ -546,11 +422,7 @@ func groupInviteAcceptHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = statements["addGroupMember"].Exec(data.GroupId, requestorId)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "failed to add person to group_members table",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "failed to add person to group_members table")
 		return
 	}
 
@@ -558,19 +430,10 @@ func groupInviteAcceptHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = statements["removeGroupInvitedUser"].Exec(requestorId, data.GroupId)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "failed to remove person from group_invited_users table",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "failed to remove person from group_invited_users table")
 		return
 	}
-
-	w.WriteHeader(200)
-	jsonResponse, _ := json.Marshal(map[string]string{
-		"message": "success: you accepted the group invite",
-	})
-	w.Write(jsonResponse)
+	jsonResponseWriterManager(w, http.StatusOK, "success: you accepted the group invite")
 	return
 }
 
@@ -582,32 +445,20 @@ func groupInviteRejectHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			w.WriteHeader(500)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
 		}
 	}()
 
 	// get the id of the request sender
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
-		w.WriteHeader(401)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "unauthorized",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusUnauthorized, "")
 		return
 	}
 	requestorId, err := getIDbyUUID(cookie.Value)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error, failed to get id of request sender",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "failed to get id of request sender")
 		return
 	}
 	var data struct {
@@ -620,11 +471,7 @@ func groupInviteRejectHandler(w http.ResponseWriter, r *http.Request) {
 	err = decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(400)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "bad request, failed to get group id from request body",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusBadRequest, "failed to get group id from request body")
 		return
 	}
 
@@ -632,18 +479,9 @@ func groupInviteRejectHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = statements["removeGroupInvitedUser"].Exec(requestorId, data.GroupId)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "failed to remove person from group_invited_users table",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "failed to remove person from group_invited_users table")
 		return
 	}
-
-	w.WriteHeader(200)
-	jsonResponse, _ := json.Marshal(map[string]string{
-		"message": "success: you rejected the group invite",
-	})
-	w.Write(jsonResponse)
+	jsonResponseWriterManager(w, http.StatusOK, "success: you rejected the group invite")
 	return
 }
