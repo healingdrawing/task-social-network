@@ -104,7 +104,7 @@ json body only needs email property, because email is used as ID to identify use
 
 <hr style="border:2px solid green">
 
-![request][request]  `api/followrequestlist` (follow request list, all pending follow requests to the current logged in user)
+![request][request]  `/api/followrequestlist` (follow request list, all pending follow requests to the current logged in user)
 
 No need to send any data in request, because user_id is taken from token.
 
@@ -245,7 +245,7 @@ SAME STRUCTURE AS FOR `/api/user/following`
 
 <hr style="border:2px solid green">
 
-![request][request]  `api/group/invite/accept` (accept group invitation)
+![request][request]  `/api/group/invite/accept` (accept group invitation)
 
 ```json
 {
@@ -263,7 +263,7 @@ SAME STRUCTURE AS FOR `/api/user/following`
 
 <hr style="border:2px solid green">
 
-![request][request]  `api/group/invite/reject` (reject group invitation)
+![request][request]  `/api/group/invite/reject` (reject group invitation)
 
 ```json
 {
@@ -415,7 +415,7 @@ SAME STRUCTURE AS FOR `/api/user/following`
 
 <hr style="border:2px solid green">
 
-![request][request]  `api/group/requests` (list of group joining pending requests)
+![request][request]  `/api/group/requests` (list of group joining pending requests)
 
 ```json
 {
@@ -483,7 +483,7 @@ SAME STRUCTURE AS FOR `/api/user/following`
 
 <hr style="border:2px solid green">
 
-![request][request] "/api/comment/submit" (add new comment)
+![request][request] `/api/comment/submit` (add new comment)
 
 ```json
 {
@@ -517,7 +517,7 @@ SAME STRUCTURE AS FOR `/api/user/following`
 
 <hr style="border:4px solid green">
 
-![request][request] /api/group/submit (add new group)
+![request][request] `/api/group/submit` (add new group)
 
 ```json
 {
@@ -539,7 +539,7 @@ SAME STRUCTURE AS FOR `/api/user/following`
 
 <hr style="border:4px solid green">
 
-![request][request] '/api/group/invited' (list of users invited to group)
+![request][request] `/api/group/invited` (list of users invited to group)
   
   ```json
   {
@@ -565,7 +565,7 @@ SAME STRUCTURE AS FOR `/api/user/following`
 
 <hr style="border:4px solid green">
 
-![request][request] '/api/group/invite' (invite single user to group)
+![request][request] `/api/group/invite` (invite single user to group)
   
   ```json
   {
@@ -584,7 +584,7 @@ SAME STRUCTURE AS FOR `/api/user/following`
 
 <hr style="border:4px solid green">
 
-![request][request] '/api/group/join' (join as a member of a group)
+![request][request] `/api/group/join` (join as a member of a group)
 
 In case the group is public, you join straight away, in case of private group, you send a request to join.
 
@@ -622,7 +622,7 @@ To show target user profile data, inside `onBeforeRouterEnter()` requests to bac
 
 <hr style="border:2px solid green">
 
-![request][request] `api/user/profile/public/{email}` (target user profile check following/public, to hide/show profile info).  
+![request][request] `/api/user/profile/public/{email}` (target user profile check following/public, to hide/show profile info).  
 `IF` target profile is public or the visitor is follower `THEN` allow to show the profile section  
 ![response][response]
 
@@ -640,7 +640,7 @@ Redirect to `ProfileView.vue`. This is the cases impossible using normal navigat
 
 <hr style="border:2px solid green">
 
-![request][request] `api/user/profile/{email}`
+![request][request] `/api/user/profile/{email}`
 SAME JSON AS FOR `/api/user/profile`
 
 <hr style="border:2px solid green">
