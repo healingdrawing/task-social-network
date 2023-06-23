@@ -429,6 +429,23 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(200)
+
+	http.SetCookie(w, &http.Cookie{
+		Name:    "user_uuid",
+		Value:   UUID,
+		Expires: time.Now().Add(24 * time.Hour),
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:    "user_email",
+		Value:   email,
+		Expires: time.Now().Add(24 * time.Hour),
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Value: UUID,
+	})
+
 	jsonResponseObj, _ := json.Marshal(map[string]string{
 		"UUID":  UUID,
 		"email": email,

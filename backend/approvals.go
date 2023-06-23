@@ -74,7 +74,6 @@ func groupRequestAcceptHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// remove it from the group_pending_members table //todo: "remove it ..." remove what? :D
 	_, err = statements["removeGroupPendingMember"].Exec(data.GroupID, memberID)
 	if err != nil {
 		log.Println(err.Error())
@@ -151,6 +150,9 @@ func groupRequestRejectHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// # approveFollowerHandler is the handler for accepting a follower request
+//
+// @rparam {email string}
 func approveFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
@@ -230,6 +232,9 @@ func approveFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// # rejectFollowerHandler is the handler for rejecting a follower request
+//
+// @rparam {email string}
 func rejectFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
