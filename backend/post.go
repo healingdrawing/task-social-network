@@ -145,7 +145,7 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 	sendPost(post)
 }
 
-func postGetHandler(w http.ResponseWriter, r *http.Request) {
+func postsGetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
 		if err := recover(); err != nil {
@@ -162,7 +162,11 @@ func postGetHandler(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var post Post
 		pictureBlob := []byte{}
-		rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Content, &pictureBlob)
+		err = rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Content, &pictureBlob)
+		if err != nil {
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "post scan failed")
+			return
+		}
 		post.Picture = base64.StdEncoding.EncodeToString(pictureBlob)
 		posts.Posts = append(posts.Posts, post)
 	}

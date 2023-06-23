@@ -105,10 +105,10 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 	*/
 }
 
-// # commentGetHandler returns all comments for a post
+// # commentsGetHandler returns all comments for a post
 //
 // - @param postID int
-func commentGetHandler(w http.ResponseWriter, r *http.Request) {
+func commentsGetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
 		if err := recover(); err != nil {
