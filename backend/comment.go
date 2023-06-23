@@ -35,11 +35,7 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			w.WriteHeader(500)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
 		}
 	}()
 	var data CommentRequest
@@ -48,32 +44,20 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(400)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "Bad request",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusBadRequest, "")
 		return
 	}
 	// get user id form the cookie
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
-		w.WriteHeader(401)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "Unauthorized",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusUnauthorized, "")
 		return
 	}
 	myuuid := cookie.Value
 	ID, err := getIDbyUUID(myuuid)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error, could not get user id",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusUnauthorized, "")
 		return
 	}
 	// convert data.Picture to blob for sqlite
@@ -83,20 +67,12 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 		avatarData, err := base64.StdEncoding.DecodeString(data.Picture)
 		if err != nil {
 			log.Println(err.Error())
-			w.WriteHeader(http.StatusUnprocessableEntity)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "Invalid avatar",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusUnprocessableEntity, "Invalid avatar")
 			return
 		}
 		if !isImage(avatarData) {
 			log.Println(err.Error())
-			w.WriteHeader(http.StatusUnsupportedMediaType)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "avatar is not a valid image",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusUnsupportedMediaType, "Avatar is not a valid image")
 			return
 		}
 		pictureBlob = avatarData
@@ -104,33 +80,29 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = statements["addComment"].Exec(ID, data.PostID, data.Content, pictureBlob, time.Now().Format("2006-01-02 15:04:05"))
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error, addComment query failed",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "addComment query failed")
 		return
 	}
-	w.WriteHeader(200)
-	jsonResponse, _ := json.Marshal(map[string]string{
-		"message": "Comment created",
-	})
-	w.Write(jsonResponse)
-	rows, err := statements["getComments"].Query(data.PostID)
-	// TODO: superfulous error return to http client, need to fix by having error return to client overr websockets
-	// if err != nil {
-	// 	w.WriteHeader(500)
-	// 	jsonResponse, _ := json.Marshal(map[string]string{
-	// 		"message": "internal server error",
-	// 	})
-	// 	w.Write(jsonResponse)
-	// 	return
-	// }
-	var comment Comment
-	rows.Next()
-	rows.Scan(&comment.Fullname, &comment.Content)
-	rows.Close()
-	sendComment(data.PostID, comment)
+	jsonResponseWriterManager(w, http.StatusOK, "Comment created")
+
+	// TODO: UNCOMMENT+REFACTOR THIS LATER!!! Old code is commented by / * * / because chat is not ready now for new version
+	/*
+		rows, err := statements["getComments"].Query(data.PostID)
+		// TODO: superfulous error return to http client, need to fix by having error return to client overr websockets
+		// if err != nil {
+		// 	w.WriteHeader(500)
+		// 	jsonResponse, _ := json.Marshal(map[string]string{
+		// 		"message": "internal server error",
+		// 	})
+		// 	w.Write(jsonResponse)
+		// 	return
+		// }
+		var comment Comment
+		rows.Next()
+		rows.Scan(&comment.Fullname, &comment.Content)
+		rows.Close()
+		sendComment(data.PostID, comment)
+	*/
 }
 
 // # commentGetHandler returns all comments for a post
@@ -141,11 +113,7 @@ func commentGetHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			w.WriteHeader(500)
-			jsonResponse, _ := json.Marshal(map[string]string{
-				"message": "internal server error",
-			})
-			w.Write(jsonResponse)
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
 		}
 	}()
 	var data struct {
@@ -156,20 +124,12 @@ func commentGetHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		w.WriteHeader(400)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "Bad request",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusBadRequest, "")
 		return
 	}
 	rows, err := statements["getComments"].Query(data.PostID)
 	if err != nil {
-		w.WriteHeader(500)
-		jsonResponse, _ := json.Marshal(map[string]string{
-			"message": "internal server error",
-		})
-		w.Write(jsonResponse)
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "")
 		return
 	}
 	var comments Comments
@@ -177,13 +137,25 @@ func commentGetHandler(w http.ResponseWriter, r *http.Request) {
 		var comment Comment
 		var firstName, lastName string
 		var pictureBlob []byte
-		rows.Scan(&firstName, &lastName, &comment.Content, &pictureBlob)
+		err = rows.Scan(&firstName, &lastName, &comment.Content, &pictureBlob)
+		if err != nil {
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "rows.Scan comments for loop failed")
+			return
+		}
 		comment.Fullname = firstName + " " + lastName
 		comment.Picture = base64.StdEncoding.EncodeToString(pictureBlob)
 		comments.Comments = append(comments.Comments, comment)
 	}
 	rows.Close()
 	w.WriteHeader(200)
-	jsonResponse, _ := json.Marshal(comments)
-	w.Write(jsonResponse)
+	jsonResponse, err := json.Marshal(comments)
+	if err != nil {
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "json.Marshal comments failed")
+		return
+	}
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		jsonResponseWriterManager(w, http.StatusInternalServerError, "w.Write comments failed") // todo: CHECK IT! handler was added, in old code it was not
+		return
+	}
 }
