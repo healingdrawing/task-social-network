@@ -15,9 +15,14 @@ func jsonResponseWriterManager(w http.ResponseWriter, statusCode int, message st
 	})
 	if err == nil {
 		w.WriteHeader(statusCode)
-		w.Write(jsonResponse)
+		_, err = w.Write(jsonResponse)
+		if err != nil { // if error in time of writing jsonResponse
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("fuck off, golang, with this shitty infinity error nesting"))
+			// fuck off golang, with this shit infinity error nesting
+		}
 	} else { // if error in time of marshalling error message
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("\"" + http.StatusText(http.StatusInternalServerError) + "\" in time of json marshalling of message: \"" + message + "\"\nMarshalling error.Error() is \"" + err.Error() + "\""))
+		w.Write([]byte("fuck off, golang, with this shitty infinity error nesting"))
 	}
 }
