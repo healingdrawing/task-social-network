@@ -13,11 +13,11 @@ func jsonResponseWriterManager(w http.ResponseWriter, statusCode int, message st
 	jsonResponse, err := json.Marshal(map[string]string{
 		"message": http.StatusText(statusCode) + ": " + message,
 	})
-	if err != nil { // if error in time of marshalling error message
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("\"" + http.StatusText(http.StatusInternalServerError) + "\" in time of json marshalling of message: \"" + message + "\"\nMarshalling error.Error() is \"" + err.Error() + "\""))
-	} else {
+	if err == nil {
 		w.WriteHeader(statusCode)
 		w.Write(jsonResponse)
+	} else { // if error in time of marshalling error message
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("\"" + http.StatusText(http.StatusInternalServerError) + "\" in time of json marshalling of message: \"" + message + "\"\nMarshalling error.Error() is \"" + err.Error() + "\""))
 	}
 }
