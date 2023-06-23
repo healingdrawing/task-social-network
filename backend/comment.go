@@ -33,26 +33,18 @@ type Comment struct {
 func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
+	ID, err := getRequestSenderID(r)
+	if err != nil {
+		jsonResponse(w, http.StatusUnauthorized, err.Error())
+		return
+	}
 	var data CommentRequest
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
-	err := decoder.Decode(&data)
+	err = decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
 		jsonResponse(w, http.StatusBadRequest, "")
-		return
-	}
-	// get user id form the cookie
-	cookie, err := r.Cookie("user_uuid")
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "")
-		return
-	}
-	myuuid := cookie.Value
-	ID, err := getIDbyUUID(myuuid)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusUnauthorized, "")
 		return
 	}
 	// convert data.Picture to blob for sqlite

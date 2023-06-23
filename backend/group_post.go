@@ -45,27 +45,22 @@ type GroupPostDTOelement struct {
 func groupPostNewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
+	userID, err := getRequestSenderID(r)
+	if err != nil {
+		jsonResponse(w, http.StatusUnauthorized, err.Error())
+		return
+	}
+
 	var data GroupPostRequest
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
-	err := decoder.Decode(&data)
+	err = decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
 		jsonResponse(w, http.StatusUnprocessableEntity, "bad request")
 		return
 	}
-	cookie, err := r.Cookie("user_uuid")
-	if err != nil || cookie.Value == "" || cookie == nil {
-		jsonResponse(w, http.StatusUnauthorized, "cannot find cookie")
-		return
-	}
-	uuid := cookie.Value
 	data.Categories = sanitizeCategories(data.Categories)
-	userID, err := getIDbyUUID(uuid)
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "You are not logged in")
-		return
-	}
 
 	// blob the picture
 	postPicture := []byte{}
@@ -135,17 +130,10 @@ func groupPostsGetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
 
-	// get the uuid of the current user from the cookies
-	cookie, err := r.Cookie("user_uuid")
+	// check session from cookie
+	_, err := getRequestSenderID(r)
 	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "cannot find cookie")
-		return
-	}
-
-	// get the user id from the uuid
-	_, err = getIDbyUUID(cookie.Value)
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "You are not logged in")
+		jsonResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	}
 

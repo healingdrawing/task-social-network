@@ -21,17 +21,13 @@ type UserFollowerRequest struct {
 func groupRequestAcceptHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
-	cookie, err := r.Cookie("user_uuid")
+
+	LoggedinUserID, err := getRequestSenderID(r)
 	if err != nil {
-		if err == http.ErrNoCookie {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		w.WriteHeader(http.StatusBadRequest)
+		jsonResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	uuid := cookie.Value
 	data := GroupMemberRequest{}
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -39,11 +35,6 @@ func groupRequestAcceptHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err.Error())
 		jsonResponse(w, http.StatusBadRequest, "")
-		return
-	}
-	LoggedinUserID, err := getIDbyUUID(uuid)
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "")
 		return
 	}
 
@@ -101,21 +92,13 @@ func groupRequestAcceptHandler(w http.ResponseWriter, r *http.Request) {
 func groupRequestRejectHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
-	// get the logged in user id from the uuid in cookies
-	cookie, err := r.Cookie("user_uuid")
+
+	LoggedinUserID, err := getRequestSenderID(r)
 	if err != nil {
-		if err == http.ErrNoCookie {
-			// If the cookie is not set, return an unauthorized status
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		// For any other type of error, return a bad request status
-		w.WriteHeader(http.StatusBadRequest)
+		jsonResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	// Get the UUID value from the cookie
-	uuid := cookie.Value
 	// incoming DTO GroupMember
 	data := GroupMemberRequest{}
 	// decode the request body into the DTO
@@ -127,21 +110,13 @@ func groupRequestRejectHandler(w http.ResponseWriter, r *http.Request) {
 		jsonResponse(w, http.StatusBadRequest, "")
 		return
 	}
-	LoggedinUserID, err := getIDbyUUID(uuid)
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "")
-		return
-	}
 
-	// from member_email get the member_id
 	memberID, err := getIDbyEmail(data.Email)
 	if err != nil {
 		jsonResponse(w, http.StatusBadRequest, "") // todo: fresh handling, in old version was just skipped
 		return
 	}
 
-	// check if the user is the creator of the group
-	// use the getGroup statement
 	rows, err := statements["getGroup"].Query(data.GroupID)
 	defer rows.Close() // todo: it says this should be after error checking, but it is only warning
 	if err != nil {
@@ -165,7 +140,6 @@ func groupRequestRejectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// remove it from the group_pending_members table
 	_, err = statements["removeGroupPendingMember"].Exec(data.GroupID, memberID)
 	if err != nil {
 		log.Println(err.Error())
@@ -180,21 +154,12 @@ func groupRequestRejectHandler(w http.ResponseWriter, r *http.Request) {
 func approveFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
-	// get the logged in user id from the uuid in cookies
-	cookie, err := r.Cookie("user_uuid")
+
+	LoggedinUserID, err := getRequestSenderID(r)
 	if err != nil {
-		if err == http.ErrNoCookie {
-			// If the cookie is not set, return an unauthorized status
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		// For any other type of error, return a bad request status
-		w.WriteHeader(http.StatusBadRequest)
+		jsonResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	}
-
-	// Get the UUID value from the cookie
-	uuid := cookie.Value
 
 	// incoming DTO UserFollowerRequest
 	data := UserFollowerRequest{}
@@ -214,12 +179,6 @@ func approveFollowerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	LoggedinUserID, err := getIDbyUUID(uuid)
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "")
-		// w.WriteHeader(http.StatusUnauthorized) // todo: CHECK IT, WAS REPLACED BY THE LINE ABOVE
-		return
-	}
 	// check if the user has the follower in the followers_pending table
 	// use the getFollowersPending statement
 	rows, err := statements["getFollowersPending"].Query(LoggedinUserID)
@@ -274,21 +233,12 @@ func approveFollowerHandler(w http.ResponseWriter, r *http.Request) {
 func rejectFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
-	// get the logged in user id from the uuid in cookies
-	cookie, err := r.Cookie("user_uuid")
+
+	LoggedinUserID, err := getRequestSenderID(r)
 	if err != nil {
-		if err == http.ErrNoCookie {
-			// If the cookie is not set, return an unauthorized status
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		// For any other type of error, return a bad request status
-		w.WriteHeader(http.StatusBadRequest)
+		jsonResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	}
-
-	// Get the UUID value from the cookie
-	uuid := cookie.Value
 
 	// incoming DTO UserFollowerRequest
 	data := UserFollowerRequest{}
@@ -305,13 +255,6 @@ func rejectFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	fanID, err := getIDbyEmail(data.Email)
 	if err != nil {
 		jsonResponse(w, http.StatusBadRequest, "") // todo: fresh handling, in old version was just skipped
-		return
-	}
-
-	LoggedinUserID, err := getIDbyUUID(uuid)
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "")
-		// w.WriteHeader(http.StatusUnauthorized) // todo: CHECK IT, WAS REPLACED BY THE LINE ABOVE
 		return
 	}
 
@@ -367,18 +310,12 @@ func groupInviteAcceptHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
 
-	// get the id of the request sender
-	cookie, err := r.Cookie("user_uuid")
+	requestorId, err := getRequestSenderID(r)
 	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "")
+		jsonResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	}
-	requestorId, err := getIDbyUUID(cookie.Value)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "failed to get id of request sender")
-		return
-	}
+
 	var data struct {
 		GroupId int `json:"group_id"`
 	}
@@ -419,18 +356,12 @@ func groupInviteRejectHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
 
-	// get the id of the request sender
-	cookie, err := r.Cookie("user_uuid")
+	requestorId, err := getRequestSenderID(r)
 	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "")
+		jsonResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	}
-	requestorId, err := getIDbyUUID(cookie.Value)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "failed to get id of request sender")
-		return
-	}
+
 	var data struct {
 		GroupId int `json:"group_id"`
 	}

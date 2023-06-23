@@ -31,25 +31,18 @@ type GroupComment struct {
 func groupCommentNewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
+	userID, err := getRequestSenderID(r)
+	if err != nil {
+		jsonResponse(w, 401, err.Error())
+		return
+	}
 	var data GroupCommentRequest
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
-	err := decoder.Decode(&data)
+	err = decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
 		jsonResponse(w, 400, "Bad request")
-		return
-	}
-	// get user id from the cookie
-	cookie, err := r.Cookie("user_uuid")
-	if err != nil {
-		jsonResponse(w, 401, "cannot get cookie")
-		return
-	}
-	myuuid := cookie.Value
-	userID, err := getIDbyUUID(myuuid)
-	if err != nil {
-		jsonResponse(w, 401, " getIDbyUUID failed")
 		return
 	}
 	_, err = statements["addGroupComment"].Exec(userID, data.GroupPostID, data.Content, data.Picture, time.Now().Format("2006-01-02 15:04:05"))

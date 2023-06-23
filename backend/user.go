@@ -70,17 +70,9 @@ func changePrivacyHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
 
-	cookie, err := r.Cookie("user_uuid")
-	if err != nil || cookie.Value == "" || cookie == nil {
-		jsonResponse(w, http.StatusUnauthorized, "You are not logged in")
-		return
-	}
-
-	uuid := cookie.Value
-
-	ID, err := getIDbyUUID(uuid)
+	ID, err := getRequestSenderID(r)
 	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "You are not logged in")
+		jsonResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -111,19 +103,9 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
 
-	// get uuid from the cookie
-	cookie, err := r.Cookie("user_uuid")
+	myID, err := getRequestSenderID(r)
 	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusUnauthorized, "cookie not found")
-		return
-	}
-	myuuid := cookie.Value
-
-	// get the ID of the user that is currently logged in
-	myID, err := getIDbyUUID(myuuid)
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "You are not logged in")
+		jsonResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -308,12 +290,6 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		defaultAvatar.Close()
 	}
-
-	// if data.Public {
-	// 	data.Privacy = "public"
-	// } else {
-	// 	data.Privacy = "private"
-	// }
 
 	data.Privacy = map[bool]string{true: "public", false: "private"}[data.Public]
 
@@ -550,26 +526,6 @@ func createSession(email string) (UUID string, err error) {
 
 func getIDbyEmail(email string) (ID int, err error) {
 	rows, err := statements["getUserIDByEmail"].Query(email)
-	if err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-	rows.Next()
-	err = rows.Scan(&ID)
-	if err != nil {
-		return 0, err
-	}
-	rows.Close()
-	return ID, nil
-}
-
-// # This function is used to retrieve the ID of the user that is currently logged in
-//
-// It does so by retrieving the UUID from the request body and then calling getIDbyUUID.
-// This function retrieves an ID based on a given UUID by joining the session table with the users table
-// and then selecting the ID from the users table
-func getIDbyUUID(UUID string) (ID int, err error) {
-	rows, err := statements["getIDbyUUID"].Query(UUID)
 	if err != nil {
 		return 0, err
 	}

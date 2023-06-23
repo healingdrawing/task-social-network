@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -41,4 +42,40 @@ func recovery(w http.ResponseWriter) {
 		// to print the full stack trace
 		// log.Println(string(stackTrace))
 	}
+}
+
+// # getRequestSenderID gets the ID of the request sender from the cookie
+//
+// @params {r *http.Request}
+func getRequestSenderID(r *http.Request) (int, error) {
+	cookie, err := r.Cookie("user_uuid")
+	if err != nil {
+		return 0, errors.New("malformed cookie/cookie not found")
+	}
+
+	requestSenderID, err := getIDbyUUID(cookie.Value)
+	if err != nil {
+		return 0, errors.New("failed to get ID of the request sender")
+	}
+
+	return requestSenderID, nil
+}
+
+// # getIDbyUUID retrieves ID of the user from uuid
+//
+// @params {UUID string}
+// execute DB prepared statement getIDbyUUID.query
+func getIDbyUUID(UUID string) (ID int, err error) {
+	rows, err := statements["getIDbyUUID"].Query(UUID)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+	rows.Next()
+	err = rows.Scan(&ID)
+	if err != nil {
+		return 0, err
+	}
+	rows.Close()
+	return ID, nil
 }

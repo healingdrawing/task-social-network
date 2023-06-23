@@ -54,14 +54,10 @@ func followingHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		cookie, err := r.Cookie("user_uuid")
+		err := error(nil)
+		userID, err = getRequestSenderID(r)
 		if err != nil {
-			jsonResponse(w, http.StatusUnauthorized, "could not get cookie")
-			return
-		}
-		err = statements["getIDbyUUID"].QueryRow(cookie.Value).Scan(&userID)
-		if err != nil {
-			jsonResponse(w, http.StatusInternalServerError, " getIDbyUUID query failed")
+			jsonResponse(w, http.StatusUnauthorized, err.Error())
 			return
 		}
 	}
@@ -132,16 +128,10 @@ func followersHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		// get uuid of current user from cookies
-		cookie, err := r.Cookie("user_uuid")
+		err := error(nil)
+		userID, err = getRequestSenderID(r)
 		if err != nil {
-			jsonResponse(w, http.StatusUnauthorized, "could not get cookie")
-			return
-		}
-		// get the user id from the uuid
-		err = statements["getIDbyUUID"].QueryRow(cookie.Value).Scan(&userID)
-		if err != nil {
-			jsonResponse(w, http.StatusInternalServerError, " getIDbyUUID query failed")
+			jsonResponse(w, http.StatusUnauthorized, err.Error())
 			return
 		}
 	}
@@ -196,19 +186,12 @@ func followersHandler(w http.ResponseWriter, r *http.Request) {
 func followHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
-	// get the uuid of the current user from the cookies
-	cookie, err := r.Cookie("user_uuid")
+	userID, err := getRequestSenderID(r)
 	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "could not get cookie")
+		jsonResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	}
-	// get the user id from the uuid
-	var userID int
-	err = statements["getIDbyUUID"].QueryRow(cookie.Value).Scan(&userID)
-	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, " getIDbyUUID query failed")
-		return
-	}
+
 	// incoming DTO UserFollowerRequest
 	data := struct {
 		Email string `json:"email"`
@@ -265,17 +248,9 @@ func followHandler(w http.ResponseWriter, r *http.Request) {
 func unfollowHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
-	// get the uuid of the current user from the cookies
-	cookie, err := r.Cookie("user_uuid")
+	userID, err := getRequestSenderID(r)
 	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "could not get cookie")
-		return
-	}
-	// get the user id from the uuid
-	var userID int
-	err = statements["getIDbyUUID"].QueryRow(cookie.Value).Scan(&userID)
-	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, " getIDbyUUID query failed")
+		jsonResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	}
 	// incoming DTO UserFollowerRequest
@@ -312,17 +287,9 @@ func unfollowHandler(w http.ResponseWriter, r *http.Request) {
 func followRequestListHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
-	// get the uuid of the current user from the cookies
-	cookie, err := r.Cookie("user_uuid")
+	userID, err := getRequestSenderID(r)
 	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "could not get cookie")
-		return
-	}
-	// get the user id from the uuid
-	var userID int
-	err = statements["getIDbyUUID"].QueryRow(cookie.Value).Scan(&userID)
-	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, " getIDbyUUID query failed")
+		jsonResponse(w, http.StatusUnauthorized, err.Error())
 		return
 	}
 	rows, err := statements["getFollowersPending"].Query(userID)

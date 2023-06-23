@@ -45,32 +45,25 @@ func groupNewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
 	var data Group
+	err := error(nil)
+	data.CreatorId, err = getRequestSenderID(r)
+	if err != nil {
+		jsonResponse(w, 401, err.Error())
+		return
+	}
 	var incomingData GroupCreationDTO
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
-	err := decoder.Decode(&incomingData)
+	err = decoder.Decode(&incomingData)
 	if err != nil {
 		log.Println(err.Error())
 		jsonResponse(w, http.StatusUnprocessableEntity, " malformed json")
 		return
 	}
 
-	// get user id from the cookie
-	cookie, err := r.Cookie("user_uuid")
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "")
-		return
-	}
-	incomingData.UUID = cookie.Value
-
 	data.Name = strings.TrimSpace(incomingData.Name)
 	data.Description = strings.TrimSpace(incomingData.Description)
 	data.Privacy = strings.TrimSpace(incomingData.Privacy)
-	data.CreatorId, err = getIDbyUUID(incomingData.UUID)
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "getIDbyUUID failed")
-		return
-	}
 	if data.Name == "" || data.Description == "" || data.Privacy == "" {
 		jsonResponse(w, http.StatusBadRequest, "missing fields")
 		return
@@ -124,17 +117,9 @@ func groupNewHandler(w http.ResponseWriter, r *http.Request) {
 func groupJoinHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
-
-	// extract requestor id from cookie
-	cookie, err := r.Cookie("user_uuid")
+	requestorID, err := getRequestSenderID(r)
 	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "cannot get cookie")
-		return
-	}
-	requestorID, err := getIDbyUUID(cookie.Value)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "failed to get id of request sender")
+		jsonResponse(w, 401, err.Error())
 		return
 	}
 
@@ -185,17 +170,9 @@ func groupJoinHandler(w http.ResponseWriter, r *http.Request) {
 func groupLeaveHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
-
-	// get the id of the request sender
-	cookie, err := r.Cookie("user_uuid")
+	requestSenderID, err := getRequestSenderID(r)
 	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "malformed cookie/cookie not found")
-		return
-	}
-	requestSenderID, err := getIDbyUUID(cookie.Value)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "failed to get id of request sender")
+		jsonResponse(w, 401, err.Error())
 		return
 	}
 
@@ -242,30 +219,24 @@ func groupLeaveHandler(w http.ResponseWriter, r *http.Request) {
 func groupInviteHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
+	requestSenderID, err := getRequestSenderID(r)
+	if err != nil {
+		jsonResponse(w, 401, err.Error())
+		return
+	}
 	var data struct {
 		GroupID      int    `json:"group_id"`
 		InvitedEmail string `json:"member_email"`
 	}
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
-	err := decoder.Decode(&data)
+	err = decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
 		jsonResponse(w, http.StatusBadRequest, "")
 		return
 	}
-	// get the id of the request sender
-	cookie, err := r.Cookie("user_uuid")
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "malformed cookie/cookie not found")
-		return
-	}
-	requestSenderID, err := getIDbyUUID(cookie.Value)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "failed to get id of request sender")
-		return
-	}
+
 	// get the id of the invited user
 	var invitedUserID int
 	err = statements["getUserIDByEmail"].QueryRow(data.InvitedEmail).Scan(&invitedUserID)
@@ -290,16 +261,10 @@ func groupInviteHandler(w http.ResponseWriter, r *http.Request) {
 func groupInvitedHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
-	// get the id of the request sender
-	cookie, err := r.Cookie("user_uuid")
+	// just to check session
+	_, err := getRequestSenderID(r)
 	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "malformed cookie/cookie not found")
-		return
-	}
-	_, err = getIDbyUUID(cookie.Value)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "failed to get id of request sender")
+		jsonResponse(w, 401, err.Error())
 		return
 	}
 	var data struct {
@@ -386,17 +351,9 @@ func groupInvitedHandler(w http.ResponseWriter, r *http.Request) {
 func groupRequestsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
-
-	// get the id of the request sender
-	cookie, err := r.Cookie("user_uuid")
+	requestSenderID, err := getRequestSenderID(r)
 	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "malformed cookie/cookie not found")
-		return
-	}
-	requestSenderID, err := getIDbyUUID(cookie.Value)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "failed to get id of request sender")
+		jsonResponse(w, 401, err.Error())
 		return
 	}
 	// check if request sender is the group creator

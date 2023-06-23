@@ -49,25 +49,18 @@ type PostDTOelement struct {
 func postNewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
+	userID, err := getRequestSenderID(r)
+	if err != nil {
+		jsonResponse(w, 401, err.Error())
+		return
+	}
 	var data PostRequest
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
-	err := decoder.Decode(&data)
+	err = decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
 		jsonResponse(w, http.StatusBadRequest, "")
-		return
-	}
-	// get user id from cookie
-	cookie, err := r.Cookie("user_uuid")
-	if err != nil || cookie.Value == "" || cookie == nil {
-		jsonResponse(w, http.StatusUnauthorized, "cannot find cookie")
-		return
-	}
-	uuid := cookie.Value
-	userID, err := getIDbyUUID(uuid)
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "getIDbyUUID failed")
 		return
 	}
 	data.Categories = sanitizeCategories(data.Categories)
@@ -214,18 +207,9 @@ func generateRandomEmojiSequence() string {
 func userPostsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer recovery(w)
-
-	// get the uuid of the current user from the cookies
-	cookie, err := r.Cookie("user_uuid")
+	userID, err := getRequestSenderID(r)
 	if err != nil {
-		jsonResponse(w, http.StatusBadRequest, "cookie not found")
-		return
-	}
-
-	// get the user id from the uuid
-	userID, err := getIDbyUUID(cookie.Value)
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, " You are not logged in")
+		jsonResponse(w, 401, err.Error())
 		return
 	}
 
