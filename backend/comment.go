@@ -19,10 +19,11 @@ type Comments struct {
 }
 
 type Comment struct {
-	Email    string `json:"email"`
-	Fullname string `json:"fullname"`
-	Content  string `json:"content"`
-	Picture  string `json:"picture"`
+	Email     string `json:"email"`
+	Fullname  string `json:"fullname"`
+	Content   string `json:"content"`
+	Picture   string `json:"picture"`
+	CreatedAt string `json:"created_at"`
 }
 
 // # commentNewHandler creates a new comment on a post

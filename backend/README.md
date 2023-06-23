@@ -130,7 +130,7 @@ No need to send any data in request, because user_id is taken from token.
 ```
 
 ![response][response]
-`SUCCESS`  
+`SUCCESS`
 
 if the target user was private:
 
@@ -367,6 +367,52 @@ SAME STRUCTURE AS FOR `/api/user/following`
 }
 ```
 
+  <hr style="border:2px solid green">
+
+ ![request][request]   `/api/group/comment/submit` (add new comment on group_post)
+
+```json
+{
+  "group_post_id": "number",
+  "content": "string",
+  "picture": "base64encodeBlobTo - string"
+}
+```
+
+![response][response] `SUCCESS`
+
+```json
+{
+    "message": "Comment created"
+}
+```
+
+  <hr style="border:2px solid green">
+
+![request][request]  `/api/group/comments/get` (get all comments on group_post)
+
+```json
+{
+  "group_post_id": "number"
+}
+```
+
+![response][response] `SUCCESS`
+
+```json
+{
+  "comments": [
+    {
+      "email": "string",
+      "fullname": "string",
+      "content": "string",
+      "picture": "base64encodeBlobTo - string",
+      "created_at": "string"
+    }
+  ]
+}
+```
+
 <hr style="border:2px solid green">
 
 ![request][request]  `api/group/requests` (list of group joining pending requests)
@@ -404,7 +450,7 @@ SAME STRUCTURE AS FOR `/api/user/following`
   ```
 
 ![response][response]
-`SUCCESS`  
+`SUCCESS`
 
 ```json
 {
@@ -448,7 +494,7 @@ SAME STRUCTURE AS FOR `/api/user/following`
 ```
 
 ![response][response]
-`SUCCESS`  
+`SUCCESS`
 
 ```json
 {
@@ -461,7 +507,7 @@ SAME STRUCTURE AS FOR `/api/user/following`
 ![request][request] `/api/user/privacy` (change profile privacy)
 
 ![response][response]
-`SUCCESS`  
+`SUCCESS`
 
 ```json
 {
@@ -483,7 +529,7 @@ SAME STRUCTURE AS FOR `/api/user/following`
 ```
 
 ![response][response]
-`SUCCESS`  
+`SUCCESS`
 
 ```json
 {

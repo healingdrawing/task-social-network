@@ -98,7 +98,7 @@ func main() {
 	http.HandleFunc("/api/group/post/submit", groupPostNewHandler)
 	http.HandleFunc("/api/group/posts/get", groupPostsGetHandler)
 	http.HandleFunc("/api/group/comment/submit", groupCommentNewHandler)
-	http.HandleFunc("/api/group/comment/get", groupCommentGetHandler)
+	http.HandleFunc("/api/group/comments/get", groupCommentsGetHandler)
 	http.HandleFunc("/api/group/join", groupJoinHandler)
 	http.HandleFunc("/api/group/leave", groupLeaveHandler) // TODO: not part of audit, so untested
 	http.HandleFunc("/api/group/invite", groupInviteHandler)

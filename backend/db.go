@@ -155,8 +155,8 @@ func statementsCreation() {
 		"addGroupPostMembership": `INSERT INTO group_post_membership (group_id, group_post_id) VALUES (?, ?);`,
 		"getGroupPosts":          `SELECT group_post.id, title, content, categories, first_name, last_name, email, created_at, picture FROM group_post JOIN group_post_membership ON group_post.id = group_post_membership.group_post_id JOIN users ON group_post.user_id = users.id ORDER BY created_at DESC;`,
 
-		"addGroupComment":  `INSERT INTO group_comment (user_id, group_post_id, content, picture) VALUES (?, ?, ?, ?);`,
-		"getGroupComments": `SELECT email, first_name, last_name, nickname, content, picture FROM group_comment INNER JOIN users ON users.id = user_id WHERE group_post_id = ? ORDER BY group_comment.id DESC;`,
+		"addGroupComment":  `INSERT INTO group_comment (user_id, group_post_id, content, picture, created_at) VALUES (?, ?, ?, ?, ?);`,
+		"getGroupComments": `SELECT email, first_name, last_name, content, picture, created_at FROM group_comment INNER JOIN users ON users.id = user_id WHERE group_post_id = ? ORDER BY group_comment.id DESC;`,
 
 		"getFollowers":          `SELECT follower_id FROM followers WHERE user_id = ?;`,
 		"getFollowersPending":   `SELECT follower_id FROM followers_pending WHERE user_id = ?;`,

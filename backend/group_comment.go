@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 )
 
 type GroupCommentRequest struct {
@@ -25,6 +26,8 @@ type GroupComment struct {
 }
 
 // # groupCommentNewHandler creates a new comment on a group post
+//
+// @r.param {group_post_id int, content string, picture string}
 func groupCommentNewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
@@ -51,7 +54,7 @@ func groupCommentNewHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// get user id from the cookie
-	cookie, err := r.Cookie("user-uuid")
+	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
 		w.WriteHeader(401)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -61,7 +64,7 @@ func groupCommentNewHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	myuuid := cookie.Value
-	ID, err := getIDbyUUID(myuuid)
+	userID, err := getIDbyUUID(myuuid)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -70,7 +73,7 @@ func groupCommentNewHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	_, err = statements["addGroupComment"].Exec(ID, data.GroupPostID, data.Content, data.Picture)
+	_, err = statements["addGroupComment"].Exec(userID, data.GroupPostID, data.Content, data.Picture, time.Now().Format("2006-01-02 15:04:05"))
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -98,18 +101,17 @@ func groupCommentNewHandler(w http.ResponseWriter, r *http.Request) {
 	rows.Next()
 	var firstName, lastName, nickname string
 	var pictureBlob []byte
-	rows.Scan(&comment.Email, &firstName, &lastName, &nickname, &comment.Content, &pictureBlob)
+	rows.Scan(&comment.Email, &firstName, &lastName, &nickname, &comment.Content, &pictureBlob, &comment.CreatedAt)
 	comment.Fullname = firstName + " " + lastName
 	comment.Picture = base64.StdEncoding.EncodeToString(pictureBlob)
 	rows.Close()
 	sendComment(data.GroupPostID, comment)
 }
 
-// todo: these comments look little bit strange, but let it be here , like in "comment.go"
-// # groupCommentGetHandler returns all comments for a post
+// # groupCommentsGetHandler returns all comments for a post
 //
-// - @param postID
-func groupCommentGetHandler(w http.ResponseWriter, r *http.Request) {
+// - @param group_post_id
+func groupCommentsGetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
 		if err := recover(); err != nil {
@@ -136,7 +138,7 @@ func groupCommentGetHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write(jsonResponse)
 		return
 	}
-	rows, err := statements["getComments"].Query(data.GroupPostID)
+	rows, err := statements["getGroupComments"].Query(data.GroupPostID)
 	if err != nil {
 		w.WriteHeader(500)
 		jsonResponse, _ := json.Marshal(map[string]string{
@@ -150,9 +152,9 @@ func groupCommentGetHandler(w http.ResponseWriter, r *http.Request) {
 	var comments Comments
 	for rows.Next() {
 		var comment Comment
-		var firstName, lastName, nickname string
+		var firstName, lastName string
 		var pictureBlob []byte
-		rows.Scan(&comment.Email, &firstName, &lastName, &nickname, &comment.Content, &pictureBlob)
+		rows.Scan(&comment.Email, &firstName, &lastName, &comment.Content, &pictureBlob, &comment.CreatedAt)
 		comment.Fullname = firstName + " " + lastName
 		comment.Picture = base64.StdEncoding.EncodeToString(pictureBlob)
 		comments.Comments = append(comments.Comments, comment)
