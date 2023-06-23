@@ -71,7 +71,7 @@ func changePrivacyHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - changePrivacyHandler")
 		}
 	}()
 
@@ -124,7 +124,7 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - userProfileHandler")
 		}
 	}()
 
@@ -276,7 +276,7 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, " we could not register you at this time")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - userRegisterHandler")
 		}
 	}()
 
@@ -431,7 +431,7 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - userLoginHandler")
 		}
 	}()
 	var data loginData
@@ -495,7 +495,7 @@ func sessionCheckHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - sessionCheckHandler")
 		}
 	}()
 	var data UUIDData
@@ -546,7 +546,7 @@ func userLogoutHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - userLogoutHandler")
 		}
 	}()
 

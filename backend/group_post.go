@@ -47,7 +47,7 @@ func groupPostNewHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, 500, "")
+			jsonResponseWriterManager(w, 500, "recover - groupPostNewHandler")
 		}
 	}()
 	var data GroupPostRequest
@@ -141,7 +141,7 @@ func groupPostsGetHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, 500, "")
+			jsonResponseWriterManager(w, 500, "recover - groupPostsGetHandler")
 		}
 	}()
 

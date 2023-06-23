@@ -23,7 +23,7 @@ func groupRequestAcceptHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - groupRequestAcceptHandler")
 		}
 	}()
 	cookie, err := r.Cookie("user_uuid")
@@ -108,7 +108,7 @@ func groupRequestRejectHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - groupRequestRejectHandler")
 		}
 	}()
 	// get the logged in user id from the uuid in cookies
@@ -192,7 +192,7 @@ func approveFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - approveFollowerHandler")
 		}
 	}()
 	// get the logged in user id from the uuid in cookies
@@ -291,7 +291,7 @@ func rejectFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - rejectFollowerHandler")
 		}
 	}()
 	// get the logged in user id from the uuid in cookies
@@ -388,7 +388,7 @@ func groupInviteAcceptHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - groupInviteAcceptHandler")
 		}
 	}()
 
@@ -445,7 +445,7 @@ func groupInviteRejectHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - groupInviteRejectHandler")
 		}
 	}()
 

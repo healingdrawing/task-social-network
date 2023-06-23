@@ -46,7 +46,7 @@ func groupNewHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - groupNewHandler")
 		}
 	}()
 	var data Group
@@ -131,7 +131,7 @@ func groupJoinHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - groupJoinHandler")
 		}
 	}()
 
@@ -197,7 +197,7 @@ func groupLeaveHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - groupLeaveHandler")
 		}
 	}()
 
@@ -259,7 +259,7 @@ func groupInviteHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - groupInviteHandler")
 		}
 	}()
 	var data struct {
@@ -312,7 +312,7 @@ func groupInvitedHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - groupInvitedHandler")
 		}
 	}()
 	// get the id of the request sender
@@ -413,7 +413,7 @@ func groupRequestsHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - groupRequestsHandler")
 		}
 	}()
 

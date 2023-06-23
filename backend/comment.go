@@ -35,7 +35,7 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - commentNewHandler")
 		}
 	}()
 	var data CommentRequest
@@ -113,7 +113,7 @@ func commentGetHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - commentGetHandler")
 		}
 	}()
 	var data struct {

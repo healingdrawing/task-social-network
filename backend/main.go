@@ -110,16 +110,16 @@ func main() {
 	http.HandleFunc("/api/group/request/reject", groupRequestRejectHandler)
 
 	http.HandleFunc("/api/user/check", sessionCheckHandler)
-	http.HandleFunc("/api/user/following", FollowingHandler)
-	http.HandleFunc("/api/user/followers", FollowersHandler)
-	http.HandleFunc("/api/user/follow", FollowHandler)
+	http.HandleFunc("/api/user/following", followingHandler)
+	http.HandleFunc("/api/user/followers", followersHandler)
+	http.HandleFunc("/api/user/follow", followHandler)
 	http.HandleFunc("/api/user/login", userLoginHandler)
 	http.HandleFunc("/api/user/logout", userLogoutHandler)
 	http.HandleFunc("/api/user/posts", userPostsHandler)
 	http.HandleFunc("/api/user/privacy", changePrivacyHandler)
 	http.HandleFunc("/api/user/profile", userProfileHandler)
 	http.HandleFunc("/api/user/register", userRegisterHandler)
-	http.HandleFunc("/api/user/unfollow", UnfollowHandler)
+	http.HandleFunc("/api/user/unfollow", unfollowHandler)
 	// Server
 	log.Fatal(http.ListenAndServe(":"+portHTTP, nil))
 }

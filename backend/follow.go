@@ -21,17 +21,17 @@ type Follower struct {
 	FullName  string `json:"full_name"`
 }
 
-// # FollowingHandler returns list of users that the target userID is following
+// # followingHandler returns list of users that the target userID is following
 //
 // - If: the request has a JSON body, it will be decoded into a DTO, and the email of the user will be extracted
 // and the user id will be extracted from the email
 //
 // - Else: the cookie of the current user will be extracted and the user id will be extracted from the uuid
-func FollowingHandler(w http.ResponseWriter, r *http.Request) {
+func followingHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
 		if err := recover(); err != nil {
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "something went wrong")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - followingHandler")
 		}
 	}()
 	var userID int
@@ -107,11 +107,11 @@ func FollowingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func FollowersHandler(w http.ResponseWriter, r *http.Request) {
+func followersHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
 		if err := recover(); err != nil {
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "something went wrong")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - followersHandler")
 		}
 	}()
 	var userID int
@@ -196,16 +196,16 @@ func FollowersHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// # FollowHandler adds the current user to the followers list of the target user
+// # followHandler adds the current user to the followers list of the target user
 //
 // - If: the target user is private, the current user will be added to the followers_pending table
 //
 // - Else: the current user will be added to the followers table
-func FollowHandler(w http.ResponseWriter, r *http.Request) {
+func followHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
 		if err := recover(); err != nil {
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "something went wrong")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - followHandler")
 		}
 	}()
 	// get the uuid of the current user from the cookies
@@ -270,15 +270,15 @@ func FollowHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// # UnfollowHandler removes the current user from the followers list of the target user
+// # unfollowHandler removes the current user from the followers list of the target user
 //
 // - If the followers table has a row with the current loggedin user as follower_id and the target user as user_id,
 // the row will be deleted
-func UnfollowHandler(w http.ResponseWriter, r *http.Request) {
+func unfollowHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
 		if err := recover(); err != nil {
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "something went wrong")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - unfollowHandler")
 		}
 	}()
 	// get the uuid of the current user from the cookies
@@ -329,7 +329,7 @@ func followRequestListHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	defer func() {
 		if err := recover(); err != nil {
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "something went wrong")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - followRequestListHandler")
 		}
 	}()
 	// get the uuid of the current user from the cookies

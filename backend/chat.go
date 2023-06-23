@@ -49,7 +49,7 @@ func chatTypingHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - chatTypingHandler")
 		}
 	}()
 	var data Typing
@@ -70,7 +70,7 @@ func chatMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - chatMessagesHandler")
 		}
 	}()
 	var data MessagesRequest
@@ -134,7 +134,7 @@ func chatUsersHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - chatUsersHandler")
 		}
 	}()
 	var data UsernameData
@@ -219,7 +219,7 @@ func chatNewHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - chatNewHandler")
 		}
 	}()
 	var data Message

@@ -51,7 +51,7 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - postNewHandler")
 		}
 	}()
 	var data PostRequest
@@ -150,7 +150,7 @@ func postGetHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - postGetHandler")
 		}
 	}()
 	rows, err := statements["getPosts"].Query()
@@ -222,7 +222,7 @@ func userPostsHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, " internal server error. we could not get your posts")
+			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - userPostsHandler")
 		}
 	}()
 
