@@ -20,12 +20,7 @@ type UserFollowerRequest struct {
 // @rparam {group_id int, member_email string}
 func groupRequestAcceptHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - groupRequestAcceptHandler")
-		}
-	}()
+	defer recovery(w)
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
 		if err == http.ErrNoCookie {
@@ -105,12 +100,7 @@ func groupRequestAcceptHandler(w http.ResponseWriter, r *http.Request) {
 // @rparam {group_id int, member_email string}
 func groupRequestRejectHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - groupRequestRejectHandler")
-		}
-	}()
+	defer recovery(w)
 	// get the logged in user id from the uuid in cookies
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
@@ -189,12 +179,7 @@ func groupRequestRejectHandler(w http.ResponseWriter, r *http.Request) {
 
 func approveFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - approveFollowerHandler")
-		}
-	}()
+	defer recovery(w)
 	// get the logged in user id from the uuid in cookies
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
@@ -288,12 +273,7 @@ func approveFollowerHandler(w http.ResponseWriter, r *http.Request) {
 
 func rejectFollowerHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - rejectFollowerHandler")
-		}
-	}()
+	defer recovery(w)
 	// get the logged in user id from the uuid in cookies
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
@@ -385,12 +365,7 @@ func rejectFollowerHandler(w http.ResponseWriter, r *http.Request) {
 // @r.param {group_id int}
 func groupInviteAcceptHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - groupInviteAcceptHandler")
-		}
-	}()
+	defer recovery(w)
 
 	// get the id of the request sender
 	cookie, err := r.Cookie("user_uuid")
@@ -442,12 +417,7 @@ func groupInviteAcceptHandler(w http.ResponseWriter, r *http.Request) {
 // @r.param {group_id int}
 func groupInviteRejectHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - groupInviteRejectHandler")
-		}
-	}()
+	defer recovery(w)
 
 	// get the id of the request sender
 	cookie, err := r.Cookie("user_uuid")

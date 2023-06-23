@@ -43,12 +43,7 @@ type InvitedUserInfoDTO struct {
 
 func groupNewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - groupNewHandler")
-		}
-	}()
+	defer recovery(w)
 	var data Group
 	var incomingData GroupCreationDTO
 	decoder := json.NewDecoder(r.Body)
@@ -128,12 +123,7 @@ func groupNewHandler(w http.ResponseWriter, r *http.Request) {
 // @params: group_id
 func groupJoinHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - groupJoinHandler")
-		}
-	}()
+	defer recovery(w)
 
 	// extract requestor id from cookie
 	cookie, err := r.Cookie("user_uuid")
@@ -194,12 +184,7 @@ func groupJoinHandler(w http.ResponseWriter, r *http.Request) {
 // @params: group_id
 func groupLeaveHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - groupLeaveHandler")
-		}
-	}()
+	defer recovery(w)
 
 	// get the id of the request sender
 	cookie, err := r.Cookie("user_uuid")
@@ -256,12 +241,7 @@ func groupLeaveHandler(w http.ResponseWriter, r *http.Request) {
 // only one person is invited at a time via this handler
 func groupInviteHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - groupInviteHandler")
-		}
-	}()
+	defer recovery(w)
 	var data struct {
 		GroupID      int    `json:"group_id"`
 		InvitedEmail string `json:"member_email"`
@@ -309,12 +289,7 @@ func groupInviteHandler(w http.ResponseWriter, r *http.Request) {
 // @params: group_id
 func groupInvitedHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - groupInvitedHandler")
-		}
-	}()
+	defer recovery(w)
 	// get the id of the request sender
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
@@ -410,12 +385,7 @@ func groupInvitedHandler(w http.ResponseWriter, r *http.Request) {
 // @r.params: {group_id : int}
 func groupRequestsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - groupRequestsHandler")
-		}
-	}()
+	defer recovery(w)
 
 	// get the id of the request sender
 	cookie, err := r.Cookie("user_uuid")

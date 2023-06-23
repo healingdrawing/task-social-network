@@ -30,12 +30,7 @@ type GroupComment struct {
 // @r.param {group_post_id int, content string, picture string}
 func groupCommentNewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, 500, "recover - groupCommentNewHandler")
-		}
-	}()
+	defer recovery(w)
 	var data GroupCommentRequest
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -86,12 +81,7 @@ func groupCommentNewHandler(w http.ResponseWriter, r *http.Request) {
 // - @param group_post_id
 func groupCommentsGetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, 500, "recover - groupCommentsGetHandler")
-		}
-	}()
+	defer recovery(w)
 	var data struct {
 		GroupPostID int `json:"group_post_id"`
 	}

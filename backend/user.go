@@ -68,12 +68,7 @@ type UUIDData struct {
 
 func changePrivacyHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - changePrivacyHandler")
-		}
-	}()
+	defer recovery(w)
 
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil || cookie.Value == "" || cookie == nil {
@@ -100,13 +95,6 @@ func changePrivacyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	wantPublic := incomingData["public"].(bool)
 
-	// privacyvalue := ""
-	// if wantPublic == true {
-	// 	privacyvalue = "public"
-	// } else {
-	// 	privacyvalue = "private"
-	// }
-
 	privacyvalue := map[bool]string{true: "public", false: "private"}[wantPublic]
 
 	_, err = statements["updateUserPrivacy"].Exec(privacyvalue, ID)
@@ -121,12 +109,7 @@ func changePrivacyHandler(w http.ResponseWriter, r *http.Request) {
 
 func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - userProfileHandler")
-		}
-	}()
+	defer recovery(w)
 
 	// get uuid from the cookie
 	cookie, err := r.Cookie("user_uuid")
@@ -273,12 +256,7 @@ func isFollowing(myID int, ID int) (bool, error) {
 
 func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - userRegisterHandler")
-		}
-	}()
+	defer recovery(w)
 
 	var data signupData
 	decoder := json.NewDecoder(r.Body)
@@ -428,12 +406,7 @@ Password must only contain english characters and numbers`
 func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - userLoginHandler")
-		}
-	}()
+	defer recovery(w)
 	var data loginData
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -492,12 +465,7 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func sessionCheckHandler(w http.ResponseWriter, r *http.Request) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - sessionCheckHandler")
-		}
-	}()
+	defer recovery(w)
 	var data UUIDData
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -543,12 +511,7 @@ func sessionCheckHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func userLogoutHandler(w http.ResponseWriter, r *http.Request) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - userLogoutHandler")
-		}
-	}()
+	defer recovery(w)
 
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil || cookie.Value == "" || cookie == nil {

@@ -48,12 +48,7 @@ type PostDTOelement struct {
 
 func postNewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - postNewHandler")
-		}
-	}()
+	defer recovery(w)
 	var data PostRequest
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -147,12 +142,7 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 
 func postsGetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - postGetHandler")
-		}
-	}()
+	defer recovery(w)
 	rows, err := statements["getPosts"].Query()
 	if err != nil {
 		jsonResponse(w, http.StatusInternalServerError, "getPosts query failed")
@@ -223,12 +213,7 @@ func generateRandomEmojiSequence() string {
 
 func userPostsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - userPostsHandler")
-		}
-	}()
+	defer recovery(w)
 
 	// get the uuid of the current user from the cookies
 	cookie, err := r.Cookie("user_uuid")

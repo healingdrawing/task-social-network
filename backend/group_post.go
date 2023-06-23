@@ -44,12 +44,7 @@ type GroupPostDTOelement struct {
 // @r.param {group_id int, title string, categories string, content string, picture string}
 func groupPostNewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, 500, "recover - groupPostNewHandler")
-		}
-	}()
+	defer recovery(w)
 	var data GroupPostRequest
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -138,12 +133,7 @@ func groupPostNewHandler(w http.ResponseWriter, r *http.Request) {
 // @r.Params {group_id int}
 func groupPostsGetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, 500, "recover - groupPostsGetHandler")
-		}
-	}()
+	defer recovery(w)
 
 	// get the uuid of the current user from the cookies
 	cookie, err := r.Cookie("user_uuid")

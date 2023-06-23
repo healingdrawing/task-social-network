@@ -46,12 +46,7 @@ type Typing struct {
 
 func chatTypingHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - chatTypingHandler")
-		}
-	}()
+	defer recovery(w)
 	var data Typing
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -67,12 +62,7 @@ func chatTypingHandler(w http.ResponseWriter, r *http.Request) {
 
 func chatMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - chatMessagesHandler")
-		}
-	}()
+	defer recovery(w)
 	var data MessagesRequest
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -131,12 +121,7 @@ func chatMessagesHandler(w http.ResponseWriter, r *http.Request) {
 
 func chatUsersHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - chatUsersHandler")
-		}
-	}()
+	defer recovery(w)
 	var data UsernameData
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -215,12 +200,7 @@ func isOnline(username string) (found bool) {
 
 func chatNewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - chatNewHandler")
-		}
-	}()
+	defer recovery(w)
 	var data Message
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()

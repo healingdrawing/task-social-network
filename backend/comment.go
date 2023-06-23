@@ -32,12 +32,7 @@ type Comment struct {
 // - @param content
 func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - commentNewHandler")
-		}
-	}()
+	defer recovery(w)
 	var data CommentRequest
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -110,12 +105,7 @@ func commentNewHandler(w http.ResponseWriter, r *http.Request) {
 // - @param postID int
 func commentsGetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(err)
-			jsonResponse(w, http.StatusInternalServerError, "recover - commentGetHandler")
-		}
-	}()
+	defer recovery(w)
 	var data struct {
 		PostID int `json:"postID"`
 	}

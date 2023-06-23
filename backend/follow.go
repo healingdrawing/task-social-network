@@ -29,11 +29,7 @@ type Follower struct {
 // - Else: the cookie of the current user will be extracted and the user id will be extracted from the uuid
 func followingHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			jsonResponse(w, http.StatusInternalServerError, "recover - followingHandler")
-		}
-	}()
+	defer recovery(w)
 	var userID int
 
 	// if the incoming request has a JSON body, decode it into the DTO, else get the cookie of current user
@@ -109,11 +105,7 @@ func followingHandler(w http.ResponseWriter, r *http.Request) {
 
 func followersHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			jsonResponse(w, http.StatusInternalServerError, "recover - followersHandler")
-		}
-	}()
+	defer recovery(w)
 	var userID int
 
 	// if the incoming request has a JSON body, decode it into the DTO, else get the cookie of current user
@@ -203,11 +195,7 @@ func followersHandler(w http.ResponseWriter, r *http.Request) {
 // - Else: the current user will be added to the followers table
 func followHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			jsonResponse(w, http.StatusInternalServerError, "recover - followHandler")
-		}
-	}()
+	defer recovery(w)
 	// get the uuid of the current user from the cookies
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
@@ -276,11 +264,7 @@ func followHandler(w http.ResponseWriter, r *http.Request) {
 // the row will be deleted
 func unfollowHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			jsonResponse(w, http.StatusInternalServerError, "recover - unfollowHandler")
-		}
-	}()
+	defer recovery(w)
 	// get the uuid of the current user from the cookies
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
@@ -327,11 +311,7 @@ func unfollowHandler(w http.ResponseWriter, r *http.Request) {
 // - No JSON body is required
 func followRequestListHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	defer func() {
-		if err := recover(); err != nil {
-			jsonResponse(w, http.StatusInternalServerError, "recover - followRequestListHandler")
-		}
-	}()
+	defer recovery(w)
 	// get the uuid of the current user from the cookies
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
