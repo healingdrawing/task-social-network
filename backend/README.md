@@ -278,6 +278,34 @@ SAME STRUCTURE AS FOR `/api/user/following`
   "message": "success: you rejected the group invite"
 }
 ```
+<hr style="border:2px solid green">
+
+![request][request]  `/api/group/posts/get` (get posts of a group)
+
+```json
+{
+  "group_id": "number"
+}
+```
+
+![response][response]  
+
+```json
+{
+  "posts": [
+    {
+      "id": "number",
+      "title": "string",
+      "content": "string",
+      "categories": "string",
+      "picture": "base64encodeBlobTo - string",
+      "createdAt": "string",
+      "creatorFullName": "string",
+      "creatorEmail": "string"
+    }
+  ]
+}
+```
 
 <hr style="border:2px solid green">
 
@@ -621,7 +649,7 @@ Redirect to `LoginView.vue`. Perhaps will be better to sign in user automaticall
 
 ## ERD for database
 
-![erd](https://github.com/healingdrawing/task-social-network/assets/5121817/4b8354f7-c165-4e31-aa63-de0f6fe7a89b)
+![erd](https://github.com/healingdrawing/task-social-network/assets/5121817/4bcce1ad-91c5-4220-842c-3a50504823a4)
 
 ## To create base64 encoded string from image file, for testing, website recommended is
 

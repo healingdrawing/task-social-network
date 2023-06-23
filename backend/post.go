@@ -32,6 +32,7 @@ type Post struct {
 	Categories string `json:"categories"`
 	Content    string `json:"content"`
 	Picture    string `json:"picture"`
+	CreatedAt  string `json:"created_at"`
 }
 
 type PostDTOelement struct {

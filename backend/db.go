@@ -151,6 +151,13 @@ func statementsCreation() {
 		"getGroupInvitedUsers":   `SELECT user_id, group_id, inviter_id, created_at FROM group_invited_users WHERE group_id = ?;`,
 		"removeGroupInvitedUser": `DELETE FROM group_invited_users WHERE user_id = ? AND group_id = ?;`,
 
+		"addGroupPost":           `INSERT INTO group_post (user_id, title, categories, content, picture, created_at) VALUES (?, ?, ?, ?, ?, ?);`,
+		"addGroupPostMembership": `INSERT INTO group_post_membership (group_id, group_post_id) VALUES (?, ?);`,
+		"getGroupPosts":          `SELECT group_post.id, title, content, categories, first_name, last_name, email, created_at, picture FROM group_post JOIN group_post_membership ON group_post.id = group_post_membership.group_post_id JOIN users ON group_post.user_id = users.id ORDER BY created_at DESC;`,
+
+		"addGroupComment":  `INSERT INTO group_comment (user_id, group_post_id, content, picture) VALUES (?, ?, ?, ?);`,
+		"getGroupComments": `SELECT email, first_name, last_name, nickname, content, picture FROM group_comment INNER JOIN users ON users.id = user_id WHERE group_post_id = ? ORDER BY group_comment.id DESC;`,
+
 		"getFollowers":          `SELECT follower_id FROM followers WHERE user_id = ?;`,
 		"getFollowersPending":   `SELECT follower_id FROM followers_pending WHERE user_id = ?;`,
 		"addFollower":           `INSERT INTO followers (user_id, follower_id) VALUES (?, ?);`,
@@ -159,13 +166,6 @@ func statementsCreation() {
 		"removeFollowerPending": `DELETE FROM followers_pending WHERE user_id = ? AND follower_id = ?;`,
 		"getFollowing":          `SELECT user_id FROM followers WHERE follower_id = ?;`,
 		"doesSecondFollowFirst": `SELECT * FROM followers WHERE user_id = ? AND follower_id = ? LIMIT 1;`,
-
-		"addGroupPost":           `INSERT INTO group_post (user_id, title, categories, content, picture, created_at) VALUES (?, ?, ?, ?, ?, ?);`,
-		"addGroupPostMembership": `INSERT INTO group_post_membership (group_id, group_post_id) VALUES (?, ?);`,
-		"getGroupPosts":          `SELECT group_post.id, title, content, categories, first_name, last_name, email, created_at FROM group_post JOIN group_post_membership ON group_post.id = group_post_membership.group_post_id JOIN users ON group_post.user_id = users.id ORDER BY created_at DESC;`,
-
-		"addGroupComment":  `INSERT INTO group_comment (user_id, group_post_id, content, picture) VALUES (?, ?, ?, ?);`,
-		"getGroupComments": `SELECT email, first_name, last_name, nickname, content, picture FROM group_comment INNER JOIN users ON users.id = user_id WHERE group_post_id = ? ORDER BY group_comment.id DESC;`,
 	} {
 		err := error(nil)
 		statements[key], err = db.Prepare(query)
