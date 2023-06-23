@@ -71,13 +71,13 @@ func changePrivacyHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - changePrivacyHandler")
+			jsonResponse(w, http.StatusInternalServerError, "recover - changePrivacyHandler")
 		}
 	}()
 
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil || cookie.Value == "" || cookie == nil {
-		jsonResponseWriterManager(w, http.StatusUnauthorized, "You are not logged in")
+		jsonResponse(w, http.StatusUnauthorized, "You are not logged in")
 		return
 	}
 
@@ -85,7 +85,7 @@ func changePrivacyHandler(w http.ResponseWriter, r *http.Request) {
 
 	ID, err := getIDbyUUID(uuid)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusUnauthorized, "You are not logged in")
+		jsonResponse(w, http.StatusUnauthorized, "You are not logged in")
 		return
 	}
 
@@ -95,7 +95,7 @@ func changePrivacyHandler(w http.ResponseWriter, r *http.Request) {
 	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&incomingData)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusBadRequest, "Bad request")
+		jsonResponse(w, http.StatusBadRequest, "Bad request")
 		return
 	}
 	wantPublic := incomingData["public"].(bool)
@@ -112,11 +112,11 @@ func changePrivacyHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = statements["updateUserPrivacy"].Exec(privacyvalue, ID)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "updateUserPrivacy query failed")
+		jsonResponse(w, http.StatusInternalServerError, "updateUserPrivacy query failed")
 		return
 	}
 
-	jsonResponseWriterManager(w, http.StatusOK, "Privacy updated")
+	jsonResponse(w, http.StatusOK, "Privacy updated")
 }
 
 func userProfileHandler(w http.ResponseWriter, r *http.Request) {
@@ -124,7 +124,7 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - userProfileHandler")
+			jsonResponse(w, http.StatusInternalServerError, "recover - userProfileHandler")
 		}
 	}()
 
@@ -132,7 +132,7 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusUnauthorized, "cookie not found")
+		jsonResponse(w, http.StatusUnauthorized, "cookie not found")
 		return
 	}
 	myuuid := cookie.Value
@@ -140,7 +140,7 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 	// get the ID of the user that is currently logged in
 	myID, err := getIDbyUUID(myuuid)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusUnauthorized, "You are not logged in")
+		jsonResponse(w, http.StatusUnauthorized, "You are not logged in")
 		return
 	}
 
@@ -151,7 +151,7 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 	err = decoder.Decode(&incomingData)
 	if err != nil && err.Error() != "EOF" {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusBadRequest, "Bad request")
+		jsonResponse(w, http.StatusBadRequest, "Bad request")
 		return
 	}
 	incomingEmail := ""
@@ -163,14 +163,14 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 		rows, err := statements["getEmailByID"].Query(myID)
 		if err != nil {
 			log.Println(err.Error())
-			jsonResponseWriterManager(w, http.StatusUnauthorized, "getEmailByID query failed, user not found")
+			jsonResponse(w, http.StatusUnauthorized, "getEmailByID query failed, user not found")
 			return
 		}
 		defer rows.Close()
 		rows.Next()
 		err = rows.Scan(&incomingEmail)
 		if err != nil {
-			jsonResponseWriterManager(w, http.StatusUnauthorized, "getEmailByID query failed, incomingEmail scan failed")
+			jsonResponse(w, http.StatusUnauthorized, "getEmailByID query failed, incomingEmail scan failed")
 			return
 		}
 		rows.Close()
@@ -182,7 +182,7 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 	ID, err := getIDbyEmail(incomingEmail)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusUnauthorized, "User not found, getIDbyEmail failed")
+		jsonResponse(w, http.StatusUnauthorized, "User not found, getIDbyEmail failed")
 		return
 	}
 
@@ -190,7 +190,7 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 	rows, err := statements["getUserProfile"].Query(ID)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusUnauthorized, "getUserProfile query failed, user not found")
+		jsonResponse(w, http.StatusUnauthorized, "getUserProfile query failed, user not found")
 		return
 	}
 	defer rows.Close()
@@ -198,7 +198,7 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 	err = rows.Scan(&profile.Email, &profile.FirstName, &profile.LastName, &profile.Dob,
 		&profile.avatarBytes, &profile.Nickname, &profile.AboutMe, &profile.Privacy)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusUnauthorized, "getUserProfile -> profile scan failed")
+		jsonResponse(w, http.StatusUnauthorized, "getUserProfile -> profile scan failed")
 		return
 	}
 	rows.Close()
@@ -220,10 +220,10 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 
 	if myID == ID {
 		w.WriteHeader(200)
-		jsonResponse, _ := json.Marshal(profileDTO)
-		_, err = w.Write(jsonResponse)
+		jsonResponseObj, _ := json.Marshal(profileDTO)
+		_, err = w.Write(jsonResponseObj)
 		if err != nil {
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "w.Write(jsonResponse) <- profileDTO failed")
+			jsonResponse(w, http.StatusInternalServerError, "w.Write(jsonResponseObj) <- profileDTO failed")
 		}
 		return
 	}
@@ -234,24 +234,24 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 		following, err := isFollowing(myID, ID)
 		if err != nil {
 			log.Println(err.Error())
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "isFollowing failed")
+			jsonResponse(w, http.StatusInternalServerError, "isFollowing failed")
 			return
 		}
 		if !following {
-			jsonResponseWriterManager(w, http.StatusUnauthorized, "User is private, you cannot check their profile without following them")
+			jsonResponse(w, http.StatusUnauthorized, "User is private, you cannot check their profile without following them")
 			return
 		}
 	}
 
 	w.WriteHeader(200)
-	jsonResponse, err := json.Marshal(profileDTO)
+	jsonResponseObj, err := json.Marshal(profileDTO)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "json.Marshal(profileDTO) failed")
+		jsonResponse(w, http.StatusInternalServerError, "json.Marshal(profileDTO) failed")
 		return
 	}
-	_, err = w.Write(jsonResponse)
+	_, err = w.Write(jsonResponseObj)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "w.Write(jsonResponse) <- profileDTO failed")
+		jsonResponse(w, http.StatusInternalServerError, "w.Write(jsonResponseObj) <- profileDTO failed")
 	}
 
 }
@@ -276,7 +276,7 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - userRegisterHandler")
+			jsonResponse(w, http.StatusInternalServerError, "recover - userRegisterHandler")
 		}
 	}()
 
@@ -286,13 +286,13 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusBadRequest, "")
+		jsonResponse(w, http.StatusBadRequest, "")
 		return
 	}
 
 	// if dob is empty, return error
 	if data.Dob == "" {
-		jsonResponseWriterManager(w, http.StatusUnprocessableEntity, "Invalid date of birth")
+		jsonResponse(w, http.StatusUnprocessableEntity, "Invalid date of birth")
 		return
 	}
 
@@ -301,12 +301,12 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		avatarData, err := base64.StdEncoding.DecodeString(data.Avatar)
 		if err != nil {
 			log.Println(err.Error())
-			jsonResponseWriterManager(w, http.StatusUnprocessableEntity, "Invalid avatar")
+			jsonResponse(w, http.StatusUnprocessableEntity, "Invalid avatar")
 			return
 		}
 		if !isImage(avatarData) {
 			log.Println(err.Error())
-			jsonResponseWriterManager(w, http.StatusUnsupportedMediaType, "avatar is not a valid image")
+			jsonResponse(w, http.StatusUnsupportedMediaType, "avatar is not a valid image")
 			return
 		}
 		data.avatarBytes = avatarData
@@ -317,7 +317,7 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		defaultAvatar, err := os.Open("./assets/images/profile/defaults/" + strconv.Itoa(rn) + ".jpeg")
 		if err != nil {
 			log.Println(err.Error())
-			jsonResponseWriterManager(w, http.StatusFailedDependency, "failed to load default avatar")
+			jsonResponse(w, http.StatusFailedDependency, "failed to load default avatar")
 			return
 		}
 		defer defaultAvatar.Close()
@@ -325,7 +325,7 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		defaultAvatar.Close()
 		if err != nil {
 			log.Println(err.Error())
-			jsonResponseWriterManager(w, http.StatusFailedDependency, "failed to load default avatar")
+			jsonResponse(w, http.StatusFailedDependency, "failed to load default avatar")
 			return
 		}
 		defaultAvatar.Close()
@@ -346,7 +346,7 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 			message := `Invalid nickname: ` + data.Nickname + `
 			Nickname must only contain english letters and numbers.
 			Nickname must be between 2 and 15 characters long.`
-			jsonResponseWriterManager(w, http.StatusUnprocessableEntity, message)
+			jsonResponse(w, http.StatusUnprocessableEntity, message)
 			return
 		}
 	}
@@ -354,14 +354,14 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if len(data.FirstName) < 1 || len(data.FirstName) > 32 {
 		message := `Invalid first name length: ` + data.FirstName + `
 		First name must be between 1 and 32 characters long`
-		jsonResponseWriterManager(w, http.StatusUnprocessableEntity, message)
+		jsonResponse(w, http.StatusUnprocessableEntity, message)
 		return
 	}
 
 	if len(data.LastName) < 1 || len(data.LastName) > 32 {
 		message := `Invalid last name length: ` + data.LastName + `
 		Last name must be between 1 and 32 characters long`
-		jsonResponseWriterManager(w, http.StatusUnprocessableEntity, message)
+		jsonResponse(w, http.StatusUnprocessableEntity, message)
 		return
 	}
 
@@ -370,56 +370,56 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if !emailRegex.MatchString(strings.ToLower((data.Email))) {
 		message := `Invalid email: ` + data.Email + `
 		Email must be a valid email address`
-		jsonResponseWriterManager(w, http.StatusUnprocessableEntity, message)
+		jsonResponse(w, http.StatusUnprocessableEntity, message)
 		return
 	}
 
 	if len(data.Password) < 6 || len(data.Password) > 15 {
 		message := `Invalid password length: ` + data.Password + `
 		Password must be between 6 and 15 characters long`
-		jsonResponseWriterManager(w, http.StatusUnprocessableEntity, message)
+		jsonResponse(w, http.StatusUnprocessableEntity, message)
 		return
 	}
 
 	if !onlyEnglishRegex.MatchString(data.Password) {
 		message := `Invalid password: ` + data.Password + `
 Password must only contain english characters and numbers`
-		jsonResponseWriterManager(w, http.StatusUnprocessableEntity, message)
+		jsonResponse(w, http.StatusUnprocessableEntity, message)
 		return
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(data.Password), 14)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusUnprocessableEntity, "dependency failure: could not hash password")
+		jsonResponse(w, http.StatusUnprocessableEntity, "dependency failure: could not hash password")
 		return
 	}
 	_, err = statements["addUser"].Exec(data.Email, string(hash), data.FirstName, data.LastName, data.Dob, data.avatarBytes, data.Nickname, data.AboutMe, data.Privacy)
 	if err != nil {
 		if err.Error() == "UNIQUE constraint failed: users.email" {
 			log.Println(err.Error())
-			jsonResponseWriterManager(w, http.StatusConflict, "This email is already taken")
+			jsonResponse(w, http.StatusConflict, "This email is already taken")
 			return
 		}
 
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusUnprocessableEntity, "database entry for adding user failed")
+		jsonResponse(w, http.StatusUnprocessableEntity, "database entry for adding user failed")
 		return
 	}
 	UUID, err := createSession(data.Email)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, " create session failed")
+		jsonResponse(w, http.StatusInternalServerError, " create session failed")
 		return
 	}
 	w.WriteHeader(200)
-	jsonResponse, _ := json.Marshal(map[string]string{
+	jsonResponseObj, _ := json.Marshal(map[string]string{
 		"UUID":  UUID,
 		"email": data.Email,
 	})
-	_, err = w.Write(jsonResponse)
+	_, err = w.Write(jsonResponseObj)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "w.Write(jsonResponse)<-UUID,email failed")
+		jsonResponse(w, http.StatusInternalServerError, "w.Write(jsonResponseObj)<-UUID,email failed")
 		return
 	}
 
@@ -431,7 +431,7 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - userLoginHandler")
+			jsonResponse(w, http.StatusInternalServerError, "recover - userLoginHandler")
 		}
 	}()
 	var data loginData
@@ -440,7 +440,7 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusUnprocessableEntity, "Bad request. The JSON body is not as expected")
+		jsonResponse(w, http.StatusUnprocessableEntity, "Bad request. The JSON body is not as expected")
 		return
 	}
 
@@ -448,27 +448,27 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	rows, err := statements["getUserCredentials"].Query(data.Email)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusUnauthorized, "Invalid credentials")
+		jsonResponse(w, http.StatusUnauthorized, "Invalid credentials")
 		return
 	}
 	defer rows.Close()
 	rows.Next()
 	err = rows.Scan(&email, &hash)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "scan credentials failed")
+		jsonResponse(w, http.StatusInternalServerError, "scan credentials failed")
 		return
 	}
 	rows.Close()
 
 	if email == "" || hash == "" {
-		jsonResponseWriterManager(w, http.StatusUnauthorized, "Invalid credentials. Email or password is incorrect")
+		jsonResponse(w, http.StatusUnauthorized, "Invalid credentials. Email or password is incorrect")
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(hash), []byte(data.Password))
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusUnauthorized, "Invalid credentials. Forgot password?")
+		jsonResponse(w, http.StatusUnauthorized, "Invalid credentials. Forgot password?")
 		return
 	}
 
@@ -476,17 +476,17 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "create session failed")
+		jsonResponse(w, http.StatusInternalServerError, "create session failed")
 		return
 	}
 	w.WriteHeader(200)
-	jsonResponse, _ := json.Marshal(map[string]string{
+	jsonResponseObj, _ := json.Marshal(map[string]string{
 		"UUID":  UUID,
 		"email": email,
 	})
-	_, err = w.Write(jsonResponse)
+	_, err = w.Write(jsonResponseObj)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "w.Write(jsonResponse)<-UUID,email failed")
+		jsonResponse(w, http.StatusInternalServerError, "w.Write(jsonResponseObj)<-UUID,email failed")
 		return
 	}
 }
@@ -495,7 +495,7 @@ func sessionCheckHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - sessionCheckHandler")
+			jsonResponse(w, http.StatusInternalServerError, "recover - sessionCheckHandler")
 		}
 	}()
 	var data UUIDData
@@ -504,39 +504,39 @@ func sessionCheckHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusBadRequest, "")
+		jsonResponse(w, http.StatusBadRequest, "")
 		return
 	}
 	rows, err := statements["getSession"].Query(data.UUID)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "")
+		jsonResponse(w, http.StatusInternalServerError, "")
 		return
 	}
 	defer rows.Close()
 	if !rows.Next() {
 		w.WriteHeader(200)
-		jsonResponse, err := json.Marshal(map[string]bool{
+		jsonResponseObj, err := json.Marshal(map[string]bool{
 			"Exists": false,
 		})
 		if err != nil {
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "json.Marshal(map[string]bool{\"Exists\": false}) failed")
+			jsonResponse(w, http.StatusInternalServerError, "json.Marshal(map[string]bool{\"Exists\": false}) failed")
 			return
 		}
-		_, err = w.Write(jsonResponse)
+		_, err = w.Write(jsonResponseObj)
 		if err != nil {
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "w.Write(jsonResponse)<-Exists:false failed")
+			jsonResponse(w, http.StatusInternalServerError, "w.Write(jsonResponseObj)<-Exists:false failed")
 		}
 		return
 	}
 	rows.Close()
 	w.WriteHeader(200)
-	jsonResponse, _ := json.Marshal(map[string]bool{
+	jsonResponseObj, _ := json.Marshal(map[string]bool{
 		"Exists": true,
 	})
-	_, err = w.Write(jsonResponse)
+	_, err = w.Write(jsonResponseObj)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "w.Write(jsonResponse)<-Exists:true failed")
+		jsonResponse(w, http.StatusInternalServerError, "w.Write(jsonResponseObj)<-Exists:true failed")
 		return
 	}
 
@@ -546,13 +546,13 @@ func userLogoutHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - userLogoutHandler")
+			jsonResponse(w, http.StatusInternalServerError, "recover - userLogoutHandler")
 		}
 	}()
 
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil || cookie.Value == "" || cookie == nil {
-		jsonResponseWriterManager(w, http.StatusOK, "You are not logged in")
+		jsonResponse(w, http.StatusOK, "You are not logged in")
 		return
 	}
 
@@ -561,14 +561,14 @@ func userLogoutHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = statements["removeSession"].Exec(uuid)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "removeSession query failed")
+		jsonResponse(w, http.StatusInternalServerError, "removeSession query failed")
 		return
 	}
 	w.Header().Set("Cache-Control", "no-cache, private, max-age=0")
 	w.Header().Set("Expires", time.Unix(0, 0).Format(http.TimeFormat))
 	w.Header().Set("Pragma", "no-cache")
 	w.Header().Set("X-Accel-Expires", "0")
-	jsonResponseWriterManager(w, http.StatusOK, "Session deleted")
+	jsonResponse(w, http.StatusOK, "Session deleted")
 }
 
 func createSession(email string) (UUID string, err error) {

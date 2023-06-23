@@ -49,7 +49,7 @@ func chatTypingHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - chatTypingHandler")
+			jsonResponse(w, http.StatusInternalServerError, "recover - chatTypingHandler")
 		}
 	}()
 	var data Typing
@@ -58,10 +58,10 @@ func chatTypingHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusBadRequest, "")
+		jsonResponse(w, http.StatusBadRequest, "")
 		return
 	}
-	jsonResponseWriterManager(w, http.StatusOK, "")
+	jsonResponse(w, http.StatusOK, "")
 	sendTyping(data)
 }
 
@@ -70,7 +70,7 @@ func chatMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - chatMessagesHandler")
+			jsonResponse(w, http.StatusInternalServerError, "recover - chatMessagesHandler")
 		}
 	}()
 	var data MessagesRequest
@@ -79,22 +79,22 @@ func chatMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusBadRequest, "")
+		jsonResponse(w, http.StatusBadRequest, "")
 		return
 	}
 	ID1, err := getIDbyEmail(data.Username)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "ID1")
+		jsonResponse(w, http.StatusInternalServerError, "ID1")
 		return
 	}
 	ID2, err := getIDbyEmail(data.OtherUser)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "ID2")
+		jsonResponse(w, http.StatusInternalServerError, "ID2")
 		return
 	}
 	rows, err := statements["getMessages"].Query(ID1, ID2, ID2, ID1)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "getMessages query failed")
+		jsonResponse(w, http.StatusInternalServerError, "getMessages query failed")
 		return
 	}
 	var messages MessagesResponse
@@ -107,7 +107,7 @@ func chatMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		)
 		err = rows.Scan(&IDFrom, &IDTo, &message.Content, &message.Time)
 		if err != nil {
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "getMessages rows.Scan for loop failed")
+			jsonResponse(w, http.StatusInternalServerError, "getMessages rows.Scan for loop failed")
 			return
 		}
 		IDpairs = append(IDpairs, [2]int{IDFrom, IDTo})
@@ -117,16 +117,16 @@ func chatMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	for i := 0; i < len(messages.Messages); i++ {
 		messages.Messages[i].UsernameFrom, err = getUserEmailbyID(IDpairs[i][0])
 		if err != nil {
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "getUserEmailbyID IDpairs[i][0]")
+			jsonResponse(w, http.StatusInternalServerError, "getUserEmailbyID IDpairs[i][0]")
 			return
 		}
 		messages.Messages[i].UsernameTo, err = getUserEmailbyID(IDpairs[i][1])
 		if err != nil {
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "getUserEmailbyID IDpairs[i][1]")
+			jsonResponse(w, http.StatusInternalServerError, "getUserEmailbyID IDpairs[i][1]")
 			return
 		}
 	}
-	jsonResponseWriterManager(w, http.StatusOK, "")
+	jsonResponse(w, http.StatusOK, "")
 }
 
 func chatUsersHandler(w http.ResponseWriter, r *http.Request) {
@@ -134,7 +134,7 @@ func chatUsersHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - chatUsersHandler")
+			jsonResponse(w, http.StatusInternalServerError, "recover - chatUsersHandler")
 		}
 	}()
 	var data UsernameData
@@ -143,12 +143,12 @@ func chatUsersHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusBadRequest, "")
+		jsonResponse(w, http.StatusBadRequest, "")
 		return
 	}
 	rows, err := statements["getAllUsers"].Query()
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "getAllUsers query failed")
+		jsonResponse(w, http.StatusInternalServerError, "getAllUsers query failed")
 		return
 	}
 	var users Users
@@ -161,18 +161,18 @@ func chatUsersHandler(w http.ResponseWriter, r *http.Request) {
 	rows.Close()
 	ID1, err := getIDbyEmail(data.Username)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "getIDbyEmail ID1 failed")
+		jsonResponse(w, http.StatusInternalServerError, "getIDbyEmail ID1 failed")
 		return
 	}
 	for i := 0; i < len(users.Users); i++ {
 		ID2, err := getIDbyEmail(users.Users[i].Username)
 		if err != nil {
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "getIDbyEmail ID2 failed")
+			jsonResponse(w, http.StatusInternalServerError, "getIDbyEmail ID2 failed")
 			return
 		}
 		rows, err := statements["getMessages"].Query(ID1, ID2, ID2, ID1)
 		if err != nil {
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "getMessages query failed")
+			jsonResponse(w, http.StatusInternalServerError, "getMessages query failed")
 			return
 		}
 		defer rows.Close()
@@ -185,20 +185,19 @@ func chatUsersHandler(w http.ResponseWriter, r *http.Request) {
 		err = rows.Scan(&IDFrom, &IDTo, &Text, &users.Users[i].LastMessage)
 		rows.Close()
 		if err != nil {
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "getMessages scan failed")
+			jsonResponse(w, http.StatusInternalServerError, "getMessages scan failed")
 			return
 		}
 	}
-	jsonResponse, _ := json.Marshal(users)
+	jsonObject, _ := json.Marshal(users)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "json.Marshal users failed")
+		jsonResponse(w, http.StatusInternalServerError, "json.Marshal users failed")
 		return
 	}
 
-	w.WriteHeader(200) // todo: CHECK IT!!! NECESSARILY. very muddy place of code, compare with old version of code! Also WriteHeader docs says if it was not called before w.Write the status 200 will be used by default. So, probably, it is not necessary to call it at all.
-	_, err = w.Write(jsonResponse)
+	_, err = w.Write(jsonObject)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "w.Write jsonResponse failed")
+		jsonResponse(w, http.StatusInternalServerError, "w.Write jsonResponse failed")
 		return
 	}
 
@@ -219,7 +218,7 @@ func chatNewHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - chatNewHandler")
+			jsonResponse(w, http.StatusInternalServerError, "recover - chatNewHandler")
 		}
 	}()
 	var data Message
@@ -228,27 +227,27 @@ func chatNewHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusBadRequest, "")
+		jsonResponse(w, http.StatusBadRequest, "")
 		return
 	}
 	fromID, err := getIDbyEmail(data.UsernameFrom)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "getIDbyEmail fromID failed")
+		jsonResponse(w, http.StatusInternalServerError, "getIDbyEmail fromID failed")
 		return
 	}
 	toID, err := getIDbyEmail(data.UsernameTo)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "getIDbyEmail toID failed")
+		jsonResponse(w, http.StatusInternalServerError, "getIDbyEmail toID failed")
 		return
 	}
 	data.Time = time.Now()
 	_, err = statements["addMessage"].Exec(fromID, toID, data.Content, data.Time)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "addMessage query failed")
+		jsonResponse(w, http.StatusInternalServerError, "addMessage query failed")
 		return
 	}
-	jsonResponseWriterManager(w, http.StatusOK, "")
+	jsonResponse(w, http.StatusOK, "")
 	sendMessage(data)
 }

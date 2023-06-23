@@ -46,7 +46,7 @@ func groupNewHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - groupNewHandler")
+			jsonResponse(w, http.StatusInternalServerError, "recover - groupNewHandler")
 		}
 	}()
 	var data Group
@@ -56,14 +56,14 @@ func groupNewHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&incomingData)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusUnprocessableEntity, " malformed json")
+		jsonResponse(w, http.StatusUnprocessableEntity, " malformed json")
 		return
 	}
 
 	// get user id from the cookie
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusUnauthorized, "")
+		jsonResponse(w, http.StatusUnauthorized, "")
 		return
 	}
 	incomingData.UUID = cookie.Value
@@ -73,23 +73,23 @@ func groupNewHandler(w http.ResponseWriter, r *http.Request) {
 	data.Privacy = strings.TrimSpace(incomingData.Privacy)
 	data.CreatorId, err = getIDbyUUID(incomingData.UUID)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusUnauthorized, "getIDbyUUID failed")
+		jsonResponse(w, http.StatusUnauthorized, "getIDbyUUID failed")
 		return
 	}
 	if data.Name == "" || data.Description == "" || data.Privacy == "" {
-		jsonResponseWriterManager(w, http.StatusBadRequest, "missing fields")
+		jsonResponse(w, http.StatusBadRequest, "missing fields")
 		return
 	}
 	result, err := statements["addGroup"].Exec(data.Name, data.Description, data.CreatorId, time.Now().Format("2006-01-02 15:04:05"), data.Privacy)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, " addGroup query failed")
+		jsonResponse(w, http.StatusInternalServerError, " addGroup query failed")
 		return
 	}
 	groupID, err := result.LastInsertId()
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, " failed to get last insert id of group creation")
+		jsonResponse(w, http.StatusInternalServerError, " failed to get last insert id of group creation")
 		return
 	}
 	invitedUsersEmailsString := strings.TrimSpace(incomingData.Invited)
@@ -101,14 +101,14 @@ func groupNewHandler(w http.ResponseWriter, r *http.Request) {
 			err = statements["getUserIDByEmail"].QueryRow(email).Scan(&invitedUserID)
 			if err != nil {
 				log.Println(err.Error())
-				jsonResponseWriterManager(w, http.StatusInternalServerError, fmt.Sprintf("getUserIDByEmail query failed, user with email %s not found", email))
+				jsonResponse(w, http.StatusInternalServerError, fmt.Sprintf("getUserIDByEmail query failed, user with email %s not found", email))
 				return
 			}
 			// add the invited user to the groupPendingMembers table
 			_, err = statements["addGroupInvitedUser"].Exec(invitedUserID, groupID, data.CreatorId, time.Now().Format("2006-01-02 15:04:05"))
 			if err != nil {
 				log.Println(err.Error())
-				jsonResponseWriterManager(w, http.StatusInternalServerError, "addGroupInvitedUser query failed, failed to add user to group pending members")
+				jsonResponse(w, http.StatusInternalServerError, "addGroupInvitedUser query failed, failed to add user to group pending members")
 				return
 			}
 		}
@@ -117,10 +117,10 @@ func groupNewHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = statements["addGroupMember"].Exec(groupID, data.CreatorId)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "addGroupMember query failed to add creator to group membership")
+		jsonResponse(w, http.StatusInternalServerError, "addGroupMember query failed to add creator to group membership")
 		return
 	}
-	jsonResponseWriterManager(w, http.StatusOK, "group created")
+	jsonResponse(w, http.StatusOK, "group created")
 }
 
 // groupGetHandler makes the user join the group
@@ -131,20 +131,20 @@ func groupJoinHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - groupJoinHandler")
+			jsonResponse(w, http.StatusInternalServerError, "recover - groupJoinHandler")
 		}
 	}()
 
 	// extract requestor id from cookie
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusUnauthorized, "cannot get cookie")
+		jsonResponse(w, http.StatusUnauthorized, "cannot get cookie")
 		return
 	}
 	requestorID, err := getIDbyUUID(cookie.Value)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "failed to get id of request sender")
+		jsonResponse(w, http.StatusInternalServerError, "failed to get id of request sender")
 		return
 	}
 
@@ -157,7 +157,7 @@ func groupJoinHandler(w http.ResponseWriter, r *http.Request) {
 	err = decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusUnprocessableEntity, " malformed json, bad request")
+		jsonResponse(w, http.StatusUnprocessableEntity, " malformed json, bad request")
 		return
 	}
 	// check if group is private
@@ -165,7 +165,7 @@ func groupJoinHandler(w http.ResponseWriter, r *http.Request) {
 	err = statements["getGroup"].QueryRow(data.GroupID).Scan(&group.ID, &group.Name, &group.Description, &group.CreatorId, &group.CreationDate, &group.Privacy)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "getGroup query failed, group not found")
+		jsonResponse(w, http.StatusInternalServerError, "getGroup query failed, group not found")
 		return
 	}
 	if group.Privacy == "private" {
@@ -173,20 +173,20 @@ func groupJoinHandler(w http.ResponseWriter, r *http.Request) {
 		_, err = statements["addGroupPendingMember"].Exec(data.GroupID, requestorID)
 		if err != nil {
 			log.Println(err.Error())
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "addGroupPendingMember query failed, failed to add user to group pending members")
+			jsonResponse(w, http.StatusInternalServerError, "addGroupPendingMember query failed, failed to add user to group pending members")
 			return
 		}
-		jsonResponseWriterManager(w, http.StatusOK, "group joining request sent to group creator, waiting for approval")
+		jsonResponse(w, http.StatusOK, "group joining request sent to group creator, waiting for approval")
 		return
 	}
 
 	_, err = statements["addGroupMember"].Exec(data.GroupID, requestorID)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "addGroupMember query failed to add user to group membership")
+		jsonResponse(w, http.StatusInternalServerError, "addGroupMember query failed to add user to group membership")
 		return
 	}
-	jsonResponseWriterManager(w, http.StatusOK, "group joined")
+	jsonResponse(w, http.StatusOK, "group joined")
 }
 
 // groupGetHandler makes the user leave the group
@@ -197,20 +197,20 @@ func groupLeaveHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - groupLeaveHandler")
+			jsonResponse(w, http.StatusInternalServerError, "recover - groupLeaveHandler")
 		}
 	}()
 
 	// get the id of the request sender
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusUnauthorized, "malformed cookie/cookie not found")
+		jsonResponse(w, http.StatusUnauthorized, "malformed cookie/cookie not found")
 		return
 	}
 	requestSenderID, err := getIDbyUUID(cookie.Value)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "failed to get id of request sender")
+		jsonResponse(w, http.StatusInternalServerError, "failed to get id of request sender")
 		return
 	}
 
@@ -223,7 +223,7 @@ func groupLeaveHandler(w http.ResponseWriter, r *http.Request) {
 	err = decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusBadRequest, "")
+		jsonResponse(w, http.StatusBadRequest, "")
 		return
 	}
 
@@ -232,22 +232,22 @@ func groupLeaveHandler(w http.ResponseWriter, r *http.Request) {
 	err = statements["getGroup"].QueryRow(data.GroupID).Scan(&group.ID, &group.Name, &group.Description, &group.CreatorId, &group.CreationDate, &group.Privacy)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "getGroup query failed, group not found")
+		jsonResponse(w, http.StatusInternalServerError, "getGroup query failed, group not found")
 		return
 	}
 	if group.CreatorId == requestSenderID {
 		// tell them that creator can't leave the group
-		jsonResponseWriterManager(w, http.StatusForbidden, "group creator can't leave the group")
+		jsonResponse(w, http.StatusForbidden, "group creator can't leave the group")
 		return
 	}
 	// remove the member from the groupMembers table
 	_, err = statements["removeGroupMember"].Exec(data.GroupID, requestSenderID)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "removeGroupMember query failed to remove user from group membership")
+		jsonResponse(w, http.StatusInternalServerError, "removeGroupMember query failed to remove user from group membership")
 		return
 	}
-	jsonResponseWriterManager(w, http.StatusOK, fmt.Sprintf("user with id %d left the group %s", requestSenderID, group.Name))
+	jsonResponse(w, http.StatusOK, fmt.Sprintf("user with id %d left the group %s", requestSenderID, group.Name))
 }
 
 // groupInviteHandler makes the user join the group_invited_users table
@@ -259,7 +259,7 @@ func groupInviteHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - groupInviteHandler")
+			jsonResponse(w, http.StatusInternalServerError, "recover - groupInviteHandler")
 		}
 	}()
 	var data struct {
@@ -271,19 +271,19 @@ func groupInviteHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusBadRequest, "")
+		jsonResponse(w, http.StatusBadRequest, "")
 		return
 	}
 	// get the id of the request sender
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusUnauthorized, "malformed cookie/cookie not found")
+		jsonResponse(w, http.StatusUnauthorized, "malformed cookie/cookie not found")
 		return
 	}
 	requestSenderID, err := getIDbyUUID(cookie.Value)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "failed to get id of request sender")
+		jsonResponse(w, http.StatusInternalServerError, "failed to get id of request sender")
 		return
 	}
 	// get the id of the invited user
@@ -291,17 +291,17 @@ func groupInviteHandler(w http.ResponseWriter, r *http.Request) {
 	err = statements["getUserIDByEmail"].QueryRow(data.InvitedEmail).Scan(&invitedUserID)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "getUserIDByEmail query failed. "+fmt.Sprintf("user with email %s not found", data.InvitedEmail))
+		jsonResponse(w, http.StatusInternalServerError, "getUserIDByEmail query failed. "+fmt.Sprintf("user with email %s not found", data.InvitedEmail))
 		return
 	}
 	// add the invited user to the groupInvitedUsers table
 	_, err = statements["addGroupInvitedUser"].Exec(invitedUserID, data.GroupID, requestSenderID, time.Now().Format("2006-01-02 15:04:05"))
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "addGroupInvitedUser query failed")
+		jsonResponse(w, http.StatusInternalServerError, "addGroupInvitedUser query failed")
 		return
 	}
-	jsonResponseWriterManager(w, http.StatusOK, "user invited to the group")
+	jsonResponse(w, http.StatusOK, "user invited to the group")
 }
 
 // groupInvitedHandler returns the list of users invited to the group
@@ -312,19 +312,19 @@ func groupInvitedHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - groupInvitedHandler")
+			jsonResponse(w, http.StatusInternalServerError, "recover - groupInvitedHandler")
 		}
 	}()
 	// get the id of the request sender
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusUnauthorized, "malformed cookie/cookie not found")
+		jsonResponse(w, http.StatusUnauthorized, "malformed cookie/cookie not found")
 		return
 	}
 	_, err = getIDbyUUID(cookie.Value)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "failed to get id of request sender")
+		jsonResponse(w, http.StatusInternalServerError, "failed to get id of request sender")
 		return
 	}
 	var data struct {
@@ -336,7 +336,7 @@ func groupInvitedHandler(w http.ResponseWriter, r *http.Request) {
 	err = decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusBadRequest, "")
+		jsonResponse(w, http.StatusBadRequest, "")
 		return
 	}
 	// get the list of users invited to the group
@@ -350,7 +350,7 @@ func groupInvitedHandler(w http.ResponseWriter, r *http.Request) {
 	rows, err := statements["getGroupInvitedUsers"].Query(data.GroupID)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "getGroupInvitedUsers query failed")
+		jsonResponse(w, http.StatusInternalServerError, "getGroupInvitedUsers query failed")
 		return
 	}
 	for rows.Next() {
@@ -358,7 +358,7 @@ func groupInvitedHandler(w http.ResponseWriter, r *http.Request) {
 		err = rows.Scan(&invitedUser.InvitedUserID, &invitedUser.GroupID, &invitedUser.InviterID, &invitedUser.InvitaionTime)
 		if err != nil {
 			log.Println(err.Error())
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "failed to scan invited user id")
+			jsonResponse(w, http.StatusInternalServerError, "failed to scan invited user id")
 			return
 		}
 		invitedUsers = append(invitedUsers, invitedUser)
@@ -380,14 +380,14 @@ func groupInvitedHandler(w http.ResponseWriter, r *http.Request) {
 		err = statements["getUserbyID"].QueryRow(invitedUserID.InvitedUserID).Scan(&invitedUserInfo.Email, &invitedFirstName, &invitedLastName, &invitedNick)
 		if err != nil {
 			log.Println(err.Error())
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "getUserbyID query failed")
+			jsonResponse(w, http.StatusInternalServerError, "getUserbyID query failed")
 			return
 		}
 		invitedUserInfo.FullName = invitedFirstName + " " + invitedLastName
 		err = statements["getUserbyID"].QueryRow(invitedUserID.InviterID).Scan(&invitedUserInfo.InviterEmail, &inviterFirstName, &inviterLastName, &invitorNick)
 		if err != nil {
 			log.Println(err.Error())
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "getUserbyID query failed")
+			jsonResponse(w, http.StatusInternalServerError, "getUserbyID query failed")
 			return
 		}
 		invitedUserInfo.InviterFullName = inviterFirstName + " " + inviterLastName
@@ -396,10 +396,10 @@ func groupInvitedHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(200)
-	jsonResponse, _ := json.Marshal(invitedUsersInfo)
-	_, err = w.Write(jsonResponse)
+	jsonResponseObj, _ := json.Marshal(invitedUsersInfo)
+	_, err = w.Write(jsonResponseObj)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "w.Write(jsonResponse)<-invitedUsersInfo failed")
+		jsonResponse(w, http.StatusInternalServerError, "w.Write(jsonResponseObj)<-invitedUsersInfo failed")
 		return
 	}
 
@@ -413,20 +413,20 @@ func groupRequestsHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "recover - groupRequestsHandler")
+			jsonResponse(w, http.StatusInternalServerError, "recover - groupRequestsHandler")
 		}
 	}()
 
 	// get the id of the request sender
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusUnauthorized, "malformed cookie/cookie not found")
+		jsonResponse(w, http.StatusUnauthorized, "malformed cookie/cookie not found")
 		return
 	}
 	requestSenderID, err := getIDbyUUID(cookie.Value)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "failed to get id of request sender")
+		jsonResponse(w, http.StatusInternalServerError, "failed to get id of request sender")
 		return
 	}
 	// check if request sender is the group creator
@@ -439,7 +439,7 @@ func groupRequestsHandler(w http.ResponseWriter, r *http.Request) {
 	err = decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusBadRequest, "")
+		jsonResponse(w, http.StatusBadRequest, "")
 		return
 	}
 
@@ -447,12 +447,12 @@ func groupRequestsHandler(w http.ResponseWriter, r *http.Request) {
 	err = statements["getGroup"].QueryRow(data.GroupID).Scan(&group.ID, &group.Name, &group.Description, &group.CreatorId, &group.CreationDate, &group.Privacy)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusNotFound, "getGroup query failed, group not found")
+		jsonResponse(w, http.StatusNotFound, "getGroup query failed, group not found")
 		return
 	}
 
 	if group.CreatorId != requestSenderID {
-		jsonResponseWriterManager(w, http.StatusForbidden, "only group creator can view requests")
+		jsonResponse(w, http.StatusForbidden, "only group creator can view requests")
 		return
 	}
 
@@ -464,7 +464,7 @@ func groupRequestsHandler(w http.ResponseWriter, r *http.Request) {
 	rows, err := statements["getGroupPendingMembers"].Query(data.GroupID)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "getGroupPendingMembers query failed")
+		jsonResponse(w, http.StatusInternalServerError, "getGroupPendingMembers query failed")
 		return
 	}
 	for rows.Next() {
@@ -472,7 +472,7 @@ func groupRequestsHandler(w http.ResponseWriter, r *http.Request) {
 		err = rows.Scan(&pendingUser.PendingUserID)
 		if err != nil {
 			log.Println(err.Error())
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "failed to scan pending user id")
+			jsonResponse(w, http.StatusInternalServerError, "failed to scan pending user id")
 			return
 		}
 		pendingUsers = append(pendingUsers, pendingUser)
@@ -490,7 +490,7 @@ func groupRequestsHandler(w http.ResponseWriter, r *http.Request) {
 		err = statements["getUserbyID"].QueryRow(pendingUserID.PendingUserID).Scan(&pendingUserInfo.Email, &pendingFirstName, &pendingLastName, &pendingNick)
 		if err != nil {
 			log.Println(err.Error())
-			jsonResponseWriterManager(w, http.StatusInternalServerError, "getUserbyID query failed")
+			jsonResponse(w, http.StatusInternalServerError, "getUserbyID query failed")
 			return
 		}
 		pendingUserInfo.FullName = pendingFirstName + " " + pendingLastName
@@ -498,10 +498,10 @@ func groupRequestsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(200)
-	jsonResponse, _ := json.Marshal(pendingUsersInfo)
-	_, err = w.Write(jsonResponse)
+	jsonResponseObj, _ := json.Marshal(pendingUsersInfo)
+	_, err = w.Write(jsonResponseObj)
 	if err != nil {
-		jsonResponseWriterManager(w, http.StatusInternalServerError, "w.Write(jsonResponse)<-pendingUsersInfo failed")
+		jsonResponse(w, http.StatusInternalServerError, "w.Write(jsonResponseObj)<-pendingUsersInfo failed")
 		return
 	}
 

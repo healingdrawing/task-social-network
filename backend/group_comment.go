@@ -33,7 +33,7 @@ func groupCommentNewHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, 500, "recover - groupCommentNewHandler")
+			jsonResponse(w, 500, "recover - groupCommentNewHandler")
 		}
 	}()
 	var data GroupCommentRequest
@@ -42,27 +42,27 @@ func groupCommentNewHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, 400, "Bad request")
+		jsonResponse(w, 400, "Bad request")
 		return
 	}
 	// get user id from the cookie
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil {
-		jsonResponseWriterManager(w, 401, "cannot get cookie")
+		jsonResponse(w, 401, "cannot get cookie")
 		return
 	}
 	myuuid := cookie.Value
 	userID, err := getIDbyUUID(myuuid)
 	if err != nil {
-		jsonResponseWriterManager(w, 401, " getIDbyUUID failed")
+		jsonResponse(w, 401, " getIDbyUUID failed")
 		return
 	}
 	_, err = statements["addGroupComment"].Exec(userID, data.GroupPostID, data.Content, data.Picture, time.Now().Format("2006-01-02 15:04:05"))
 	if err != nil {
-		jsonResponseWriterManager(w, 500, "addGroupComment query failed")
+		jsonResponse(w, 500, "addGroupComment query failed")
 		return
 	}
-	jsonResponseWriterManager(w, 200, "Comment created")
+	jsonResponse(w, 200, "Comment created")
 
 	// rows, err := statements["getGroupComments"].Query(data.GroupPostID)
 	// if err != nil {
@@ -89,7 +89,7 @@ func groupCommentsGetHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(err)
-			jsonResponseWriterManager(w, 500, "recover - groupCommentsGetHandler")
+			jsonResponse(w, 500, "recover - groupCommentsGetHandler")
 		}
 	}()
 	var data struct {
@@ -100,12 +100,12 @@ func groupCommentsGetHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&data)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponseWriterManager(w, 400, "Bad request")
+		jsonResponse(w, 400, "Bad request")
 		return
 	}
 	rows, err := statements["getGroupComments"].Query(data.GroupPostID)
 	if err != nil {
-		jsonResponseWriterManager(w, 500, "getGroupComments query failed")
+		jsonResponse(w, 500, "getGroupComments query failed")
 		return
 	}
 
@@ -117,7 +117,7 @@ func groupCommentsGetHandler(w http.ResponseWriter, r *http.Request) {
 		var pictureBlob []byte
 		err = rows.Scan(&comment.Email, &firstName, &lastName, &comment.Content, &pictureBlob, &comment.CreatedAt)
 		if err != nil {
-			jsonResponseWriterManager(w, 500, " scan getGroupComments query failed")
+			jsonResponse(w, 500, " scan getGroupComments query failed")
 			return
 		}
 		comment.Fullname = firstName + " " + lastName
@@ -126,14 +126,14 @@ func groupCommentsGetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	rows.Close()
 	w.WriteHeader(200)
-	jsonResponse, err := json.Marshal(comments)
+	jsonResponseObj, err := json.Marshal(comments)
 	if err != nil {
-		jsonResponseWriterManager(w, 500, "json.Marshal(comments) failed")
+		jsonResponse(w, 500, "json.Marshal(comments) failed")
 		return
 	}
-	_, err = w.Write(jsonResponse)
+	_, err = w.Write(jsonResponseObj)
 	if err != nil {
-		jsonResponseWriterManager(w, 500, "w.Write(jsonResponse)<-comments failed")
+		jsonResponse(w, 500, "w.Write(jsonResponseObj)<-comments failed")
 		return
 	}
 
