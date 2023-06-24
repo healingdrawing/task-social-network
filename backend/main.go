@@ -109,6 +109,12 @@ func main() {
 	http.HandleFunc("/api/group/request/accept", groupRequestAcceptHandler)
 	http.HandleFunc("/api/group/request/reject", groupRequestRejectHandler)
 
+	http.HandleFunc("/api/event/submit", eventNewHandler)
+	http.HandleFunc("/api/events/get", eventsGetHandler)
+	http.HandleFunc("/api/event/participants/get", eventParticipantsGetHandler)
+	http.HandleFunc("/api/event/attend", eventAttendHandler)
+	http.HandleFunc("/api/event/notattend", eventNotAttendHandler)
+
 	http.HandleFunc("/api/user/check", sessionCheckHandler)
 	http.HandleFunc("/api/user/following", followingHandler)
 	http.HandleFunc("/api/user/followers", followersHandler)
