@@ -5,10 +5,10 @@
   </div>
   <div>
     <h1>Sign up</h1>
-    <form @submit.prevent="signup">
     
     <div><hr><button type="button" @click="crap" title="remove in production">Fill Debug / remove later</button><hr></div> <!-- todo: remove later -->
-      
+    
+    <form @submit.prevent="signup"> 
     <div>
       <label for="email">Email:</label>
       <input type="email" id="email" v-model="email" required>
@@ -86,7 +86,8 @@ const signup = async () => {
     aboutMe: aboutMe.value,
     public: false
   })
-  router.push('/') /* go back to login, after signup successful */
+  /* todo: go to profile, after signup successful, plus autologin after success signup */
+  router.push('/profile')
 }
 
 // todo: remove later
