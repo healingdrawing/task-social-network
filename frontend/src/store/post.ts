@@ -6,9 +6,9 @@ interface PostState {
 
 export const usePostStore = defineStore({
   id: 'post',
-  state: ():PostState => ({
+  state: (): PostState => ({
     // Define your state properties here
-    postId: -1, 
+    postId: -1,
   }),
   getters: {
     // Define your getters here

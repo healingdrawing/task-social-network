@@ -27,10 +27,17 @@
         <option v-for="follower in followers" :key="follower.id" :value="follower.id">{{ follower.name }}</option>
       </select>
       
+      <div>
+        <label for="picture">Picture:</label>
+        <input type="file" id="picture" accept="image/jpeg, image/png, image/gif" @change="handlePictureChange">
+        <div class="optional">(optional)</div>
+      </div>
+
       <br>
       <button type="submit">Submit</button>
-      <!-- todo: add image or gif to post required in task. Perhaps, to prevent posting "anacondas" and "caves" photos, the images can be limited from allowed lists of images, but generally it sounds like they expect any image upload, which is unsafe, like in avatar too -->
+      <!-- todo: add image or gif to post required in task. Perhaps, to prevent posting "anacondas" and "caves" photos, the images can be limited from allowed lists of images, but generally it sounds like they expect any image upload, which is unsafe, like in picture too -->
     </form>
+    <div v-if="pictureStore.pictureError">{{ pictureStore.pictureError }}</div>
   </div>
   <div>
     <h2>Posts:</h2>
@@ -49,14 +56,16 @@
         <p>Post content: {{ post.content }}</p>
         <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
         <p>Post followers: {{ post.followers }}</p> <!-- todo: no need to display it of course, it is used on backend side, before return post as visible or not -->
+        <p>Post picture: {{ post.picture }}</p> <!-- todo: no need to display it of course, it is used on backend side, before return post as visible or not -->
       </router-link>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
-import { usePostStore } from '@/store/post';
+import { Ref, onMounted, ref } from 'vue';
+import { usePostStore } from '@/store/pinia';
+import { usePictureStore } from '@/store/pinia';
 
 interface Follower {
   id: number;
@@ -72,6 +81,7 @@ interface Post {
   content: string;
   privacy: string;
   followers?: number[]; // user ids, to filter posts by privacy, on backend side, before sending to frontend
+  picture?: Blob | null; //todo: need to implement image or gif to post required in task. Perhaps, to prevent posting "anacondas" and "caves" photos, the images can be limited from allowed lists of images, but generally it sounds like they expect any image upload, which is unsafe, like in picture too
 }
 
 //todo: remove/refactor later, dummy data, must be collected from backend
@@ -91,6 +101,13 @@ const postContent = ref('');
 const postPrivacy = ref('public');
 const selectedFollowers = ref([]);
 const followers = ref<Follower[]>([]);
+const picture: Ref<Blob | null> = ref(null); //todo: chat gpt solution, to fix null value case, because field is optional
+
+const pictureStore = usePictureStore();
+function handlePictureChange(event: Event) {
+  pictureStore.handlePictureUpload(event);
+  picture.value = (event.target as HTMLInputElement).files?.[0] ?? null;
+}
 
 //todo: refactor to send post to backend
 function addPost() {
@@ -103,6 +120,7 @@ function addPost() {
     tags: postTags.value, //todo: comma separated tags, but for dummy case just string on screen
     content: postContent.value,
     privacy: postPrivacy.value,
+    picture: picture.value,
   };
 
   if (postPrivacy.value === 'almostPrivate') {
@@ -116,6 +134,7 @@ function addPost() {
   postContent.value = '';
   postPrivacy.value = 'public';
   selectedFollowers.value = [];
+  picture.value = null;
 
 }
 

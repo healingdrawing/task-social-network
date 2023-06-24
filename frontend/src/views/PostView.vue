@@ -13,10 +13,18 @@
       <form @submit.prevent="addComment">
         <label for="commentContent">Comment Content:</label>
         <textarea id="commentContent" v-model="commentContent" required></textarea>
+
+        <div>
+          <label for="picture">Picture:</label>
+          <input type="file" id="picture" accept="image/jpeg, image/png, image/gif" @change="handlePictureChange">
+          <div class="optional">(optional)</div>
+        </div>
+
         <br>
         <button type="submit">Submit</button>
         <!-- todo: add image or gif to comment required in task. Perhaps, to prevent posting "anacondas" and "caves" photos, the images can be limited from allowed lists of images, but generally it sounds like they expect any image upload, which is unsafe, like in avatar too -->
       </form>
+      <div v-if="pictureStore.pictureError">{{ pictureStore.pictureError }}</div>
     </div>
     <!-- add comments list , already created -->
     <div v-for="comment in commentsList"
@@ -30,15 +38,24 @@
       </router-link>
       <p>Comment id: {{ comment.id }}</p>
       <p>Comment content: {{ comment.content }}</p>
+      <p>Comment picture: {{ comment.picture }}</p>
     </div>
   </div>
   
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, Ref } from 'vue';
 import { usePostStore } from '@/store/pinia';
 import { useProfileStore } from '@/store/pinia';
+import { usePictureStore } from '@/store/pinia';
+
+const picture: Ref<Blob | null> = ref(null); //todo: chat gpt solution, to fix null value case, because field is optional
+const pictureStore = usePictureStore();
+function handlePictureChange(event: Event) {
+  pictureStore.handlePictureUpload(event);
+  picture.value = (event.target as HTMLInputElement).files?.[0] ?? null;
+}
 
 const postStore = usePostStore();
 
@@ -66,6 +83,7 @@ interface Comment {
   authorId: number; //todo: need to implement clickable link to user profile
   authorFullName: string; //todo: need to implement clickable link to user profile
   content: string;
+  picture?: Blob | null;
 }
 
 //todo: remove/refactor later, dummy data, must be collected from backend
@@ -90,9 +108,12 @@ function addComment() {
     authorId: 33,
     authorFullName: commentAuthorFullName.value,
     content: commentContent.value,
+    picture: picture.value,
   };
   commentsList.value.unshift(comment);
+
   commentContent.value = '';
+  picture.value = null;
 
 }
 

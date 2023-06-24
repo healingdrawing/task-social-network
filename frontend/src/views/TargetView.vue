@@ -1,41 +1,50 @@
 <template>
   <h1>Profile:</h1>
-  <!-- todo: remove later . show id for dev needs-->
-  <p>Id: {{ profileStore.getTargetUserId }}</p>
-  <!-- add user information -->
+
   <div>
-    <p>Email: {{ email }}</p>
-    <p>First Name: {{ firstName }}</p>
-    <p>Last Name: {{ lastName }}</p>
-    <p>Date of Birth: {{ dob }}</p>
-    <p>Nickname: {{ nickname }}</p>
-    <p>About Me: {{ aboutMe }}</p>
+    <button @click="handleFollowing()">
+      {{ isVisitorNotFollowerAndDidNotRequested ? 'Request To Follow' : 'Unfollow' }}
+    </button>
   </div>
-  <!-- separately add avatar, perhaps it should be on the right half of screen -->
-  <div>
-    <p>Avatar: <img :src="getImgUrl(avatar)" alt="fail again"></p>
+
+  <div v-if="isProfilePublicOrVisitorFollower">
+    <!-- todo: remove later . show id for dev needs-->
+    <p>Id: {{ profileStore.getTargetUserId }}</p>
+    <!-- add user information -->
+    <div>
+      <p>Email: {{ email }}</p>
+      <p>First Name: {{ firstName }}</p>
+      <p>Last Name: {{ lastName }}</p>
+      <p>Date of Birth: {{ dob }}</p>
+      <p>Nickname: {{ nickname }}</p>
+      <p>About Me: {{ aboutMe }}</p>
+    </div>
+    <!-- separately add avatar, perhaps it should be on the right half of screen -->
+    <div>
+      <p>Avatar: <img :src="getImgUrl(avatar)" alt="fail again"></p>
+    </div>
+    <!-- add following list. The other users followed by the user -->
+    <h2>Following:</h2>
+    <div class="user-list" style="height: 100px; overflow-y: scroll;">
+      <div v-for="user in followingList" :key="user.id">{{ user.name }}</div>
+    </div>
+    <!-- add followers list. The other users following the user -->
+    <h2>Followers:</h2>
+    <div class="user-list" style="height: 100px; overflow-y: scroll;">
+      <div v-for="user in followersList" :key="user.id">{{ user.name }}</div>
+    </div>
+    <!-- add user posts list. The posts created by the user -->
+    <h2>Posts:</h2>
+    <div v-for="post in postsList"
+      :key="post.id">
+      <router-link
+      :to="{ name: 'post' }"
+      @click="piniaManageData(post)">
+        {{ post.title }}
+      </router-link>
+    </div>
+    <!-- ( :to="{ name: 'post' }" ) also can be ( :to="'/post'" ) -->
   </div>
-  <!-- add following list. The other users followed by the user -->
-  <h2>Following:</h2>
-  <div class="user-list" style="height: 100px; overflow-y: scroll;">
-    <div v-for="user in followingList" :key="user.id">{{ user.name }}</div>
-  </div>
-  <!-- add followers list. The other users following the user -->
-  <h2>Followers:</h2>
-  <div class="user-list" style="height: 100px; overflow-y: scroll;">
-    <div v-for="user in followersList" :key="user.id">{{ user.name }}</div>
-  </div>
-  <!-- add user posts list. The posts created by the user -->
-  <h2>Posts:</h2>
-  <div v-for="post in postsList"
-    :key="post.id">
-    <router-link
-    :to="{ name: 'post' }"
-    @click="piniaManageData(post)">
-      {{ post.title }}
-    </router-link>
-  </div>
-  <!-- ( :to="{ name: 'post' }" ) also can be ( :to="'/post'" ) -->
 </template>
 
 <script lang="ts" setup>
@@ -43,16 +52,21 @@ import { ref, watch, onMounted } from 'vue';
 import { usePostStore } from '@/store/post';
 import { useProfileStore } from '@/store/profile';
 
-const isPublic = ref(false);
+// if true/false, then show follow/unfollow text on button
+const isVisitorNotFollowerAndDidNotRequested = ref(true);
 
-watch(isPublic, (newValue, oldValue) => {
-  handleCheckboxChange(newValue);
+watch(isVisitorNotFollowerAndDidNotRequested, (newValue, oldValue) => {
+  alert(`isVisitorNotFollowerAndDidNotRequested: ${newValue}`);
+  // handleFollowing(newValue);
 });
 
-function handleCheckboxChange(value: boolean) {
+function handleFollowing() {
   // Call your method here
-  alert(value)
+  isVisitorNotFollowerAndDidNotRequested.value = !isVisitorNotFollowerAndDidNotRequested.value;
 }
+
+// if true then show all profile information on screen
+const isProfilePublicOrVisitorFollower = ref(true);
 
 function getImgUrl(imageNameWithExtension: string) {
   return require(`../assets/${imageNameWithExtension}`)
