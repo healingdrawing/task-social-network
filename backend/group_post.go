@@ -146,11 +146,11 @@ func groupPostsGetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create a slice of posts
-	var posts []PostDTOelement
+	var posts []PostDTOoutElement
 
 	// iterate over the rows and append the posts to the slice
 	for rows.Next() {
-		var post PostDTOelement
+		var post PostDTOoutElement
 		var firstName, lastName string
 		var pictureBlob []byte
 		err = rows.Scan(&post.ID, &post.Title, &post.Content, &post.Categories, &firstName, &lastName, &post.CreatorEmail, &post.CreatedAt, &pictureBlob)
@@ -167,7 +167,7 @@ func groupPostsGetHandler(w http.ResponseWriter, r *http.Request) {
 	rows.Close()
 
 	// add the posts to the map
-	postsMap := map[string][]PostDTOelement{
+	postsMap := map[string][]PostDTOoutElement{
 		"posts": posts,
 	}
 

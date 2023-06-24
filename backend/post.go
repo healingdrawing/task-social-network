@@ -35,7 +35,7 @@ type Post struct {
 	CreatedAt  string `json:"created_at"`
 }
 
-type PostDTOelement struct {
+type PostDTOoutElement struct {
 	ID              int    `json:"id"`
 	Title           string `json:"title"`
 	Content         string `json:"content"`
@@ -223,11 +223,11 @@ func userPostsHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("starting to iterate over the rows")
 
 	// create a slice of posts
-	var posts []PostDTOelement
+	var posts []PostDTOoutElement
 
 	// iterate over the rows and append the posts to the slice
 	for rows.Next() {
-		var post PostDTOelement
+		var post PostDTOoutElement
 		var firstName, lastName string
 		var pictureBlob []byte
 		err = rows.Scan(&post.ID, &post.Title, &post.Content, &post.Categories, &pictureBlob, &firstName, &lastName, &post.CreatorEmail, &post.CreatedAt)
@@ -247,7 +247,7 @@ func userPostsHandler(w http.ResponseWriter, r *http.Request) {
 	// var postsMap map[string][]PostDTOelement
 
 	// add the posts to the map
-	postsMap := map[string][]PostDTOelement{
+	postsMap := map[string][]PostDTOoutElement{
 		"posts": posts,
 	}
 

@@ -47,6 +47,38 @@ type wsTyping struct {
 	Typing       bool   `json:"typing"`
 }
 
+type wsError struct {
+	Type  string `json:"type"`
+	Error string `json:"error"`
+}
+
+type wsGroupPosts struct {
+	Type  string              `json:"type"`
+	Posts []PostDTOoutElement `json:"posts"`
+}
+
+type wsGroupPost struct {
+	Type string `json:"type"`
+	Post Post   `json:"post"`
+}
+
+type wsGroupPostComment struct {
+	Type    string       `json:"type"`
+	PostID  int          `json:"postID"`
+	Comment GroupComment `json:"group_comment"`
+}
+
+type wsGroupPostComments struct {
+	Type          string         `json:"type"`
+	PostID        int            `json:"postID"`
+	GroupComments []GroupComment `json:"group_comments"`
+}
+
+type wsNotification struct {
+	Type string `json:"type"`
+	Data string `json:"data"`
+}
+
 func wsConnection(w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
@@ -63,25 +95,30 @@ func reader(conn *websocket.Conn) {
 	defer clients.Delete(conn)
 	defer conn.Close()
 	for {
-		_, incoming, err := conn.ReadMessage()
+		messageType, incoming, err := conn.ReadMessage()
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		var data wsInput
-		if err := json.Unmarshal([]byte(incoming), &data); err != nil {
-			log.Println(err)
-			return
+		if messageType == websocket.TextMessage {
+			var data wsInput
+			if err := json.Unmarshal([]byte(incoming), &data); err != nil {
+				log.Println(err)
+				return
+			}
+			switch data.Type {
+			case "login":
+				clients.Store(conn, data.Data["username"])
+				sendStatus(data.Data["username"].(string), true)
+				defer sendStatus(data.Data["username"].(string), false)
+			case "logout":
+				conn.Close()
+				clients.Delete(conn)
+				sendStatus(data.Data["username"].(string), false)
+			}
 		}
-		switch data.Type {
-		case "login":
-			clients.Store(conn, data.Data["username"])
-			sendStatus(data.Data["username"].(string), true)
-			defer sendStatus(data.Data["username"].(string), false)
-		case "logout":
-			conn.Close()
-			clients.Delete(conn)
-			sendStatus(data.Data["username"].(string), false)
+		if messageType == websocket.BinaryMessage {
+			log.Println("Binary message received")
 		}
 	}
 }
