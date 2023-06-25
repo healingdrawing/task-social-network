@@ -59,7 +59,7 @@ import { useAvatarStore } from '@/store/pinia';
 import { useSignupLoginStore } from '@/store/pinia';
 
 const store = useSignupLoginStore();
-const fetchData = store.signup
+const fetchData = store.storeFetchData
 const error = store.error
 
 const email = ref('');
@@ -79,18 +79,42 @@ function handleAvatarChange(event: Event) {
 }
 
 const signup = async () => {
-  /* todo: shoud happens only if signup is successful */
-  fetchData({
-    email: email.value,
-    password: password.value,
-    firstName: firstName.value,
-    lastName: lastName.value,
-    dob: dob.value,
-    avatar: avatar.value,
-    nickname: nickname.value,
-    aboutMe: aboutMe.value,
-    public: false
-  })
+  try {
+    /* todo: should happen only if signup is successful */
+    await fetchData({
+      email: email.value,
+      password: password.value,
+      firstName: firstName.value,
+      lastName: lastName.value,
+      dob: dob.value,
+      avatar: avatar.value,
+      nickname: nickname.value,
+      aboutMe: aboutMe.value,
+      public: false
+    });
+
+    // Result storage logic here
+    // For example, you can store the result in a Vuex store or any other storage mechanism
+    // Assuming you have a Vuex store setup, you can dispatch an action to store the result
+    // Example:
+    // await store.dispatch('storeSignupResult', result);
+
+
+  } catch (error) {
+    // Error handling logic here
+    // For example, you can display the error message or log it
+    // Assuming you have a Vuex store setup for error handling, you can dispatch an action to handle the error
+    // Example:
+    // await store.dispatch('handleSignupError', error);
+    console.error(error);
+  } finally {
+    // Finally logic here
+    console.log('finally');
+    // print the result to the console
+    router.push('/profile');
+  }
+
+
   // downscale avatar image and convert it into Blob string of bytes
   // signupUser({
   //   email: email.value,
@@ -103,9 +127,8 @@ const signup = async () => {
   //   aboutMe: aboutMe.value,
   //   public: false
   // })
-  /* todo: go to profile, after signup successful, plus autologin after success signup */
-  router.push('/profile')
-}
+};
+
 
 // todo: remove later
 const crap = () => {
