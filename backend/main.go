@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	portHTTP     string = "8000"
+	portHTTP     string = "8080"
 	fileDB       string = "./forum.db"
 	db           *sql.DB
 	reset        *bool
@@ -34,6 +34,9 @@ func main() {
 	corsMiddleware := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-CSRF-Token, application/json, Authorization")
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
 			next.ServeHTTP(w, r)
 		})
 	}
