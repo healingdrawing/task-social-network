@@ -39,7 +39,7 @@ export const useSignupLoginStore = defineStore('signupLogin', {
           },
           body: JSON.stringify(userData),
           mode: 'cors',
-          credentials: 'include'
+          credentials: 'omit' // <-- modified option
         });
         if (!response.ok) {
           throw new Error('Network response was not ok');
