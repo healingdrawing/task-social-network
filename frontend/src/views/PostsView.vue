@@ -66,22 +66,12 @@
 import { Ref, onMounted, ref } from 'vue';
 import { usePostStore } from '@/store/pinia';
 import { usePictureStore } from '@/store/pinia';
+import { useWebSocketStore } from '@/store/websocket';
+import { Message, MessageType, Post } from '@/api/types';
 
 interface Follower {
   id: number;
   name: string;
-}
-
-interface Post {
-  id: number; // post id, unique, autoincrement, primary key, all posts must be stored one table in database
-  authorId: number; //todo: need to implement clickable link to user profile
-  authorFullName: string; //todo: need to implement clickable link to user profile
-  title: string;
-  tags: string;
-  content: string;
-  privacy: string;
-  followers?: number[]; // user ids, to filter posts by privacy, on backend side, before sending to frontend
-  picture?: Blob | null; //todo: need to implement image or gif to post required in task. Perhaps, to prevent posting "anacondas" and "caves" photos, the images can be limited from allowed lists of images, but generally it sounds like they expect any image upload, which is unsafe, like in picture too
 }
 
 //todo: remove/refactor later, dummy data, must be collected from backend
@@ -93,7 +83,9 @@ function getPosts() {
   return posts;
 }
 
-const postsList = ref(getPosts());
+const webSocketStore = useWebSocketStore();
+const postsList = webSocketStore.postsList;
+// const postsList = ref(getPosts());
 
 const postTitle = ref('');
 const postTags = ref('');
@@ -127,7 +119,13 @@ function addPost() {
     post.followers = selectedFollowers.value;
   }
 
-  postsList.value.unshift(post);
+  const message: Message = {
+    messageType: MessageType.POST_SUBMIT,
+    content: JSON.stringify(post),
+  };
+  webSocketStore.sendMessage(message);
+
+  // postsList.value.unshift(post);
 
   postTitle.value = '';
   postTags.value = '';
