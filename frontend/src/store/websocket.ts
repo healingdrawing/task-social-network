@@ -52,291 +52,18 @@ export enum MessageType {
   USER_UNFOLLOW = "user_unfollow", //  unfollowHandler)
 }
 
-interface Message<T> {
-  type: MessageType;
-  content: T;
-}
-
-interface CommentSubmit {
-  type: MessageType.COMMENT_SUBMIT
-  content: MessageUnionType
-}
-interface CommentsList {
-  type: MessageType.COMMENTS_LIST
-  content: MessageUnionType
-}
-
-interface ChatMessagesList {
-  type: MessageType.CHAT_MESSAGES_LIST
-  content: MessageUnionType
-}
-interface ChatUsersList {
-  type: MessageType.CHAT_USERS_LIST
-  content: MessageUnionType
-}
-interface ChatMessageSubmit {
-  type: MessageType.CHAT_MESSAGE_SUBMIT
-  content: MessageUnionType
-}
-interface ChatTyping {
-  type: MessageType.CHAT_TYPING
-  content: MessageUnionType
-}
-
-interface FollowRequestReject {
-  type: MessageType.FOLLOW_REQUEST_REJECT
-  content: MessageUnionType
-}
-interface FollowRequestAccept {
-  type: MessageType.FOLLOW_REQUEST_ACCEPT
-  content: MessageUnionType
-}
-interface FollowRequestsList {
-  type: MessageType.FOLLOW_REQUESTS_LIST
-  content: MessageUnionType
-}
-
-interface PostsList {
-  type: MessageType.POSTS_LIST
-  content: MessageUnionType
-}
-interface PostSubmit {
-  type: MessageType.POST_SUBMIT
-  content: MessageUnionType
-}
-
-interface GroupsList {
-  type: MessageType.GROUPS_LIST
-  content: MessageUnionType
-}
-interface GroupSubmit {
-  type: MessageType.GROUP_SUBMIT
-  content: MessageUnionType
-}
-interface GroupPostSubmit {
-  type: MessageType.GROUP_POST_SUBMIT
-  content: MessageUnionType
-}
-interface GroupPostsList {
-  type: MessageType.GROUP_POSTS_LIST
-  content: MessageUnionType
-}
-interface GroupPostCommentSubmit {
-  type: MessageType.GROUP_POST_COMMENT_SUBMIT
-  content: MessageUnionType
-}
-interface GroupPostCommentsList {
-  type: MessageType.GROUP_POST_COMMENTS_LIST
-  content: MessageUnionType
-}
-interface GroupJoin {
-  type: MessageType.GROUP_JOIN
-  content: MessageUnionType
-}
-interface GroupLeave {
-  type: MessageType.GROUP_LEAVE
-  content: MessageUnionType
-}
-interface GroupInvite {
-  type: MessageType.GROUP_INVITE
-  content: MessageUnionType
-}
-interface GroupInvited {
-  type: MessageType.GROUP_INVITED
-  content: MessageUnionType
-}
-interface GroupInviteAccept {
-  type: MessageType.GROUP_INVITE_ACCEPT
-  content: MessageUnionType
-}
-interface GroupInviteReject {
-  type: MessageType.GROUP_INVITE_REJECT
-  content: MessageUnionType
-}
-interface GroupRequestsList {
-  type: MessageType.GROUP_REQUESTS_LIST
-  content: MessageUnionType
-}
-interface GroupRequestAccept {
-  type: MessageType.GROUP_REQUEST_ACCEPT
-  content: MessageUnionType
-}
-interface GroupRequestReject {
-  type: MessageType.GROUP_REQUEST_REJECT
-  content: MessageUnionType
-}
-
-interface GroupEventSubmit {
-  type: MessageType.GROUP_EVENT_SUBMIT
-  content: MessageUnionType
-}
-interface GroupEventsList {
-  type: MessageType.GROUP_EVENTS_LIST
-  content: MessageUnionType
-}
-interface GroupEventParticipantsList {
-  type: MessageType.GROUP_EVENT_PARTICIPANTS_LIST
-  content: MessageUnionType
-}
-interface GroupEventAttend {
-  type: MessageType.GROUP_EVENT_ATTEND
-  content: MessageUnionType
-}
-interface GroupEventNotAttend {
-  type: MessageType.GROUP_EVENT_NOT_ATTEND
-  content: MessageUnionType
-}
-
-interface UserCheck {
-  type: MessageType.USER_CHECK
-  content: MessageUnionType
-}
-interface UserFollowingList {
-  type: MessageType.USER_FOLLOWING_LIST
-  content: MessageUnionType
-}
-interface UserFollowersList {
-  type: MessageType.USER_FOLLOWERS_LIST
-  content: MessageUnionType
-}
-interface UserFollow {
-  type: MessageType.USER_FOLLOW
-  content: MessageUnionType
-}
-interface UserLogin {
-  type: MessageType.USER_LOGIN
-  content: MessageUnionType
-}
-interface UserLogout {
-  type: MessageType.USER_LOGOUT
-  content: MessageUnionType
-}
-interface UserPostsList {
-  type: MessageType.USER_POSTS_LIST
-  content: MessageUnionType
-}
-interface UserPrivacy {
-  type: MessageType.USER_PRIVACY
-  content: MessageUnionType
-}
-interface UserProfile {
-  type: MessageType.USER_PROFILE
-  content: MessageUnionType
-}
-interface UserRegister {
-  type: MessageType.USER_REGISTER
-  content: MessageUnionType
-}
-interface UserUnfollow {
-  type: MessageType.USER_UNFOLLOW
-  content: MessageUnionType
+interface Message {
+  messageType: MessageType;
+  content: string;
 }
 
 
-type CommentSubmitType = Message<CommentSubmit>
-type CommentsListType = Message<CommentsList>
-
-type ChatMessagesListType = Message<ChatMessagesList>
-type ChatUsersListType = Message<ChatUsersList>
-type ChatMessageSubmitType = Message<ChatMessageSubmit>
-type ChatTypingType = Message<ChatTyping>
-
-type FollowRequestRejectType = Message<FollowRequestReject>
-type FollowRequestAcceptType = Message<FollowRequestAccept>
-type FollowRequestsListType = Message<FollowRequestsList>
-
-type PostsListType = Message<PostsList>
-type PostSubmitType = Message<PostSubmit>
-
-type GroupsListType = Message<GroupsList>
-type GroupSubmitType = Message<GroupSubmit>
-type GroupPostSubmitType = Message<GroupPostSubmit>
-type GroupPostsListType = Message<GroupPostsList>
-type GroupPostCommentSubmitType = Message<GroupPostCommentSubmit>
-type GroupPostCommentsListType = Message<GroupPostCommentsList>
-type GroupJoinType = Message<GroupJoin>
-type GroupLeaveType = Message<GroupLeave>
-type GroupInviteType = Message<GroupInvite>
-type GroupInvitedType = Message<GroupInvited>
-type GroupInviteAcceptType = Message<GroupInviteAccept>
-type GroupInviteRejectType = Message<GroupInviteReject>
-type GroupRequestsListType = Message<GroupRequestsList>
-type GroupRequestAcceptType = Message<GroupRequestAccept>
-type GroupRequestRejectType = Message<GroupRequestReject>
-
-type GroupEventSubmitType = Message<GroupEventSubmit>
-type GroupEventsListType = Message<GroupEventsList>
-type GroupEventParticipantsGetType = Message<GroupEventParticipantsList>
-type GroupEventAttendType = Message<GroupEventAttend>
-type GroupEventNotAttendType = Message<GroupEventNotAttend>
-
-type UserCheckType = Message<UserCheck>
-type UserFollowingListType = Message<UserFollowingList>
-type UserFollowersListType = Message<UserFollowersList>
-type UserFollowType = Message<UserFollow>
-type UserLoginType = Message<UserLogin>
-type UserLogoutType = Message<UserLogout>
-type UserPostsListType = Message<UserPostsList>
-type UserPrivacyType = Message<UserPrivacy>
-type UserProfileType = Message<UserProfile>
-type UserRegisterType = Message<UserRegister>
-type UserUnfollowType = Message<UserUnfollow>
-
-type MessageUnionType =
-  CommentSubmit |
-  CommentsList |
-
-  ChatMessagesList |
-  ChatUsersList |
-  ChatMessageSubmit |
-  ChatTyping |
-
-  FollowRequestReject |
-  FollowRequestAccept |
-  FollowRequestsList |
-
-  PostsList |
-  PostSubmit |
-
-  GroupsList |
-  GroupSubmit |
-  GroupPostSubmit |
-  GroupPostsList |
-  GroupPostCommentSubmit |
-  GroupPostCommentsList |
-  GroupJoin |
-  GroupLeave |
-  GroupInvite |
-  GroupInvited |
-  GroupInviteAccept |
-  GroupInviteReject |
-  GroupRequestsList |
-  GroupRequestAccept |
-  GroupRequestReject |
-
-  GroupEventSubmit |
-  GroupEventsList |
-  GroupEventParticipantsList |
-  GroupEventAttend |
-  GroupEventNotAttend |
-
-  UserCheck |
-  UserFollowingList |
-  UserFollowersList |
-  UserFollow |
-  UserLogin |
-  UserLogout |
-  UserPostsList |
-  UserPrivacy |
-  UserProfile |
-  UserRegister |
-  UserUnfollow
 
 export const useWebSocketStore = defineStore({
   id: 'websocket',
   state: () => ({
     socket: null as WebSocket | null,
-    messages: [] as MessageUnionType[],
+    messages: [] as Message[],
   }),
   actions: {
     connect() {
@@ -351,11 +78,11 @@ export const useWebSocketStore = defineStore({
       };
 
       this.socket.onmessage = (event) => {
-        const message = JSON.parse(event.data) as MessageUnionType;
+        const message = JSON.parse(event.data) as Message;
         this.messages.push(message);
       };
     },
-    sendMessage(message: MessageUnionType) {
+    sendMessage(message: Message) {
       const messageString = JSON.stringify(message);
       this.socket?.send(messageString);
     },
@@ -369,20 +96,20 @@ export const useWebSocketStore = defineStore({
       return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
     },
 
-    commentsList(): Message<MessageUnionType>[] { return this.messages.filter((message) => message.type === MessageType.COMMENTS_LIST) },
-    chatMessagesList(): Message<MessageUnionType>[] { return this.messages.filter((message) => message.type === MessageType.CHAT_MESSAGES_LIST) },
-    chatUsersList(): Message<MessageUnionType>[] { return this.messages.filter((message) => message.type === MessageType.CHAT_USERS_LIST) },
-    followRequestsList(): Message<MessageUnionType>[] { return this.messages.filter((message) => message.type === MessageType.FOLLOW_REQUESTS_LIST) },
-    postsList(): Message<MessageUnionType>[] { return this.messages.filter((message) => message.type === MessageType.POSTS_LIST) },
-    groupsList(): Message<MessageUnionType>[] { return this.messages.filter((message) => message.type === MessageType.GROUPS_LIST) },
-    groupPostsList(): Message<MessageUnionType>[] { return this.messages.filter((message) => message.type === MessageType.GROUP_POSTS_LIST) },
-    groupPostCommentsList(): Message<MessageUnionType>[] { return this.messages.filter((message) => message.type === MessageType.GROUP_POST_COMMENTS_LIST) },
-    groupRequestsList(): Message<MessageUnionType>[] { return this.messages.filter((message) => message.type === MessageType.GROUP_REQUESTS_LIST) },
-    groupEventsList(): Message<MessageUnionType>[] { return this.messages.filter((message) => message.type === MessageType.GROUP_EVENTS_LIST) },
-    groupEventParticipantsList(): Message<MessageUnionType>[] { return this.messages.filter((message) => message.type === MessageType.GROUP_EVENT_PARTICIPANTS_LIST) },
-    userFollowingList(): Message<MessageUnionType>[] { return this.messages.filter((message) => message.type === MessageType.USER_FOLLOWING_LIST) },
-    userFollowersList(): Message<MessageUnionType>[] { return this.messages.filter((message) => message.type === MessageType.USER_FOLLOWERS_LIST) },
-    userPostsList(): Message<MessageUnionType>[] { return this.messages.filter((message) => message.type === MessageType.USER_POSTS_LIST) },
+    commentsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.COMMENTS_LIST) },
+    chatMessagesList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.CHAT_MESSAGES_LIST) },
+    chatUsersList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.CHAT_USERS_LIST) },
+    followRequestsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.FOLLOW_REQUESTS_LIST) },
+    postsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.POSTS_LIST) },
+    groupsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.GROUPS_LIST) },
+    groupPostsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.GROUP_POSTS_LIST) },
+    groupPostCommentsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.GROUP_POST_COMMENTS_LIST) },
+    groupRequestsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.GROUP_REQUESTS_LIST) },
+    groupEventsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.GROUP_EVENTS_LIST) },
+    groupEventParticipantsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.GROUP_EVENT_PARTICIPANTS_LIST) },
+    userFollowingList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.USER_FOLLOWING_LIST) },
+    userFollowersList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.USER_FOLLOWERS_LIST) },
+    userPostsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.USER_POSTS_LIST) },
 
     // chatMessages(): Message[] {
     //   return this.messages.filter((message) => message.type === 'chat');
