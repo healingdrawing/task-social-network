@@ -47,6 +47,7 @@
     <button type="submit">Submit</button>
   </form>
   <div v-if="avatarStore.avatarError">{{ avatarStore.avatarError }}</div>
+  <div v-if="error">{{ error }}</div>
   </div>
 </template>
 
@@ -55,6 +56,11 @@ import { Ref, ref } from 'vue';
 import router from '@/router/index'
 import { signupUser } from '@/api/methods'
 import { useAvatarStore } from '@/store/pinia';
+import { useSignupLoginStore } from '@/store/pinia';
+
+const store = useSignupLoginStore();
+const fetchData = store.signup
+const error = store.error
 
 const email = ref('');
 const password = ref('');
@@ -74,8 +80,7 @@ function handleAvatarChange(event: Event) {
 
 const signup = async () => {
   /* todo: shoud happens only if signup is successful */
-  // downscale avatar image and convert it into Blob string of bytes
-  signupUser({
+  fetchData({
     email: email.value,
     password: password.value,
     firstName: firstName.value,
@@ -86,6 +91,18 @@ const signup = async () => {
     aboutMe: aboutMe.value,
     public: false
   })
+  // downscale avatar image and convert it into Blob string of bytes
+  // signupUser({
+  //   email: email.value,
+  //   password: password.value,
+  //   firstName: firstName.value,
+  //   lastName: lastName.value,
+  //   dob: dob.value,
+  //   avatar: avatar.value,
+  //   nickname: nickname.value,
+  //   aboutMe: aboutMe.value,
+  //   public: false
+  // })
   /* todo: go to profile, after signup successful, plus autologin after success signup */
   router.push('/profile')
 }

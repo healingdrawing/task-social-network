@@ -13,3 +13,4 @@ export { useChatStore } from '@/store/chat';
 export { useChatsStore } from '@/store/chats';
 export { useGroupStore } from '@/store/group';
 export { useBellStore } from '@/store/bell';
+export { useSignupLoginStore } from '@/store/signupLogin';

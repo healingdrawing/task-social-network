@@ -4,7 +4,7 @@ export interface User {
   firstName: string;
   lastName: string;
   dob: string;
-  avatar: Blob | null;
+  avatar: Blob | null | string;
   nickname: string;
   aboutMe: string;
   public: boolean;
