@@ -11,10 +11,11 @@ import (
 )
 
 var (
-	portHTTP string = "8000"
-	fileDB   string = "./forum.db"
-	db       *sql.DB
-	reset    *bool
+	portHTTP     string = "8000"
+	fileDB       string = "./forum.db"
+	db           *sql.DB
+	reset        *bool
+	CustomRouter *http.ServeMux
 )
 
 func main() {
@@ -30,10 +31,19 @@ func main() {
 	runMigrations(db)
 	statementsCreation()
 
+	corsMiddleware := func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "http//localhost:8080")
+			next.ServeHTTP(w, r)
+		})
+	}
+
+	CustomRouter = http.NewServeMux()
+
 	// Static files, forum
-	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./web"))))
+	CustomRouter.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./web"))))
 	registerHandlers()
 	log.Println("starting forum at http://localhost:" + portHTTP + "/")
 	log.Println("starting websocket at ws://localhost:" + portHTTP + "/ws")
-	log.Fatal(http.ListenAndServe(":"+portHTTP, nil))
+	log.Fatal(http.ListenAndServe(":"+portHTTP, corsMiddleware(CustomRouter)))
 }
