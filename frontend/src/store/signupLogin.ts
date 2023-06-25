@@ -31,12 +31,15 @@ export const useSignupLoginStore = defineStore('signupLogin', {
         }
         console.log("request signup userData: ", userData);
         console.log("request signup userData: ", JSON.stringify(userData));
-        const response = await fetch('http://127.0.0.1:8000/api/user/register', {
+        const response = await fetch('http://localhost:8080/api/user/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Origin': 'http://localhost:8080'
           },
           body: JSON.stringify(userData),
+          mode: 'cors',
+          credentials: 'include'
         });
         if (!response.ok) {
           throw new Error('Network response was not ok');

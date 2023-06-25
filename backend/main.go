@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	portHTTP     string = "8000"
+	portHTTP     string = "8080"
 	fileDB       string = "./forum.db"
 	db           *sql.DB
 	reset        *bool
