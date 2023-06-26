@@ -27,14 +27,19 @@ must be used everywhere
 */
 
 import { useProfileStore } from '@/store/profile';
+import { useWebSocketStore } from '@/store/websocket';
 
 const profileStore = useProfileStore();
+const webSocketStore = useWebSocketStore();
 
 const login = async () => {
   // backend api call
   const dummyUserId = 88;
   /* todo: shoud happens only if login is successful */
   profileStore.setUserId(dummyUserId); // set once in login process. Perhaps need clear before logout etc.
+
+  webSocketStore.connect(); // todo: shoud happens only if login is successful
+
   router.push('/profile')
 
   /* todo: also manual open any routes from browser url window,

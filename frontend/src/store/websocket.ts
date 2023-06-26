@@ -10,7 +10,7 @@ export const useWebSocketStore = defineStore({
   }),
   actions: {
     connect() {
-      this.socket = new WebSocket('ws://localhost:8080');
+      this.socket = new WebSocket('ws://localhost:8080/ws');
 
       this.socket.onopen = () => {
         console.log('WebSocket connected');
@@ -21,6 +21,7 @@ export const useWebSocketStore = defineStore({
       };
 
       this.socket.onmessage = (event) => {
+        console.log(`Received message: ${event.data}`);
         const message = JSON.parse(event.data) as Message;
         this.messages.push(message);
       };
@@ -40,24 +41,24 @@ export const useWebSocketStore = defineStore({
       return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
     },
 
-    commentsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.COMMENTS_LIST) },
-    chatMessagesList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.CHAT_MESSAGES_LIST) },
-    chatUsersList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.CHAT_USERS_LIST) },
-    followRequestsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.FOLLOW_REQUESTS_LIST) },
+    commentsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.COMMENTS_LIST) },
+    chatMessagesList(): Message[] { return this.messages.filter((message) => message.type === MessageType.CHAT_MESSAGES_LIST) },
+    chatUsersList(): Message[] { return this.messages.filter((message) => message.type === MessageType.CHAT_USERS_LIST) },
+    followRequestsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.FOLLOW_REQUESTS_LIST) },
     postsList(): Post[] {
-      const postsMessages = this.messages.filter((message) => message.messageType === MessageType.POSTS_LIST);
-      const posts = postsMessages.map((message) => JSON.parse(message.content) as Post);
+      const postsMessages = this.messages.filter((message) => message.type === MessageType.POSTS_LIST);
+      const posts = postsMessages.map((message) => message.data as Post);
       return posts;
     },
-    groupsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.GROUPS_LIST) },
-    groupPostsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.GROUP_POSTS_LIST) },
-    groupPostCommentsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.GROUP_POST_COMMENTS_LIST) },
-    groupRequestsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.GROUP_REQUESTS_LIST) },
-    groupEventsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.GROUP_EVENTS_LIST) },
-    groupEventParticipantsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.GROUP_EVENT_PARTICIPANTS_LIST) },
-    userFollowingList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.USER_FOLLOWING_LIST) },
-    userFollowersList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.USER_FOLLOWERS_LIST) },
-    userPostsList(): Message[] { return this.messages.filter((message) => message.messageType === MessageType.USER_POSTS_LIST) },
+    groupsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.GROUPS_LIST) },
+    groupPostsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.GROUP_POSTS_LIST) },
+    groupPostCommentsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.GROUP_POST_COMMENTS_LIST) },
+    groupRequestsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.GROUP_REQUESTS_LIST) },
+    groupEventsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.GROUP_EVENTS_LIST) },
+    groupEventParticipantsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.GROUP_EVENT_PARTICIPANTS_LIST) },
+    userFollowingList(): Message[] { return this.messages.filter((message) => message.type === MessageType.USER_FOLLOWING_LIST) },
+    userFollowersList(): Message[] { return this.messages.filter((message) => message.type === MessageType.USER_FOLLOWERS_LIST) },
+    userPostsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.USER_POSTS_LIST) },
 
     // chatMessages(): Message[] {
     //   return this.messages.filter((message) => message.type === 'chat');

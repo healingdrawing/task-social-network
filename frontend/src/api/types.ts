@@ -51,8 +51,8 @@ export enum MessageType {
 }
 
 export interface Message {
-  messageType: MessageType;
-  content: string;
+  type: MessageType;
+  data: object;
 }
 
 
@@ -73,10 +73,19 @@ export interface Post {
   id: number; // post id, unique, autoincrement, primary key, all posts must be stored one table in database
   authorId: number; //todo: need to implement clickable link to user profile
   authorFullName: string; //todo: need to implement clickable link to user profile
+  authorEmail: string; //todo: need to implement clickable link to user profile
+  title: string;
+  tags: string;
+  content: string;
+  privacy: string;
+  picture?: string;
+}
+
+export interface PostSubmit {
   title: string;
   tags: string;
   content: string;
   privacy: string;
   followers?: number[]; // user ids, to filter posts by privacy, on backend side, before sending to frontend
-  picture?: Blob | null; //todo: need to implement image or gif to post required in task. Perhaps, to prevent posting "anacondas" and "caves" photos, the images can be limited from allowed lists of images, but generally it sounds like they expect any image upload, which is unsafe, like in picture too
+  picture?: string; // jpeg,png,gif
 }

@@ -100,13 +100,25 @@ func reader(conn *websocket.Conn) {
 			log.Println(err)
 			return
 		}
+
+		log.Println("read message: \nincoming bytes: ", incoming,
+			"\nincoming as string:", string(incoming),
+			"\nmessageType: ", messageType) //todo: delete debug
+
 		if messageType == websocket.TextMessage {
+			log.Println("Text message received")
 			var data wsInput
-			if err := json.Unmarshal([]byte(incoming), &data); err != nil {
+			if err := json.Unmarshal(incoming, &data); err != nil {
 				log.Println(err)
 				return
 			}
+
+			log.Println("data after unmarshalling: ", data) //todo: delete debug
+
 			switch data.Type {
+			case "post_submit":
+				log.Println("inside ws post_submit case")
+				// todo: implement post_submit case, check data + make record in DB + send to all clients allowed to see this post
 			case "login":
 				clients.Store(conn, data.Data["username"])
 				sendStatus(data.Data["username"].(string), true)
@@ -115,6 +127,8 @@ func reader(conn *websocket.Conn) {
 				conn.Close()
 				clients.Delete(conn)
 				sendStatus(data.Data["username"].(string), false)
+			default:
+				log.Println("Unknown type: ", data.Type)
 			}
 		}
 		if messageType == websocket.BinaryMessage {
