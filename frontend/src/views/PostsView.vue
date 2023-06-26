@@ -77,8 +77,8 @@ interface Follower {
 //todo: remove/refactor later, dummy data, must be collected from backend
 function getPosts() {
   const posts: Post[] = [
-    { id: 1, authorId: 11, authorFullName: 'John Doe 11', authorEmail: "email11@mail.com", title: "Dummy post title", tags: "dummy, post, 111", content: 'Dummy Post content text.', privacy: 'public' },
-    { id: 2, authorId: 22, authorFullName: 'Jane Doe 22', authorEmail: "email22@mail.com", title: "Dummy post title", tags: "dummy, post, 222", content: 'Dummy Post content text.', privacy: 'private' },
+    { id: 1, author_id: 11, author_full_name: 'John Doe 11', author_email: "email11@mail.com", title: "Dummy post title", tags: "dummy, post, 111", content: 'Dummy Post content text.', privacy: 'public' },
+    { id: 2, author_id: 22, author_full_name: 'Jane Doe 22', author_email: "email22@mail.com", title: "Dummy post title", tags: "dummy, post, 222", content: 'Dummy Post content text.', privacy: 'private' },
   ];
   return posts;
 }

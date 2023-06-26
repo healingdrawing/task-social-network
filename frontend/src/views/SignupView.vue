@@ -84,12 +84,12 @@ const signup = async () => {
     await fetchData({
       email: email.value,
       password: password.value,
-      firstName: firstName.value,
-      lastName: lastName.value,
+      first_name: firstName.value,
+      last_name: lastName.value,
       dob: dob.value,
       avatar: avatar.value,
       nickname: nickname.value,
-      aboutMe: aboutMe.value,
+      about_me: aboutMe.value,
       public: false
     });
 

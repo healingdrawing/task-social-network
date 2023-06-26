@@ -62,20 +62,20 @@ export interface WSMessage {
 export interface User {
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   dob: string;
   avatar: Blob | null | string;
   nickname: string;
-  aboutMe: string;
+  about_me: string;
   public: boolean;
 }
 
 export interface Post {
   id: number; // post id, unique, autoincrement, primary key, all posts must be stored one table in database
-  authorId: number; //todo: need to implement clickable link to user profile
-  authorFullName: string; //todo: need to implement clickable link to user profile
-  authorEmail: string; //todo: need to implement clickable link to user profile
+  author_id: number; //todo: need to implement clickable link to user profile
+  author_full_name: string; //todo: need to implement clickable link to user profile
+  author_email: string; //todo: need to implement clickable link to user profile
   title: string;
   tags: string;
   content: string;

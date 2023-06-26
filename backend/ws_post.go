@@ -47,22 +47,10 @@ type WSPostDTOoutElement struct {
 }
 
 func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	defer recovery(w)
-	userID, err := getRequestSenderID(r)
-	if err != nil {
-		jsonResponse(w, 401, err.Error())
-		return
-	}
+	defer wsRecover()
+
 	var data WSPostRequest
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&data)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusBadRequest, "")
-		return
-	}
+
 	data.Categories = sanitizeCategories(data.Categories)
 	// process the picture
 	postPicture := []byte{}
@@ -70,27 +58,29 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 		avatarData, err := base64.StdEncoding.DecodeString(data.Picture)
 		if err != nil {
 			log.Println(err.Error())
-			jsonResponse(w, http.StatusUnprocessableEntity, "Invalid avatar")
+			// jsonResponse(w, http.StatusUnprocessableEntity, "Invalid avatar")
 			return
 		}
 		if !isImage(avatarData) {
 			log.Println(err.Error())
-			jsonResponse(w, http.StatusUnsupportedMediaType, "avatar is not a valid image")
+			// jsonResponse(w, http.StatusUnsupportedMediaType, "avatar is not a valid image")
 			return
 		}
 		postPicture = avatarData
 	}
 
+	userID := messageData["userID"].(int) // todo: FAKE code
+
 	data.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
 	result, err := statements["addPost"].Exec(userID, data.Title, data.Categories, data.Content, data.Privacy, postPicture, data.CreatedAt)
 	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, "addPost query failed")
+		// jsonResponse(w, http.StatusInternalServerError, "addPost query failed")
 		return
 	}
 
 	postId, err := result.LastInsertId()
 	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, "LastInsertId of addPost query failed")
+		// jsonResponse(w, http.StatusInternalServerError, "LastInsertId of addPost query failed")
 		return
 	}
 	// privacy check and able to see
@@ -101,32 +91,32 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 				// get the id of the user from the email
 				userID, err := getIDbyEmail(email)
 				if err != nil {
-					jsonResponse(w, http.StatusUnprocessableEntity, "Invalid email")
+					// jsonResponse(w, http.StatusUnprocessableEntity, "Invalid email")
 					return
 				}
 				// add the post to the almost_private table (user_id, post_id)
 				_, err = statements["addAlmostPrivate"].Exec(userID, postId)
 				if err != nil {
-					jsonResponse(w, http.StatusInternalServerError, "addAlmostPrivate query failed")
+					// jsonResponse(w, http.StatusInternalServerError, "addAlmostPrivate query failed")
 					return
 				}
 			}
 		}
 	}
 
-	jsonResponse(w, http.StatusOK, "Post created")
+	// jsonResponse(w, http.StatusOK, "Post created")
 
 	rows, err := statements["getPosts"].Query(userID)
 	if err != nil {
 		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "getPosts query failed")
+		// jsonResponse(w, http.StatusInternalServerError, "getPosts query failed")
 		return
 	}
 	var post Post
 	rows.Next()
 	err = rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Content)
 	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, "post scan failed")
+		// jsonResponse(w, http.StatusInternalServerError, "post scan failed")
 		return
 	}
 	rows.Close()
@@ -141,9 +131,9 @@ func wsPostsGetHandler(w http.ResponseWriter, r *http.Request) {
 		jsonResponse(w, http.StatusInternalServerError, "getPosts query failed")
 		return
 	}
-	var posts WSPosts
+	var wsPosts WSPosts
 	for rows.Next() {
-		var post Post
+		var post WSPost
 		pictureBlob := []byte{}
 		err = rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Content, &pictureBlob)
 		if err != nil {
@@ -151,11 +141,11 @@ func wsPostsGetHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		post.Picture = base64.StdEncoding.EncodeToString(pictureBlob)
-		posts.WSPosts = append(posts.WSPosts, post)
+		wsPosts.WSPosts = append(wsPosts.WSPosts, post)
 	}
 	rows.Close()
 	w.WriteHeader(200)
-	jsonResponseObj, err := json.Marshal(posts)
+	jsonResponseObj, err := json.Marshal(wsPosts)
 	if err != nil {
 		jsonResponse(w, http.StatusInternalServerError, "json.Marshal failed")
 		return

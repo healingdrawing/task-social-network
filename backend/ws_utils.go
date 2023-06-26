@@ -4,19 +4,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"runtime/debug"
 	"strings"
 )
 
 const (
-	WS_ERROR                         = "error"
-	WS_COMMENT_SUBMIT                = "comment_submit"
-	WS_COMMENTS_LIST                 = "comments_list"
-	WS_CHAT_MESSAGES_LIST            = "chat_messages_list"
-	WS_CHAT_USERS_LIST               = "chat_users_list"
-	WS_CHAT_MESSAGE_SUBMIT           = "chat_message_submit"
-	WS_CHAT_TYPING                   = "chat_typing"
+	WS_ERROR          = "error"
+	WS_COMMENT_SUBMIT = "comment_submit"
+	WS_COMMENTS_LIST  = "comments_list"
+
+	WS_CHAT_USERS_LIST     = "chat_users_list"
+	WS_CHAT_MESSAGE_SUBMIT = "chat_message_submit"
+
 	WS_FOLLOW_REQUEST_REJECT         = "follow_request_reject"
 	WS_FOLLOW_REQUEST_ACCEPT         = "follow_request_accept"
 	WS_FOLLOW_REQUESTS_LIST          = "follow_requests_list"
@@ -55,59 +54,45 @@ const (
 	WS_USER_UNFOLLOW                 = "user_unfollow"
 )
 
-type WS_ERROR_DTO struct {
-	Type  string `json:"type"`
-	Error string `json:"error"`
-}
-
 // # jsonResponse marshals and forwards json response writing to http.ResponseWriter
 //
 // @params {w http.ResponseWriter, statusCode int, data any}
 // @sideEffect {jsonResponse -> w}
 func wsJsonMarshal(data any) []byte {
 
-	jsonResponseObj := []byte{}
+	jsonMarshaledObj := []byte{}
 	// if data type is string
 	if message, ok := data.(string); ok {
-		jsonResponseObj, _ = json.Marshal(map[string]string{
-			"message": http.StatusText(statusCode) + ": " + message,
+		jsonMarshaledObj, _ = json.Marshal(map[string]string{
+			"message": ": " + message,
 		})
 	}
 	// if data type is int
 	if message, ok := data.(int); ok {
-		jsonResponseObj, _ = json.Marshal(map[string]int{
+		jsonMarshaledObj, _ = json.Marshal(map[string]int{
 			"message": message,
 		})
 	}
 	// if data type is bool
 	if message, ok := data.(bool); ok {
-		jsonResponseObj, _ = json.Marshal(map[string]bool{
+		jsonMarshaledObj, _ = json.Marshal(map[string]bool{
 			"message": message,
 		})
 	}
 	// if data type is slice
 	if _, ok := data.([]any); ok {
-		jsonResponseObj, _ = json.Marshal(map[string][]any{
+		jsonMarshaledObj, _ = json.Marshal(map[string][]any{
 			"data": data.([]any),
 		})
 	}
 	// if data type is object
 	if _, ok := data.(map[string]any); ok {
-		jsonResponseObj, _ = json.Marshal(map[string]any{
+		jsonMarshaledObj, _ = json.Marshal(map[string]any{
 			"data": data.(map[string]any),
 		})
 	}
-	// if unhandled by above custom conversion
-	if len(jsonResponseObj) == 0 {
-		w.WriteHeader(statusCode)
-		err := json.NewEncoder(w).Encode(data)
-		if err != nil {
-			log.Println(err.Error())
-		}
-		return
-	}
-	w.WriteHeader(statusCode)
-	w.Write(jsonResponseObj)
+
+	return jsonMarshaledObj
 }
 
 // # recovery is a utility function to recover from panic and send a json err response over http
@@ -135,7 +120,7 @@ func wsRecover() {
 		}
 		relevantPanicLine := strings.Join(relevantPanicLines, "\n")
 		log.Println(relevantPanicLines)
-		jsonResponse(w, http.StatusInternalServerError, relevantPanicLine)
+		wsJsonMarshal(relevantPanicLine)
 		fmt.Println("=====================================")
 		// to print the full stack trace
 		log.Println(string(stackTrace))
