@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia';
-import { Message, MessageType, Post } from '@/api/types';
+import { WSMessage, WSMessageType, Post } from '@/api/types';
 
 
 export const useWebSocketStore = defineStore({
   id: 'websocket',
   state: () => ({
     socket: null as WebSocket | null,
-    messages: [] as Message[],
+    messages: [] as WSMessage[],
   }),
   actions: {
     connect() {
@@ -22,11 +22,11 @@ export const useWebSocketStore = defineStore({
 
       this.socket.onmessage = (event) => {
         console.log(`Received message: ${event.data}`);
-        const message = JSON.parse(event.data) as Message;
+        const message = JSON.parse(event.data) as WSMessage;
         this.messages.push(message);
       };
     },
-    sendMessage(message: Message) {
+    sendMessage(message: WSMessage) {
       const messageString = JSON.stringify(message);
       console.log(`Sending message json string: ${messageString}`);
       this.socket?.send(messageString);
@@ -41,24 +41,24 @@ export const useWebSocketStore = defineStore({
       return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
     },
 
-    commentsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.COMMENTS_LIST) },
-    chatMessagesList(): Message[] { return this.messages.filter((message) => message.type === MessageType.CHAT_MESSAGES_LIST) },
-    chatUsersList(): Message[] { return this.messages.filter((message) => message.type === MessageType.CHAT_USERS_LIST) },
-    followRequestsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.FOLLOW_REQUESTS_LIST) },
+    commentsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.COMMENTS_LIST) },
+    chatMessagesList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.CHAT_MESSAGES_LIST) },
+    chatUsersList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.CHAT_USERS_LIST) },
+    followRequestsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.FOLLOW_REQUESTS_LIST) },
     postsList(): Post[] {
-      const postsMessages = this.messages.filter((message) => message.type === MessageType.POSTS_LIST);
+      const postsMessages = this.messages.filter((message) => message.type === WSMessageType.POSTS_LIST);
       const posts = postsMessages.map((message) => message.data as Post);
       return posts;
     },
-    groupsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.GROUPS_LIST) },
-    groupPostsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.GROUP_POSTS_LIST) },
-    groupPostCommentsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.GROUP_POST_COMMENTS_LIST) },
-    groupRequestsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.GROUP_REQUESTS_LIST) },
-    groupEventsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.GROUP_EVENTS_LIST) },
-    groupEventParticipantsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.GROUP_EVENT_PARTICIPANTS_LIST) },
-    userFollowingList(): Message[] { return this.messages.filter((message) => message.type === MessageType.USER_FOLLOWING_LIST) },
-    userFollowersList(): Message[] { return this.messages.filter((message) => message.type === MessageType.USER_FOLLOWERS_LIST) },
-    userPostsList(): Message[] { return this.messages.filter((message) => message.type === MessageType.USER_POSTS_LIST) },
+    groupsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUPS_LIST) },
+    groupPostsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_POSTS_LIST) },
+    groupPostCommentsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_POST_COMMENTS_LIST) },
+    groupRequestsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_REQUESTS_LIST) },
+    groupEventsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_EVENTS_LIST) },
+    groupEventParticipantsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_EVENT_PARTICIPANTS_LIST) },
+    userFollowingList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.USER_FOLLOWING_LIST) },
+    userFollowersList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.USER_FOLLOWERS_LIST) },
+    userPostsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.USER_POSTS_LIST) },
 
     // chatMessages(): Message[] {
     //   return this.messages.filter((message) => message.type === 'chat');

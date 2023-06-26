@@ -118,6 +118,7 @@ func reader(conn *websocket.Conn) {
 			switch data.Type {
 			case "post_submit":
 				log.Println("inside ws post_submit case")
+				wsPostSubmitHandler(conn, data.Data)
 				// todo: implement post_submit case, check data + make record in DB + send to all clients allowed to see this post
 			case "login":
 				clients.Store(conn, data.Data["username"])

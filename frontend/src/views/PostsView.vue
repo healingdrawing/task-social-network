@@ -67,7 +67,7 @@ import { Ref, onMounted, ref } from 'vue';
 import { usePostStore } from '@/store/pinia';
 import { usePictureStore } from '@/store/pinia';
 import { useWebSocketStore } from '@/store/websocket';
-import { Message, MessageType, PostSubmit, Post } from '@/api/types';
+import { WSMessage, WSMessageType, PostSubmit, Post } from '@/api/types';
 
 interface Follower {
   id: number;
@@ -118,8 +118,8 @@ async function addPost() {
     postSubmit.followers = selectedFollowers.value;
   }
 
-  const message: Message = {
-    type: MessageType.POST_SUBMIT,
+  const message: WSMessage = {
+    type: WSMessageType.POST_SUBMIT,
     data: postSubmit,
   };
   webSocketStore.sendMessage(message);
