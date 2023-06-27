@@ -404,7 +404,8 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	rows.Next()
 	err = rows.Scan(&email, &hash)
 	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, "scan credentials failed")
+		log.Println(err.Error())
+		jsonResponse(w, http.StatusInternalServerError, "scan credentials failed") // bug: it fires also when the user is not registered and try to login with error "Rows are closed"
 		return
 	}
 	rows.Close()
