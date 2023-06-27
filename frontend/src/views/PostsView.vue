@@ -1,6 +1,9 @@
 <template>
   <div>
     <h1>Create Post:</h1>
+
+    <div><hr><button type="button" @click="crap" title="remove in production">Fill Debug / remove later</button><hr></div> <!-- todo: remove later -->
+
     <form @submit.prevent="addPost">
       <label for="postTitle">Post Title:</label>
       <input type="text" id="postTitle" v-model="postTitle" required>
@@ -53,7 +56,7 @@
         <h3>Post Author email:{{ post.author_email }}</h3>
         <p>Post id: {{ post.id }}</p>
         <p>Post title: {{ post.title }}</p>
-        <p>Post tags: {{ post.tags }}</p>
+        <p>Post tags: {{ post.categories }}</p>
         <p>Post content: {{ post.content }}</p>
         <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
         <p>Post picture: {{ post.picture }}</p>
@@ -64,6 +67,7 @@
 
 <script lang="ts" setup>
 import { Ref, onMounted, ref } from 'vue';
+import { useUUIDStore } from '@/store/pinia';
 import { usePostStore } from '@/store/pinia';
 import { usePictureStore } from '@/store/pinia';
 import { useWebSocketStore } from '@/store/websocket';
@@ -77,8 +81,8 @@ interface Follower {
 //todo: remove/refactor later, dummy data, must be collected from backend
 function getPosts() {
   const posts: Post[] = [
-    { id: 1, author_id: 11, author_full_name: 'John Doe 11', author_email: "email11@mail.com", title: "Dummy post title", tags: "dummy, post, 111", content: 'Dummy Post content text.', privacy: 'public' },
-    { id: 2, author_id: 22, author_full_name: 'Jane Doe 22', author_email: "email22@mail.com", title: "Dummy post title", tags: "dummy, post, 222", content: 'Dummy Post content text.', privacy: 'private' },
+    { id: 1, author_id: 11, author_full_name: 'John Doe 11', author_email: "email11@mail.com", title: "Dummy post title", categories: "dummy, post, 111", content: 'Dummy Post content text.', privacy: 'public' },
+    { id: 2, author_id: 22, author_full_name: 'Jane Doe 22', author_email: "email22@mail.com", title: "Dummy post title", categories: "dummy, post, 222", content: 'Dummy Post content text.', privacy: 'private' },
   ];
   return posts;
 }
@@ -101,24 +105,24 @@ function handlePictureChange(event: Event) {
   // picture.value = (event.target as HTMLInputElement).files?.[0] ?? null;
 }
 
+const storeUUID = useUUIDStore();
 //todo: refactor to send post to backend
 async function addPost() {
-  //todo: first send to backend, and if success, then add to postsList on page, so all the data finally must be from backend. The "postTitle.value" etc must be used in request to backend, to create new post. The authorId is the current user id, f.e. managed using pinia storage, or cookies, not sure yet.
-
   const picture = await pictureStore.getBase64forJson
   const postSubmit: PostSubmit = {
-    user_uuid: "123", //todo: get from pinia storage, or cookies, or backend
+    user_uuid: storeUUID.getUUID,
 
     title: postTitle.value,
-    tags: postTags.value, //todo: comma separated tags, but for dummy case just string on screen
+    categories: postTags.value,
     content: postContent.value,
     privacy: postPrivacy.value,
+    able_to_see: selectedFollowers.value.join(' '), //list of emails, separated by space
     picture: picture,
   };
 
-  if (postPrivacy.value === 'almostPrivate') {
-    postSubmit.followers = selectedFollowers.value;
-  }
+  // if (postPrivacy.value === 'almostPrivate') {
+  //   postSubmit.able_to_see = selectedFollowers.value.join(' ');
+  // }
 
   const message: WSMessage = {
     type: WSMessageType.POST_SUBMIT,
@@ -154,5 +158,12 @@ function piniaManageData(post: Post) {
 onMounted(() => {
   updateFollowersList();
 });
+
+const crap = () => {
+  postTitle.value = 'Dummy post title';
+  postTags.value = 'dummy, post, 111, test';
+  postContent.value = 'Dummy Post content text.';
+  postPrivacy.value = 'public';
+}
 
 </script>

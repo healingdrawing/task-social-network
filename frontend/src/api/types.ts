@@ -66,7 +66,7 @@ export interface Post {
   author_full_name: string; //todo: need to implement clickable link to user profile
   author_email: string; //todo: need to implement clickable link to user profile
   title: string;
-  tags: string;
+  categories: string;
   content: string;
   privacy: string;
   picture?: string;
@@ -75,9 +75,9 @@ export interface Post {
 export interface PostSubmit {
   user_uuid: string;
   title: string;
-  tags: string;
+  categories: string;
   content: string;
   privacy: string;
-  followers?: string[]; // user ids, to filter posts by privacy, on backend side, before sending to frontend
+  able_to_see: string; // user emails, to filter posts by privacy, on backend side, before sending to frontend
   picture?: string; // jpeg,png,gif
 }
