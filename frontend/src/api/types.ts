@@ -5,10 +5,8 @@ export enum WSMessageType {
   COMMENT_SUBMIT = "comment_submit", //  commentNewHandler
   COMMENTS_LIST = "comments_list", //  commentsGetHandler
 
-  CHAT_MESSAGES_LIST = "chat_messages_list", //  chatMessagesHandler
   CHAT_USERS_LIST = "chat_users_list", //  chatUsersHandler
   CHAT_MESSAGE_SUBMIT = "chat_message_submit", //  chatNewHandler
-  CHAT_TYPING = "chat_typing", //  chatTypingHandler
 
   FOLLOW_REQUEST_REJECT = "follow_request_reject", //  rejectFollowerHandler
   FOLLOW_REQUEST_ACCEPT = "follow_request_accept", //  approveFollowerHandler
@@ -24,9 +22,8 @@ export enum WSMessageType {
   GROUP_POST_COMMENT_SUBMIT = "group_post_comment_submit", //  groupCommentNewHandler
   GROUP_POST_COMMENTS_LIST = "group_post_comments_list", //  groupCommentsGetHandler
   GROUP_JOIN = "group_join", //  groupJoinHandler
-  GROUP_LEAVE = "group_leave", //  groupLeaveHandler, // TODO: not part of audit, so untested
   GROUP_INVITE = "group_invite", //  groupInviteHandler
-  GROUP_INVITED = "group_invited", //  groupInvitedHandler
+  GROUP_INVITES_LIST = "group_invited_list", //todo: attention  groupInvitedHandler
   GROUP_INVITE_ACCEPT = "group_invite_accept", //  groupInviteAcceptHandler
   GROUP_INVITE_REJECT = "group_invite_reject", //  groupInviteRejectHandler
   GROUP_REQUESTS_LIST = "group_requests_list", //  groupRequestsHandler
@@ -59,16 +56,8 @@ export interface WSMessage {
 
 
 
-export interface User {
-  email: string;
-  password: string;
-  first_name: string;
-  last_name: string;
-  dob: string;
-  avatar: Blob | null | string;
-  nickname: string;
-  about_me: string;
-  public: boolean;
+export interface ErrorResponse {
+  message: string;
 }
 
 export interface Post {
@@ -84,10 +73,11 @@ export interface Post {
 }
 
 export interface PostSubmit {
+  user_uuid: string;
   title: string;
   tags: string;
   content: string;
   privacy: string;
-  followers?: number[]; // user ids, to filter posts by privacy, on backend side, before sending to frontend
+  followers?: string[]; // user ids, to filter posts by privacy, on backend side, before sending to frontend
   picture?: string; // jpeg,png,gif
 }

@@ -8,7 +8,7 @@ type WS_ERROR_DTO struct {
 type WS_COMMENT_SUBMIT_DTO struct {
 	Type string `json:"type"`
 	Data struct {
-		Email      string `json:"email"`
+		User_uuid  string `json:"user_uuid"`
 		Content    string `json:"content"`
 		Picture    string `json:"picture"`
 		Created_at string `json:"created_at"`
@@ -36,10 +36,17 @@ type WS_CHAT_USERS_LIST_DTO struct {
 type WS_CHAT_MESSAGE_SUBMIT_DTO struct {
 	Type string `json:"type"`
 	Data struct {
+		User_uuid    string `json:"user_uuid"`
+		To_email     string `json:"to_email"`
+		To_full_name string `json:"to_full_name"`
+		Content      string `json:"content"`
+	} `json:"data"`
+}
+type WS_CHAT_MESSAGE_BROADCAST_DTO struct {
+	Type string `json:"type"`
+	Data struct {
 		From_email     string `json:"from_email"`
 		From_full_name string `json:"from_full_name"`
-		To_email       string `json:"to_email"`
-		To_full_name   string `json:"to_full_name"`
 		Content        string `json:"content"`
 	} `json:"data"`
 }
@@ -67,7 +74,7 @@ type WS_FOLLOW_REQUESTS_LIST_DTO struct {
 type WS_POST_SUBMIT_DTO struct {
 	Type string `json:"type"`
 	Data struct {
-		User_id     int    `json:"user_id"`
+		User_uuid   int    `json:"user_uuid"`
 		Title       string `json:"title"`
 		Content     string `json:"content"`
 		Categories  string `json:"categories"`

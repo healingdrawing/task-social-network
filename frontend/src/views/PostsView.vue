@@ -24,7 +24,7 @@
       <label for="almostPrivate">Almost Private - for selected followers</label>
       <br>
       <select v-if="postPrivacy === 'almostPrivate'" multiple v-model="selectedFollowers">
-        <option v-for="follower in followers" :key="follower.id" :value="follower.id">{{ follower.name }}</option>
+        <option v-for="follower in followers" :key="follower.email" :value="follower.email">{{ follower.full_name }} ({{ follower.email }})</option>
       </select>
       
       <div>
@@ -48,9 +48,9 @@
       <router-link
       :to="{ name: 'post' }"
       @click="piniaManageData(post)">
-        <p>Post Author id: {{ post.authorId }}</p>
-        <h3>Post Author: {{ post.authorFullName }}</h3>
-        <h3>Post Author email:{{ post.authorEmail }}</h3>
+        <p>Post Author id: {{ post.author_id }}</p>
+        <h3>Post Author: {{ post.author_full_name }}</h3>
+        <h3>Post Author email:{{ post.author_email }}</h3>
         <p>Post id: {{ post.id }}</p>
         <p>Post title: {{ post.title }}</p>
         <p>Post tags: {{ post.tags }}</p>
@@ -70,8 +70,8 @@ import { useWebSocketStore } from '@/store/websocket';
 import { WSMessage, WSMessageType, PostSubmit, Post } from '@/api/types';
 
 interface Follower {
-  id: number;
-  name: string;
+  full_name: string;
+  email: string;
 }
 
 //todo: remove/refactor later, dummy data, must be collected from backend
@@ -91,7 +91,7 @@ const postTitle = ref('');
 const postTags = ref('');
 const postContent = ref('');
 const postPrivacy = ref('public');
-const selectedFollowers = ref([]);
+const selectedFollowers = ref<string[]>([]);
 const followers = ref<Follower[]>([]);
 // const picture: Ref<Blob | null> = ref(null); //todo: chat gpt solution, to fix null value case, because field is optional
 
@@ -107,6 +107,8 @@ async function addPost() {
 
   const picture = await pictureStore.getBase64forJson
   const postSubmit: PostSubmit = {
+    user_uuid: "123", //todo: get from pinia storage, or cookies, or backend
+
     title: postTitle.value,
     tags: postTags.value, //todo: comma separated tags, but for dummy case just string on screen
     content: postContent.value,
@@ -138,9 +140,9 @@ async function addPost() {
 //todo: remove/refactor later, dummy data, must be collected from backend
 function updateFollowersList() {
   followers.value = [
-    { id: 11, name: 'John Doe 11' },
-    { id: 22, name: 'Jane Doe 22' },
-    { id: 33, name: 'Sir Flex 33' },
+    { full_name: 'John Doe 11', email: 'John_Doe@mail.com' },
+    { full_name: 'Jane Doe 22', email: 'Jane_Doe@mail.com' },
+    { full_name: 'Sir Flex 33', email: 'Sir_Flex@mail.com' },
   ];
 }
 

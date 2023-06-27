@@ -9,10 +9,11 @@
       <router-link to="/posts" @click="piniaManageData()">Posts</router-link> |
       <router-link :class="{ highlighted: hasNewMessages }" to="/chats">Chats</router-link> |
       <router-link to="/groups">Groups</router-link> |
-      <router-link to="/">Logout</router-link>
+      <router-link to="/" @click="logout()">Logout</router-link>
     </div>
     <router-view/>
   </div>
+  <div v-if="logoutError">logout error: {{ logoutError }}</div>
 </template>
 
 <style scoped>
@@ -22,15 +23,60 @@
 </style>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { ErrorResponse } from '@/api/types';
 import { useBellStore } from '@/store/bell';
 import { useChatsStore } from '@/store/chats';
 import { useGroupStore } from '@/store/group';
+import { useUUIDStore } from '@/store/uuid';
+import { useLoginStore } from '@/store/login';
+import { useSignupStore } from '@/store/signup';
+
+const logoutError = ref('');
+
+const storeUUID = useUUIDStore();
+const storeLogin = useLoginStore();
+const storeSignup = useSignupStore();
+
+async function logout() {
+  console.log("stage 0")
+  try {
+    const bodyJson = JSON.stringify(useUUIDStore().getUUID); //todo: perhaps remove/replace later
+    const response = await fetch('http://localhost:8080/api/user/logout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Origin': 'http://localhost:8080'
+      },
+      body: bodyJson,
+      mode: 'cors',
+      // credentials: 'omit' // when commented, includes cookie for logout procedure on backend
+    });
+    console.log("stage 1") //todo: clean up later
+    const data = await response.json();
+    if (data.error) {
+      throw new Error(data.error as string + "problem with json parsing of response");
+    }
+    console.log("stage 3")
+
+    console.log(data);
+    logoutError.value = '';
+    storeUUID.$reset();
+    storeLogin.$reset();
+    storeSignup.$reset();
+    //todo: reset all pinia stores later
+
+  } catch (error) {
+    const errorResponse = error as ErrorResponse;
+    logoutError.value = errorResponse.message;
+  } finally {
+    console.log("stage 4")
+  }
+}
 
 // when "posts" click happens, reset group id to -1 or 0, to prevent backend filtering of the posts to not show group only posts, but show all
 const groupStore = useGroupStore();
 function piniaManageData() {
-  alert('piniaManageData posts NavBar.vue');
   groupStore.setGroupId(-1); //todo: implement on backend. Now posts will be not filtered by group id. But only filtered by date, fresh first
 }
 

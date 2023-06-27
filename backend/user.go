@@ -22,13 +22,13 @@ import (
 type signupData struct {
 	Email       string `json:"email"`
 	Password    string `json:"password"`
-	FirstName   string `json:"firstName"`
-	LastName    string `json:"lastName"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
 	Dob         string `json:"dob"`
 	Avatar      string `json:"avatar"`
 	avatarBytes []byte `sqlite3:"avatar"`
 	Nickname    string `json:"nickname"`
-	AboutMe     string `json:"aboutMe"`
+	AboutMe     string `json:"about_me"`
 	Public      bool   `json:"public"`
 	Privacy     string `sqlite3:"privacy"`
 }
@@ -369,7 +369,7 @@ Password must only contain english characters and numbers`
 	w.WriteHeader(200)
 	jsonResponseObj, _ := json.Marshal(map[string]string{
 		"UUID":  UUID,
-		"email": data.Email,
+		"email": data.Email, // todo: perhaps remove later
 	})
 	_, err = w.Write(jsonResponseObj)
 	if err != nil {
@@ -448,7 +448,7 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	jsonResponseObj, _ := json.Marshal(map[string]string{
 		"UUID":  UUID,
-		"email": email,
+		"email": email, // todo: perhaps remove later
 	})
 	_, err = w.Write(jsonResponseObj)
 	if err != nil {

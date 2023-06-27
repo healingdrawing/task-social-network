@@ -54,13 +54,16 @@
 <script lang="ts" setup>
 import { Ref, ref } from 'vue';
 import router from '@/router/index'
-import { signupUser } from '@/api/methods'
 import { useAvatarStore } from '@/store/pinia';
-import { useSignupLoginStore } from '@/store/pinia';
+import { useSignupStore } from '@/store/pinia';
+import { useUUIDStore } from '@/store/pinia';
+import { useWebSocketStore } from '@/store/websocket';
 
-const store = useSignupLoginStore();
-const fetchData = store.storeFetchData
+
+const store = useSignupStore();
 const error = store.error
+const storeUUID = useUUIDStore();
+const webSocketStore = useWebSocketStore();
 
 const email = ref('');
 const password = ref('');
@@ -81,7 +84,7 @@ function handleAvatarChange(event: Event) {
 const signup = async () => {
   try {
     /* todo: should happen only if signup is successful */
-    await fetchData({
+    await store.fetchData({
       email: email.value,
       password: password.value,
       first_name: firstName.value,
@@ -93,12 +96,22 @@ const signup = async () => {
       public: false
     });
 
+
     // Result storage logic here
     // For example, you can store the result in a Vuex store or any other storage mechanism
     // Assuming you have a Vuex store setup, you can dispatch an action to store the result
     // Example:
     // await store.dispatch('storeSignupResult', result);
 
+    if (store.getData.UUID === undefined) {
+      store.error = "Error: UUID is undefined. Signup failed.";
+      throw new Error(store.error);
+    } else {
+      console.log("UUID: " + storeUUID.getUUID);
+      storeUUID.setUUID(store.getData.UUID)
+      webSocketStore.connect();
+      router.push('/profile');
+    }
 
   } catch (error) {
     // Error handling logic here
@@ -111,7 +124,7 @@ const signup = async () => {
     // Finally logic here
     console.log('finally');
     // print the result to the console
-    router.push('/profile');
+    // router.push('/profile');
   }
 
 

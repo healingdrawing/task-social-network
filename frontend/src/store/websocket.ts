@@ -42,7 +42,6 @@ export const useWebSocketStore = defineStore({
     },
 
     commentsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.COMMENTS_LIST) },
-    chatMessagesList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.CHAT_MESSAGES_LIST) },
     chatUsersList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.CHAT_USERS_LIST) },
     followRequestsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.FOLLOW_REQUESTS_LIST) },
     postsList(): Post[] {

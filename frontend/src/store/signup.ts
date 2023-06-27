@@ -1,30 +1,42 @@
 import { defineStore } from 'pinia';
-import { User } from '../api/types';
+import { ErrorResponse } from '@/api/types';
 
-interface SignupLoginResponse {
-  UUID: string;
+// interface SignupLoginResponse {
+//   UUID: string;
+//   email: string;
+// }
+
+
+export interface SignupSubmit {
   email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  dob: string;
+  avatar: Blob | null | string;
+  nickname: string;
+  about_me: string;
+  public: boolean;
+}
+export interface SignupResponse {
+  UUID: string;
 }
 
-interface ErrorResponse {
-  message: string;
-}
-
-export const useSignupLoginStore = defineStore('signupLogin', {
+export const useSignupStore = defineStore('signup', {
   state: () => ({
-    data: {} as SignupLoginResponse,
+    data: {} as SignupResponse,
     error: '',
   }),
   getters: {
     getError(): string {
       return this.error;
     },
-    getData(): SignupLoginResponse {
+    getData(): SignupResponse {
       return this.data;
     }
   },
   actions: {
-    async storeFetchData(userData: User) {
+    async fetchData(userData: SignupSubmit) {
       console.log("stage 0")
       try {
         if (!userData.avatar) {
@@ -59,6 +71,7 @@ export const useSignupLoginStore = defineStore('signupLogin', {
 
         console.log(data);
         this.data = data;
+
       } catch (error) {
         const errorResponse = error as ErrorResponse;
         this.error = errorResponse.message;
