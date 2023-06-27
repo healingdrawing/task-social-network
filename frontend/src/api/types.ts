@@ -12,8 +12,9 @@ export enum WSMessageType {
   FOLLOW_REQUEST_ACCEPT = "follow_request_accept", //  approveFollowerHandler
   FOLLOW_REQUESTS_LIST = "follow_requests_list", //  followRequestListHandler
 
-  POSTS_LIST = "posts_list", //  postsGetHandler
   POST_SUBMIT = "post_submit", //  postNewHandler
+  POST_RESPONSE = "post_response",
+  POSTS_LIST = "posts_list", //  postsGetHandler
 
   GROUPS_LIST = "groups_list", //  !!!groupsGetHandler //todo: NOT IMPLEMENTED ON OLD BACKEND
   GROUP_SUBMIT = "group_submit", //  groupNewHandler
@@ -55,21 +56,22 @@ export interface WSMessage {
 }
 
 
-
+// used in NavBar.vue signup.ts login.ts
 export interface ErrorResponse {
   message: string;
 }
 
 export interface Post {
   id: number; // post id, unique, autoincrement, primary key, all posts must be stored one table in database
-  author_id: number; //todo: need to implement clickable link to user profile
-  author_full_name: string; //todo: need to implement clickable link to user profile
-  author_email: string; //todo: need to implement clickable link to user profile
   title: string;
   categories: string;
   content: string;
   privacy: string;
   picture?: string;
+  created_at: string;
+  email: string;
+  first_name: string;
+  last_name: string;
 }
 
 export interface PostSubmit {

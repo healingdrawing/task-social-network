@@ -129,7 +129,7 @@ func statementsCreation() {
 		"addAlmostPrivate": `INSERT INTO almost_private (user_id, post_id) VALUES (?, ?);`,
 
 		"addPost":     `INSERT INTO post (user_id, title, categories, content, privacy, picture, created_at) VALUES (?, ?, ?, ?, ?, ?, ?);`,
-		"getPosts":    `SELECT post.id, title, content, categories, picture, first_name, last_name, email, created_at FROM post INNER JOIN users ON user_id=? ORDER BY created_at DESC;`,
+		"getPosts":    `SELECT post.id, title, content, categories, picture, post.privacy, created_at, email, first_name, last_name FROM post INNER JOIN users ON user_id=? ORDER BY created_at DESC;`,
 		"addComment":  `INSERT INTO comment (user_id, post_id, content, picture, created_at) VALUES (?, ?, ?, ?, ?);`,
 		"getComments": `SELECT first_name, last_name, content, picture FROM comment INNER JOIN users ON user_id = users.id WHERE post_id = ? ORDER BY comment.id DESC;`,
 		"addMessage":  `INSERT INTO message (from_id, to_id, content, created_at) VALUES (?, ?, ?, ?);`,

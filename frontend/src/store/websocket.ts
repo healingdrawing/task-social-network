@@ -23,7 +23,7 @@ export const useWebSocketStore = defineStore({
       this.socket.onmessage = (event) => {
         console.log(`Received message: ${event.data}`);
         const message = JSON.parse(event.data) as WSMessage;
-        this.messages.push(message);
+        this.messages.unshift(message);
       };
     },
     sendMessage(message: WSMessage) {
@@ -45,7 +45,7 @@ export const useWebSocketStore = defineStore({
     chatUsersList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.CHAT_USERS_LIST) },
     followRequestsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.FOLLOW_REQUESTS_LIST) },
     postsList(): Post[] {
-      const postsMessages = this.messages.filter((message) => message.type === WSMessageType.POSTS_LIST);
+      const postsMessages = this.messages.filter((message) => message.type === WSMessageType.POST_RESPONSE);
       const posts = postsMessages.map((message) => message.data as Post);
       return posts;
     },

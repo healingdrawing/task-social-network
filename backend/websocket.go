@@ -138,6 +138,28 @@ func reader(conn *websocket.Conn) {
 	}
 }
 
+func wsSendPost(post WS_POST_RESPONSE_DTO) {
+
+	outputMessage, err := wsCreateResponseMessage(WS_POST_RESPONSE, post)
+
+	if err != nil {
+		log.Println(err)
+	}
+	clients.Range(func(key, value interface{}) bool {
+		if c, ok := key.(*websocket.Conn); ok {
+			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return true
+	})
+}
+
+////////////////////////////
+// old code
+////////////////////////////
+
 func sendPost(post Post) {
 	data := wsPost{"post", post}
 	output, err := json.Marshal(data)

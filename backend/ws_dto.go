@@ -1,9 +1,11 @@
 package main
 
-type WS_ERROR_DTO struct {
-	Type string `json:"type"`
-	Data string `json:"data"`
+type WS_RESPONSE_MESSAGE_DTO struct {
+	Type WSMT        `json:"type"`
+	Data interface{} `json:"data"`
 }
+
+// perhaps refactor bottom code
 
 type WS_COMMENT_SUBMIT_DTO struct {
 	Type string `json:"type"`
@@ -71,18 +73,18 @@ type WS_FOLLOW_REQUESTS_LIST_DTO struct {
 	} `json:"data"`
 }
 
-type WS_POST_SUBMIT_DTO struct {
-	Type string `json:"type"`
-	Data struct {
-		User_uuid   int    `json:"user_uuid"`
-		Title       string `json:"title"`
-		Content     string `json:"content"`
-		Categories  string `json:"categories"`
-		Picture     string `json:"picture"`
-		Privacy     string `json:"privacy"`
-		Able_to_see string `json:"able_to_see"` // only list of emails
-	} `json:"data"`
-}
+// type WS_POST_SUBMIT_DTO struct {
+// 	Type string `json:"type"`
+// 	Data struct {
+// 		User_uuid   int    `json:"user_uuid"`
+// 		Title       string `json:"title"`
+// 		Content     string `json:"content"`
+// 		Categories  string `json:"categories"`
+// 		Picture     string `json:"picture"`
+// 		Privacy     string `json:"privacy"`
+// 		Able_to_see string `json:"able_to_see"` // only list of emails
+// 	} `json:"data"`
+// }
 
 type WS_POSTS_LIST_DTO struct {
 	Type string `json:"type"`

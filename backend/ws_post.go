@@ -25,18 +25,20 @@ type WSPost struct {
 	CreatedAt  string `json:"created_at"`
 }
 
-type WSPostDTOoutElement struct {
-	ID              int    `json:"id"`
-	Title           string `json:"title"`
-	Content         string `json:"content"`
-	Categories      string `json:"categories"`
-	Picture         string `json:"picture"`
-	CreatorFullName string `json:"creatorFullName"`
-	CreatorEmail    string `json:"creatorEmail"`
-	CreatedAt       string `json:"createdAt"`
+type WS_POST_RESPONSE_DTO struct {
+	ID         int    `json:"id"` // post section. use to get comments
+	Title      string `json:"title"`
+	Content    string `json:"content"`
+	Categories string `json:"categories"`
+	Picture    string `json:"picture"`
+	Privacy    string `json:"privacy"`
+	Created_at string `json:"created_at"`
+	Email      string `json:"email"` //creator section. use to show post credentials
+	First_name string `json:"first_name"`
+	Last_name  string `json:"last_name"`
 }
 
-type WSPostSubmit struct {
+type WS_POST_SUBMIT_DTO struct {
 	User_uuid   string `json:"user_uuid"`
 	Title       string `json:"title"`
 	Categories  string `json:"categories"`
@@ -54,7 +56,7 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 		log.Println("wsPostSubmitHandler,\nkey: ", key, "\nvalue: ", value)
 	}
 
-	var data WSPostSubmit
+	var data WS_POST_SUBMIT_DTO
 	data.User_uuid = messageData["user_uuid"].(string)
 	data.Title = messageData["title"].(string)
 	data.Categories = messageData["categories"].(string)
@@ -132,16 +134,16 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 		// jsonResponse(w, http.StatusInternalServerError, "getPosts query failed")
 		return
 	}
-	var post Post
+	var post WS_POST_RESPONSE_DTO
 	rows.Next()
-	err = rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Content)
+	err = rows.Scan(&post.ID, &post.Title, &post.Content, &post.Categories, &post.Picture, &post.Privacy, &post.Created_at, &post.Email, &post.First_name, &post.Last_name)
 	if err != nil {
 		log.Println("post scan failed", err.Error())
 		// jsonResponse(w, http.StatusInternalServerError, "post scan failed")
 		return
 	}
 	rows.Close()
-	sendPost(post)
+	wsSendPost(post)
 }
 
 func wsPostsGetHandler(w http.ResponseWriter, r *http.Request) {

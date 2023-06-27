@@ -9,7 +9,7 @@
       <input type="text" id="postTitle" v-model="postTitle" required>
       <br>
       <label for="postTags">Post Tags:</label>
-      <input type="text" id="postTags" v-model="postTags"> <!-- todo: the "required" field removed, because in "real-time-forum" backend the empty tag was implemented as decoration using randomly colored circles from emoji, and i like it generally. There is no strict requirements about tags in the task. And no post filtering required to implement in the task, the tags can be not clickable. So it is ok at the moment. But check and keep in mind this -->
+      <input type="text" id="postTags" v-model="postTags">
       <br>
       <label for="postContent">Post Content:</label>
       <textarea id="postContent" v-model="postContent" required></textarea>
@@ -38,7 +38,6 @@
 
       <br>
       <button type="submit">Submit</button>
-      <!-- todo: add image or gif to post required in task. Perhaps, to prevent posting "anacondas" and "caves" photos, the images can be limited from allowed lists of images, but generally it sounds like they expect any image upload, which is unsafe, like in picture too -->
     </form>
     <div v-if="pictureStore.pictureError">{{ pictureStore.pictureError }}</div>
   </div>
@@ -51,22 +50,25 @@
       <router-link
       :to="{ name: 'post' }"
       @click="piniaManageData(post)">
-        <p>Post Author id: {{ post.author_id }}</p>
-        <h3>Post Author: {{ post.author_full_name }}</h3>
-        <h3>Post Author email:{{ post.author_email }}</h3>
-        <p>Post id: {{ post.id }}</p>
-        <p>Post title: {{ post.title }}</p>
-        <p>Post tags: {{ post.categories }}</p>
-        <p>Post content: {{ post.content }}</p>
-        <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
-        <p>Post picture: {{ post.picture }}</p>
+      <p>Post id: {{ post.id }}</p>
+      <p>Post title: {{ post.title }}</p>
+      <p>Post tags: {{ post.categories }}</p>
+      <p>Post content: {{ post.content }}</p>
+      <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
+      <p>Post picture: {{ post.picture }}</p>
+      <p>Post created: {{ post.created_at }}</p>
+      <h3>
+        Author: {{ post.first_name }}
+        {{ post.last_name }} 
+        ({{ post.email }})
+      </h3>
       </router-link>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { Ref, onMounted, ref } from 'vue';
+import { Ref, computed, onMounted, reactive, ref, watch } from 'vue';
 import { useUUIDStore } from '@/store/pinia';
 import { usePostStore } from '@/store/pinia';
 import { usePictureStore } from '@/store/pinia';
@@ -78,18 +80,8 @@ interface Follower {
   email: string;
 }
 
-//todo: remove/refactor later, dummy data, must be collected from backend
-function getPosts() {
-  const posts: Post[] = [
-    { id: 1, author_id: 11, author_full_name: 'John Doe 11', author_email: "email11@mail.com", title: "Dummy post title", categories: "dummy, post, 111", content: 'Dummy Post content text.', privacy: 'public' },
-    { id: 2, author_id: 22, author_full_name: 'Jane Doe 22', author_email: "email22@mail.com", title: "Dummy post title", categories: "dummy, post, 222", content: 'Dummy Post content text.', privacy: 'private' },
-  ];
-  return posts;
-}
-
 const webSocketStore = useWebSocketStore();
-const postsList = webSocketStore.postsList;
-// const postsList = ref(getPosts());
+const postsList = computed(() => webSocketStore.postsList); // ref and reactive failed to work here, so computed used. Straight way put webSocketStore.postsList to template works too,
 
 const postTitle = ref('');
 const postTags = ref('');
@@ -106,7 +98,6 @@ function handlePictureChange(event: Event) {
 }
 
 const storeUUID = useUUIDStore();
-//todo: refactor to send post to backend
 async function addPost() {
   const picture = await pictureStore.getBase64forJson
   const postSubmit: PostSubmit = {
@@ -165,5 +156,9 @@ const crap = () => {
   postContent.value = 'Dummy Post content text.';
   postPrivacy.value = 'public';
 }
+
+watch(postsList, (newVal, oldVal) => {
+  console.log('Posts list:', newVal);
+});
 
 </script>
