@@ -179,3 +179,13 @@ func wsPostsGetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+// todo: global
+// Picture not managed properly.
+// Need:
+// - link to profile of post author
+// - some sorting of posts on backend side by able_to_see emails
+// - convert to picture for screen after server respond to frontend
+// - clear the storage when picture uplaoaded, or fail checks.
+
+// Now the last successed picture will be uploaded on the next post automatically.
