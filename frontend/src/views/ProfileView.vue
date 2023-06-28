@@ -47,8 +47,11 @@
 
 <script lang="ts" setup>
 import { ref, watch, onMounted } from 'vue';
+import { useWebSocketStore } from '@/store/websocket';
+import { useUUIDStore } from '@/store/uuid';
 import { usePostStore } from '@/store/post';
 import { useProfileStore } from '@/store/profile';
+import { WSMessageType, ChangePrivacyRequest } from '@/api/types';
 
 const isPublic = ref(false);
 
@@ -56,7 +59,16 @@ watch(isPublic, (newValue, oldValue) => {
   handleCheckboxChange(newValue);
 });
 
+const webSocketStore = useWebSocketStore();
+const storeUUID = useUUIDStore();
 function handleCheckboxChange(value: boolean) {
+  webSocketStore.sendMessage({
+    type: WSMessageType.USER_PRIVACY,
+    data: {
+      user_uuid: storeUUID.getUUID,
+      make_public: value,
+    } as ChangePrivacyRequest,
+  })
   // Call your method here
   alert(value + ' . Checkbox changed. ProfileView.vue');
 }

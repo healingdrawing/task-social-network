@@ -3,25 +3,26 @@
 
   <div>
     <button @click="handleFollowing()">
-      {{ isVisitorNotFollowerAndDidNotRequested ? 'Request To Follow' : 'Unfollow' }}
+      {{ isVisitorNotFollowerAndNotRequester ? 'Request To Follow' : 'Unfollow' }}
     </button>
   </div>
 
   <div v-if="isProfilePublicOrVisitorFollower">
     <!-- todo: remove later . show id for dev needs-->
-    <p>Id: {{ profileStore.getTargetUserId }}</p>
+    <p>target_email: {{ profileStore.getTargetUserEmail }}</p>
     <!-- add user information -->
-    <div>
-      <p>Email: {{ email }}</p>
-      <p>First Name: {{ firstName }}</p>
-      <p>Last Name: {{ lastName }}</p>
-      <p>Date of Birth: {{ dob }}</p>
-      <p>Nickname: {{ nickname }}</p>
-      <p>About Me: {{ aboutMe }}</p>
+    <div v-if="profile">
+      <p>Email: {{ profile.email }}</p>
+      <p>First Name: {{ profile.first_name }}</p>
+      <p>Last Name: {{ profile.last_name }}</p>
+      <p>Date of Birth: {{ profile.dob }}</p>
+      <p>Nickname: {{ profile.nickname }}</p>
+      <p>About Me: {{ profile.about_me }}</p>
     </div>
     <!-- separately add avatar, perhaps it should be on the right half of screen -->
-    <div>
-      <p>Avatar: <img :src="getImgUrl(avatar)" alt="fail again"></p>
+    <div v-if="profile">
+      <!-- <p>Avatar: <img :src="getImgUrl(profile.avatar)" alt="fail again"></p> -->
+      <p>Avatar: {{ profile.avatar }} </p>
     </div>
     <!-- add following list. The other users followed by the user -->
     <h2>Following:</h2>
@@ -48,21 +49,24 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, onBeforeMount, computed, reactive } from 'vue';
+import { useWebSocketStore } from '@/store/websocket';
+import { useUUIDStore } from '@/store/uuid';
 import { usePostStore } from '@/store/post';
 import { useProfileStore } from '@/store/profile';
+import { WSMessageType, TargetProfileRequest, UserProfile } from '@/api/types';
 
 // if true/false, then show follow/unfollow text on button
-const isVisitorNotFollowerAndDidNotRequested = ref(true);
+const isVisitorNotFollowerAndNotRequester = ref(true);
 
-watch(isVisitorNotFollowerAndDidNotRequested, (newValue, oldValue) => {
+watch(isVisitorNotFollowerAndNotRequester, (newValue, oldValue) => {
   alert(`isVisitorNotFollowerAndDidNotRequested: ${newValue}`);
   // handleFollowing(newValue);
 });
 
 function handleFollowing() {
   // Call your method here
-  isVisitorNotFollowerAndDidNotRequested.value = !isVisitorNotFollowerAndDidNotRequested.value;
+  isVisitorNotFollowerAndNotRequester.value = !isVisitorNotFollowerAndNotRequester.value;
 }
 
 // if true then show all profile information on screen
@@ -72,50 +76,23 @@ function getImgUrl(imageNameWithExtension: string) {
   return require(`../assets/${imageNameWithExtension}`)
 }
 
-const email = ref('john.doe@example.com');
-const firstName = ref('John');
-const lastName = ref('Doe');
-const dob = ref('01/01/1990');
-const avatar = ref('logo.png'); //todo: have to be at least logo.png in intial moment or fail with updateProfile() inside onMounted(). Outside onMounted() it works fine, with any initial string value
-const nickname = ref('johndoe');
-const aboutMe = ref('Lorem ipsum dolor sit amet, consectetur adipiscing elit.');
-
-//todo: remove/refactor later, to get data from backend
-interface Profile {
-  email: string;
-  firstName: string;
-  lastName: string;
-  dob: string;
-  avatar: string;
-  nickname: string;
-  aboutMe: string;
-}
-
-function fillDummyProfileData(userId: number): Profile {
-  return {
-    email: 'dummy@mail.com',
-    firstName: 'Dummy',
-    lastName: 'Doe',
-    dob: '01/01/1990',
-    avatar: 'logo.png',
-    nickname: 'dummydoe',
-    aboutMe: 'Very interesting text.',
-  };
-}
-
+const webSocketStore = useWebSocketStore();
+const storeUUID = useUUIDStore();
 const profileStore = useProfileStore();
+
+
+const profile = computed(() => webSocketStore.userProfile);
+
+
 /** Function to update the profile data using dummy data at the moment*/
 function updateProfile() {
-  //todo: get data from backend based on user() id from profileStore
-  const profile = fillDummyProfileData(profileStore.getTargetUserId);
-
-  email.value = profile.email;
-  firstName.value = profile.firstName;
-  lastName.value = profile.lastName;
-  dob.value = profile.dob;
-  avatar.value = profile.avatar;//todo: placeholder.it must be image(uploaded or anonymous placeholder), so or from assets, like it is now, or from public folder(requires another code) * /
-  nickname.value = profile.nickname;
-  aboutMe.value = profile.aboutMe;
+  webSocketStore.sendMessage({
+    type: WSMessageType.USER_PROFILE,
+    data: {
+      user_uuid: storeUUID.getUUID,
+      target_email: profileStore.getTargetUserEmail,
+    } as TargetProfileRequest,
+  })
 }
 
 // following and followers section
@@ -200,10 +177,13 @@ const piniaManageData = (post: Post) => {
 }
 
 onMounted(() => {
+  console.log('profile.value', profile)
   updateProfile();
   updateFollowingList();
   updateFollowersList();
   updatePostsList();
 });
+
+
 
 </script>

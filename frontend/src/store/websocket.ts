@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { WSMessage, WSMessageType, Post } from '@/api/types';
+import { WSMessage, WSMessageType, Post, UserProfile } from '@/api/types';
 
 
 export const useWebSocketStore = defineStore({
@@ -27,6 +27,7 @@ export const useWebSocketStore = defineStore({
       };
     },
     sendMessage(message: WSMessage) {
+      this.clearMessages(message);
       const messageString = JSON.stringify(message);
       console.log(`Sending message json string: ${messageString}`);
       this.socket?.send(messageString);
@@ -35,12 +36,30 @@ export const useWebSocketStore = defineStore({
       this.socket?.close();
       this.socket = null;
     },
+    clearMessages(message: WSMessage) {
+      console.log('clearMessages==============================', message.type);
+      switch (message.type) {
+        case WSMessageType.POSTS_LIST:
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.POST_RESPONSE);
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.POSTS_LIST);
+          break;
+        case WSMessageType.USER_PROFILE:
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.USER_PROFILE);
+          break;
+        default:
+          console.log('SKIP clearMessages default==============================');
+      }
+    },
   },
   getters: {
     isConnected(): boolean {
       return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
     },
-
+    userProfile(): UserProfile {
+      const profile_messages = this.messages.filter((message) => message.type === WSMessageType.USER_PROFILE);
+      const profile = profile_messages.map((message) => message.data as UserProfile)[0];
+      return profile;
+    },
     postsList(): Post[] {
       const fresh_posts_messages = this.messages.filter((message) => message.type === WSMessageType.POST_RESPONSE);
       const fresh_posts = fresh_posts_messages.map((message) => message.data as Post);

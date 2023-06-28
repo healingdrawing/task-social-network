@@ -119,7 +119,7 @@ function addComment() {
 
 const profileStore = useProfileStore();
 function piniaManageData(comment: Comment) {
-  profileStore.setTargetUserId(comment.authorId);
+  profileStore.setTargetUserEmail("comment.authorEmail");
 }
 
 onMounted(() => {

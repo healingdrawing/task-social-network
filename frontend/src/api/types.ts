@@ -87,3 +87,24 @@ export interface PostSubmit {
 export interface PostsListRequest {
   user_uuid: string;
 }
+
+export interface TargetProfileRequest {
+  user_uuid: string;
+  target_email: string;
+}
+
+export interface ChangePrivacyRequest {
+  user_uuid: string;
+  make_public: boolean;
+}
+
+export interface UserProfile {
+  email: string;
+  first_name: string;
+  last_name: string;
+  dob: string;
+  avatar: string;
+  nickname: string;
+  about_me: string;
+  public: boolean;
+}

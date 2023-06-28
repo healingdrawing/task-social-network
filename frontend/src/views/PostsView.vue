@@ -48,32 +48,37 @@
       :key="post.id">
       <hr>
       <router-link
-      :to="{ name: 'post' }"
-      @click="piniaManageData(post)">
-      <p>Post id: {{ post.id }}</p>
-      <p>Post title: {{ post.title }}</p>
-      <p>Post tags: {{ post.categories }}</p>
-      <p>Post content: {{ post.content }}</p>
-      <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
-      <p>Post picture: {{ post.picture }}</p>
-      <p>Post created: {{ post.created_at }}</p>
-      <h3>
-        Author: {{ post.first_name }}
-        {{ post.last_name }} 
-        ({{ post.email }})
-      </h3>
+        :to="{ name: 'post' }"
+        @click="piniaManageDataPost(post)">
+        <p>Post id: {{ post.id }}</p>
+        <p>Post title: {{ post.title }}</p>
+        <p>Post tags: {{ post.categories }}</p>
+        <p>Post content: {{ post.content }}</p>
+        <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
+        <p>Post picture: {{ post.picture }}</p>
+        <p>Post created: {{ post.created_at }}</p>
+      </router-link>
+      <router-link
+      :to="{ name: 'target' }"
+      @click="piniaManageDataProfile(post.email)">
+        <h3>
+          Author: {{ post.first_name }}
+          {{ post.last_name }} 
+          ({{ post.email }})
+        </h3>
       </router-link>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { Ref, computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useUUIDStore } from '@/store/pinia';
 import { usePostStore } from '@/store/pinia';
+import { useProfileStore } from '@/store/pinia';
 import { usePictureStore } from '@/store/pinia';
 import { useWebSocketStore } from '@/store/websocket';
-import { WSMessage, WSMessageType, PostSubmit, Post, PostsListRequest } from '@/api/types';
+import { WSMessage, WSMessageType, PostSubmit, Post, PostsListRequest, TargetProfileRequest } from '@/api/types';
 
 interface Follower {
   full_name: string;
@@ -142,13 +147,19 @@ function updateFollowersList() {
 }
 
 const postStore = usePostStore();
-function piniaManageData(post: Post) {
+function piniaManageDataPost(post: Post) {
   postStore.setPostId(post.id);
+}
+
+const profileStore = useProfileStore();
+function piniaManageDataProfile(email: string) {
+  profileStore.setTargetUserEmail(email);
 }
 
 // send request to get old posts list, used inside onMounted
 function updatePostsList() {
   console.log('=======FIRED======= updatePostsList');
+
   webSocketStore.sendMessage({
     type: WSMessageType.POSTS_LIST,
     data: {

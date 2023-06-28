@@ -11,20 +11,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type WSPosts struct {
-	WSPosts []WSPost `json:"posts"`
-}
-
-type WSPost struct {
-	ID         int    `json:"ID"`
-	UserID     int    `json:"user_id"`
-	Title      string `json:"title"`
-	Categories string `json:"categories"`
-	Content    string `json:"content"`
-	Picture    string `json:"picture"`
-	CreatedAt  string `json:"created_at"`
-}
-
 type WS_POST_SUBMIT_DTO struct {
 	User_uuid   string `json:"user_uuid"`
 	Title       string `json:"title"`
@@ -54,11 +40,6 @@ type WS_POSTS_LIST_DTO []WS_POST_RESPONSE_DTO
 func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
 
-	log.Println("wsPostSubmitHandler-------NEW POST") //todo: remove this
-	for key, value := range messageData {
-		log.Println("KEY: ", key, "\nVALUE: ", value)
-	}
-
 	var data WS_POST_SUBMIT_DTO
 	data.User_uuid = messageData["user_uuid"].(string)
 	data.Title = messageData["title"].(string)
@@ -86,14 +67,15 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 		postPicture = avatarData
 	}
 
-	userID, err := getIDbyUUID(data.User_uuid)
+	user_id, err := getIDbyUUID(data.User_uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
+		return
 	}
 
 	data.Created_at = time.Now().Format("2006-01-02 15:04:05")
-	result, err := statements["addPost"].Exec(userID, data.Title, data.Categories, data.Content, data.Privacy, postPicture, data.Created_at)
+	result, err := statements["addPost"].Exec(user_id, data.Title, data.Categories, data.Content, data.Privacy, postPicture, data.Created_at)
 	if err != nil {
 		log.Println("addPost query failed", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addPost query failed"})
@@ -129,7 +111,7 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 		}
 	}
 
-	rows, err := statements["getPosts"].Query(userID)
+	rows, err := statements["getPosts"].Query(user_id)
 	if err != nil {
 		log.Println("getPosts query failed", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getPosts query failed"})
@@ -155,13 +137,14 @@ func wsPostsListHandler(conn *websocket.Conn, messageData map[string]interface{}
 	defer wsRecover()
 
 	user_uuid := messageData["user_uuid"].(string)
-	userID, err := getIDbyUUID(user_uuid)
+	user_id, err := getIDbyUUID(user_uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
+		return
 	}
 
-	rows, err := statements["getPostsAbleToSee"].Query(userID, userID, userID)
+	rows, err := statements["getPostsAbleToSee"].Query(user_id, user_id, user_id)
 	if err != nil {
 		log.Println("getPosts query failed", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getPostsAbleToSee query failed"})

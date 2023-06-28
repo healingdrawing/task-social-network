@@ -120,6 +120,10 @@ func reader(conn *websocket.Conn) {
 				wsPostSubmitHandler(conn, data.Data)
 			case string(WS_POSTS_LIST):
 				wsPostsListHandler(conn, data.Data)
+			case string(WS_USER_PROFILE):
+				wsUserProfileHandler(conn, data.Data)
+			case string(WS_USER_PRIVACY):
+				wsChangePrivacyHandler(conn, data.Data)
 			case "login":
 				clients.Store(conn, data.Data["username"])
 				sendStatus(data.Data["username"].(string), true)
@@ -157,6 +161,23 @@ func wsSendError(msg WS_ERROR_RESPONSE_DTO) {
 	})
 }
 
+func wsSendSuccess(msg WS_SUCCESS_RESPONSE_DTO) {
+	outputMessage, err := wsCreateResponseMessage(WS_SUCCESS_RESPONSE, msg)
+
+	if err != nil {
+		log.Println(err)
+	}
+	clients.Range(func(key, value interface{}) bool {
+		if c, ok := key.(*websocket.Conn); ok {
+			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return true
+	})
+}
+
 func wsSendPost(post WS_POST_RESPONSE_DTO) {
 
 	outputMessage, err := wsCreateResponseMessage(WS_POST_RESPONSE, post)
@@ -178,6 +199,24 @@ func wsSendPost(post WS_POST_RESPONSE_DTO) {
 func wsSendPostsList(postsList WS_POSTS_LIST_DTO) {
 
 	outputMessage, err := wsCreateResponseMessage(WS_POSTS_LIST, postsList)
+
+	if err != nil {
+		log.Println(err)
+	}
+	clients.Range(func(key, value interface{}) bool {
+		if c, ok := key.(*websocket.Conn); ok {
+			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return true
+	})
+}
+
+func wsSendUserProfile(profile WS_USER_PROFILE_RESPONSE_DTO) {
+
+	outputMessage, err := wsCreateResponseMessage(WS_USER_PROFILE, profile)
 
 	if err != nil {
 		log.Println(err)

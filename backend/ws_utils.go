@@ -12,7 +12,8 @@ import (
 type WSMT string
 
 const (
-	WS_ERROR_RESPONSE WSMT = "error_response"
+	WS_ERROR_RESPONSE   WSMT = "error_response"
+	WS_SUCCESS_RESPONSE WSMT = "success_response"
 
 	WS_COMMENT_SUBMIT WSMT = "comment_submit"
 	WS_COMMENTS_LIST  WSMT = "comments_list"

@@ -9,6 +9,10 @@ type WS_ERROR_RESPONSE_DTO struct {
 	Content string `json:"content"`
 }
 
+type WS_SUCCESS_RESPONSE_DTO struct {
+	Content string `json:"content"`
+}
+
 // perhaps refactor bottom code
 
 // type WS_COMMENT_SUBMIT_DTO struct {
