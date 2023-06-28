@@ -146,6 +146,7 @@ function piniaManageData(post: Post) {
   postStore.setPostId(post.id);
 }
 
+// send request to get old posts list, used inside onMounted
 function updatePostsList() {
   console.log('=======FIRED======= updatePostsList');
   webSocketStore.sendMessage({

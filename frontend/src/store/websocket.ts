@@ -41,14 +41,21 @@ export const useWebSocketStore = defineStore({
       return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
     },
 
+    postsList(): Post[] {
+      const fresh_posts_messages = this.messages.filter((message) => message.type === WSMessageType.POST_RESPONSE);
+      const fresh_posts = fresh_posts_messages.map((message) => message.data as Post);
+
+      const history_posts_messages_list = this.messages.filter((message) => message.type === WSMessageType.POSTS_LIST);
+      const history_posts = history_posts_messages_list.map((message) =>
+        (message.data as Post[]).map((post) => post)
+      ).flat();
+
+      const posts = [...fresh_posts, ...history_posts];
+      return posts;
+    },
     commentsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.COMMENTS_LIST) },
     chatUsersList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.CHAT_USERS_LIST) },
     followRequestsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.FOLLOW_REQUESTS_LIST) },
-    postsList(): Post[] {
-      const postsMessages = this.messages.filter((message) => message.type === WSMessageType.POST_RESPONSE);
-      const posts = postsMessages.map((message) => message.data as Post);
-      return posts;
-    },
     groupsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUPS_LIST) },
     groupPostsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_POSTS_LIST) },
     groupPostCommentsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_POST_COMMENTS_LIST) },

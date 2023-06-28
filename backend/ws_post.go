@@ -154,10 +154,17 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 func wsPostsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
 
-	rows, err := statements["getPosts"].Query()
+	user_uuid := messageData["user_uuid"].(string)
+	userID, err := getIDbyUUID(user_uuid)
+	if err != nil {
+		log.Println("failed to get ID of the request sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
+	}
+
+	rows, err := statements["getPostsAbleToSee"].Query(userID, userID, userID)
 	if err != nil {
 		log.Println("getPosts query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getPosts query failed"})
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getPostsAbleToSee query failed"})
 		return
 	}
 	defer rows.Close()
@@ -166,7 +173,6 @@ func wsPostsListHandler(conn *websocket.Conn, messageData map[string]interface{}
 	for rows.Next() {
 		var post WS_POST_RESPONSE_DTO
 		pictureBytes := []byte{}
-		rows.Next()
 		err = rows.Scan(&post.ID, &post.Title, &post.Content, &post.Categories, &pictureBytes, &post.Privacy, &post.Created_at, &post.Email, &post.First_name, &post.Last_name)
 		if err != nil {
 			log.Println("post scan failed", err.Error())

@@ -101,7 +101,7 @@ func reader(conn *websocket.Conn) {
 			return
 		}
 
-		log.Println("read message: \nincoming bytes: ", incoming,
+		log.Println("=================\nread message:",
 			"\nincoming as string:", string(incoming),
 			"\nmessageType: ", messageType) //todo: delete debug
 
@@ -177,7 +177,7 @@ func wsSendPost(post WS_POST_RESPONSE_DTO) {
 
 func wsSendPostsList(postsList WS_POSTS_LIST_DTO) {
 
-	outputMessage, err := wsCreateResponseMessage(WS_POST_RESPONSE, postsList)
+	outputMessage, err := wsCreateResponseMessage(WS_POSTS_LIST, postsList)
 
 	if err != nil {
 		log.Println(err)

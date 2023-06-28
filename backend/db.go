@@ -108,6 +108,7 @@ func dbInit() {
 	}
 }
 
+// todo: CHECK IT! getPostsAbleToSee cybermonster is not checked properly
 func statementsCreation() {
 	for key, query := range map[string]string{
 		"addUser":            `INSERT INTO users (email, password, first_name, last_name, dob, avatar, nickname, about_me, privacy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
@@ -128,8 +129,11 @@ func statementsCreation() {
 
 		"addAlmostPrivate": `INSERT INTO almost_private (user_id, post_id) VALUES (?, ?);`,
 
-		"addPost":     `INSERT INTO post (user_id, title, categories, content, privacy, picture, created_at) VALUES (?, ?, ?, ?, ?, ?, ?);`,
-		"getPosts":    `SELECT post.id, title, content, categories, picture, post.privacy, created_at, email, first_name, last_name FROM post INNER JOIN users ON user_id=? ORDER BY created_at DESC;`,
+		"addPost":  `INSERT INTO post (user_id, title, categories, content, privacy, picture, created_at) VALUES (?, ?, ?, ?, ?, ?, ?);`,
+		"getPosts": `SELECT post.id, title, content, categories, picture, post.privacy, created_at, email, first_name, last_name FROM post INNER JOIN users ON user_id=? ORDER BY created_at DESC;`,
+
+		"getPostsAbleToSee": `SELECT post.id, title, content, categories, picture, post.privacy, created_at, email, first_name, last_name FROM post INNER JOIN users ON users.id = post.user_id LEFT JOIN followers ON followers.user_id = post.user_id AND followers.follower_id = ? LEFT JOIN almost_private ON almost_private.user_id = ? AND almost_private.post_id = post.id WHERE post.user_id = ? OR post.privacy = "public" OR (post.privacy = "private" AND followers.follower_id IS NOT NULL) OR (almost_private.post_id IS NOT NULL) ORDER BY created_at DESC;`,
+
 		"addComment":  `INSERT INTO comment (user_id, post_id, content, picture, created_at) VALUES (?, ?, ?, ?, ?);`,
 		"getComments": `SELECT first_name, last_name, content, picture FROM comment INNER JOIN users ON user_id = users.id WHERE post_id = ? ORDER BY comment.id DESC;`,
 		"addMessage":  `INSERT INTO message (from_id, to_id, content, created_at) VALUES (?, ?, ?, ?);`,
