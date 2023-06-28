@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/base64"
-	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -25,6 +25,17 @@ type WSPost struct {
 	CreatedAt  string `json:"created_at"`
 }
 
+type WS_POST_SUBMIT_DTO struct {
+	User_uuid   string `json:"user_uuid"`
+	Title       string `json:"title"`
+	Categories  string `json:"categories"`
+	Content     string `json:"content"`
+	Privacy     string `json:"privacy"`
+	Picture     string `json:"picture"`
+	Created_at  string `json:"created_at"`
+	Able_to_see string `json:"able_to_see"`
+}
+
 type WS_POST_RESPONSE_DTO struct {
 	ID         int    `json:"id"` // post section. use to get comments
 	Title      string `json:"title"`
@@ -38,22 +49,14 @@ type WS_POST_RESPONSE_DTO struct {
 	Last_name  string `json:"last_name"`
 }
 
-type WS_POST_SUBMIT_DTO struct {
-	User_uuid   string `json:"user_uuid"`
-	Title       string `json:"title"`
-	Categories  string `json:"categories"`
-	Content     string `json:"content"`
-	Privacy     string `json:"privacy"`
-	Picture     string `json:"picture"`
-	Created_at  string `json:"created_at"`
-	Able_to_see string `json:"able_to_see"`
-}
+type WS_POSTS_LIST_DTO []WS_POST_RESPONSE_DTO
 
 func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
 
+	log.Println("wsPostSubmitHandler-------NEW POST") //todo: remove this
 	for key, value := range messageData {
-		log.Println("wsPostSubmitHandler,\nkey: ", key, "\nvalue: ", value)
+		log.Println("KEY: ", key, "\nVALUE: ", value)
 	}
 
 	var data WS_POST_SUBMIT_DTO
@@ -72,12 +75,12 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 		avatarData, err := base64.StdEncoding.DecodeString(data.Picture)
 		if err != nil {
 			log.Println("Invalid avatar ", err.Error())
-			// jsonResponse(w, http.StatusUnprocessableEntity, "Invalid avatar")
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " Invalid avatar"})
 			return
 		}
 		if !isImage(avatarData) {
 			log.Println("avatar is not a valid image", err.Error())
-			// jsonResponse(w, http.StatusUnsupportedMediaType, "avatar is not a valid image")
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnsupportedMediaType) + " avatar is not a valid image"})
 			return
 		}
 		postPicture = avatarData
@@ -85,21 +88,22 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 
 	userID, err := getIDbyUUID(data.User_uuid)
 	if err != nil {
-		log.Println("failed to get ID of the request sender", err.Error()) // todo: some error common message sender needed
+		log.Println("failed to get ID of the request sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
 	}
 
 	data.Created_at = time.Now().Format("2006-01-02 15:04:05")
 	result, err := statements["addPost"].Exec(userID, data.Title, data.Categories, data.Content, data.Privacy, postPicture, data.Created_at)
 	if err != nil {
 		log.Println("addPost query failed", err.Error())
-		// jsonResponse(w, http.StatusInternalServerError, "addPost query failed")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addPost query failed"})
 		return
 	}
 
 	postId, err := result.LastInsertId()
 	if err != nil {
 		log.Println("LastInsertId of addPost query failed", err.Error())
-		// jsonResponse(w, http.StatusInternalServerError, "LastInsertId of addPost query failed")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " LastInsertId of addPost query failed"})
 		return
 	}
 	// privacy check and able to see
@@ -111,73 +115,70 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 				userID, err := getIDbyEmail(email)
 				if err != nil {
 					log.Println("Invalid email ", err.Error())
-					// jsonResponse(w, http.StatusUnprocessableEntity, "Invalid email")
+					wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " Invalid email"})
 					return
 				}
 				// add the post to the almost_private table (user_id, post_id)
 				_, err = statements["addAlmostPrivate"].Exec(userID, postId)
 				if err != nil {
 					log.Println("addAlmostPrivate query failed", err.Error())
-					// jsonResponse(w, http.StatusInternalServerError, "addAlmostPrivate query failed")
+					wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addAlmostPrivate query failed"})
 					return
 				}
 			}
 		}
 	}
 
-	//fix: fails with scan, because structure was changed, continue refactoring
-	// jsonResponse(w, http.StatusOK, "Post created")
-
 	rows, err := statements["getPosts"].Query(userID)
 	if err != nil {
 		log.Println("getPosts query failed", err.Error())
-		// jsonResponse(w, http.StatusInternalServerError, "getPosts query failed")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getPosts query failed"})
 		return
 	}
+	defer rows.Close()
+
 	var post WS_POST_RESPONSE_DTO
+	pictureBytes := []byte{}
 	rows.Next()
-	err = rows.Scan(&post.ID, &post.Title, &post.Content, &post.Categories, &post.Picture, &post.Privacy, &post.Created_at, &post.Email, &post.First_name, &post.Last_name)
+	err = rows.Scan(&post.ID, &post.Title, &post.Content, &post.Categories, &pictureBytes, &post.Privacy, &post.Created_at, &post.Email, &post.First_name, &post.Last_name)
 	if err != nil {
 		log.Println("post scan failed", err.Error())
-		// jsonResponse(w, http.StatusInternalServerError, "post scan failed")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " post scan failed"})
 		return
 	}
-	rows.Close()
+	post.Picture = base64.StdEncoding.EncodeToString(pictureBytes)
+
 	wsSendPost(post)
 }
 
-func wsPostsGetHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	defer recovery(w)
+func wsPostsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+	defer wsRecover()
+
 	rows, err := statements["getPosts"].Query()
 	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, "getPosts query failed")
+		log.Println("getPosts query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getPosts query failed"})
 		return
 	}
-	var wsPosts WSPosts
+	defer rows.Close()
+
+	var postsList WS_POSTS_LIST_DTO
 	for rows.Next() {
-		var post WSPost
-		pictureBlob := []byte{}
-		err = rows.Scan(&post.ID, &post.UserID, &post.Title, &post.Categories, &post.Content, &pictureBlob)
+		var post WS_POST_RESPONSE_DTO
+		pictureBytes := []byte{}
+		rows.Next()
+		err = rows.Scan(&post.ID, &post.Title, &post.Content, &post.Categories, &pictureBytes, &post.Privacy, &post.Created_at, &post.Email, &post.First_name, &post.Last_name)
 		if err != nil {
-			jsonResponse(w, http.StatusInternalServerError, "post scan failed")
+			log.Println("post scan failed", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " post scan failed"})
 			return
 		}
-		post.Picture = base64.StdEncoding.EncodeToString(pictureBlob)
-		wsPosts.WSPosts = append(wsPosts.WSPosts, post)
+		post.Picture = base64.StdEncoding.EncodeToString(pictureBytes)
+		postsList = append(postsList, post)
 	}
-	rows.Close()
-	w.WriteHeader(200)
-	jsonResponseObj, err := json.Marshal(wsPosts)
-	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, "json.Marshal failed")
-		return
-	}
-	_, err = w.Write(jsonResponseObj)
-	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, "w.Write(jsonResponseObj)<-posts failed")
-		return
-	}
+
+	wsSendPostsList(postsList)
+
 }
 
 // todo: global

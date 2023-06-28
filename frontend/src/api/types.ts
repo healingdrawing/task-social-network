@@ -83,3 +83,7 @@ export interface PostSubmit {
   able_to_see: string; // user emails, to filter posts by privacy, on backend side, before sending to frontend
   picture?: string; // jpeg,png,gif
 }
+
+export interface PostsListRequest {
+  user_uuid: string;
+}

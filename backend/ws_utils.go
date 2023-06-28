@@ -12,7 +12,8 @@ import (
 type WSMT string
 
 const (
-	WS_ERROR          WSMT = "error"
+	WS_ERROR_RESPONSE WSMT = "error_response"
+
 	WS_COMMENT_SUBMIT WSMT = "comment_submit"
 	WS_COMMENTS_LIST  WSMT = "comments_list"
 
@@ -72,7 +73,7 @@ func wsCreateResponseMessage(messageType WSMT, data interface{}) ([]byte, error)
 
 	jsonData, err := json.Marshal(response)
 	if err != nil {
-		response.Type = WS_ERROR
+		response.Type = WS_ERROR_RESPONSE
 		response.Data = "Error while marshaling response message"
 		stableJsonErrorData, _ := json.Marshal(response)
 		return stableJsonErrorData, err

@@ -73,7 +73,7 @@ import { useUUIDStore } from '@/store/pinia';
 import { usePostStore } from '@/store/pinia';
 import { usePictureStore } from '@/store/pinia';
 import { useWebSocketStore } from '@/store/websocket';
-import { WSMessage, WSMessageType, PostSubmit, Post } from '@/api/types';
+import { WSMessage, WSMessageType, PostSubmit, Post, PostsListRequest } from '@/api/types';
 
 interface Follower {
   full_name: string;
@@ -146,7 +146,18 @@ function piniaManageData(post: Post) {
   postStore.setPostId(post.id);
 }
 
+function updatePostsList() {
+  console.log('=======FIRED======= updatePostsList');
+  webSocketStore.sendMessage({
+    type: WSMessageType.POSTS_LIST,
+    data: {
+      user_uuid: storeUUID.getUUID,
+    } as PostsListRequest,
+  });
+}
+
 onMounted(() => {
+  updatePostsList();
   updateFollowersList();
 });
 

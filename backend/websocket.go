@@ -116,10 +116,10 @@ func reader(conn *websocket.Conn) {
 			log.Println("data after unmarshalling: ", data) //todo: delete debug
 
 			switch data.Type {
-			case "post_submit":
-				log.Println("inside ws post_submit case")
+			case string(WS_POST_SUBMIT):
 				wsPostSubmitHandler(conn, data.Data)
-				// todo: implement post_submit case, check data + make record in DB + send to all clients allowed to see this post
+			case string(WS_POSTS_LIST):
+				wsPostsListHandler(conn, data.Data)
 			case "login":
 				clients.Store(conn, data.Data["username"])
 				sendStatus(data.Data["username"].(string), true)
@@ -138,9 +138,46 @@ func reader(conn *websocket.Conn) {
 	}
 }
 
+//todo: there is tiny chance it can be simplified. Check after all wsSend... is done
+
+func wsSendError(msg WS_ERROR_RESPONSE_DTO) {
+	outputMessage, err := wsCreateResponseMessage(WS_ERROR_RESPONSE, msg)
+
+	if err != nil {
+		log.Println(err)
+	}
+	clients.Range(func(key, value interface{}) bool {
+		if c, ok := key.(*websocket.Conn); ok {
+			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return true
+	})
+}
+
 func wsSendPost(post WS_POST_RESPONSE_DTO) {
 
 	outputMessage, err := wsCreateResponseMessage(WS_POST_RESPONSE, post)
+
+	if err != nil {
+		log.Println(err)
+	}
+	clients.Range(func(key, value interface{}) bool {
+		if c, ok := key.(*websocket.Conn); ok {
+			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return true
+	})
+}
+
+func wsSendPostsList(postsList WS_POSTS_LIST_DTO) {
+
+	outputMessage, err := wsCreateResponseMessage(WS_POST_RESPONSE, postsList)
 
 	if err != nil {
 		log.Println(err)
