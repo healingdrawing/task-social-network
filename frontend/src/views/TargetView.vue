@@ -27,12 +27,12 @@
     <!-- add following list. The other users followed by the user -->
     <h2>Following:</h2>
     <div class="user-list" style="height: 100px; overflow-y: scroll;">
-      <div v-for="user in followingList" :key="user.id">{{ user.name }}</div>
+      <div v-for="user in followingList" :key="user.email">{{ `${user.first_name} ${user.last_name} (${user.email})` }}</div>
     </div>
     <!-- add followers list. The other users following the user -->
     <h2>Followers:</h2>
     <div class="user-list" style="height: 100px; overflow-y: scroll;">
-      <div v-for="user in followersList" :key="user.id">{{ user.name }}</div>
+      <div v-for="user in followersList" :key="user.email">{{ `${user.first_name} ${user.last_name} (${user.email})` }}</div>
     </div>
     <!-- add user posts list. The posts created by the user -->
     <h2>Posts:</h2>
@@ -82,7 +82,7 @@ const profileStore = useProfileStore();
 
 
 const profile = computed(() => webSocketStore.userProfile);
-/** Function to update the profile data from server*/
+/** updateProfile updates the profile data from server*/
 function updateProfile() {
   webSocketStore.sendMessage({
     type: WSMessageType.USER_PROFILE,
@@ -92,53 +92,29 @@ function updateProfile() {
     } as TargetProfileRequest,
   })
 }
-
-// following and followers section
-interface User {
-  id: number;
-  name: string;
-}
-
-const followingList = ref<User[]>([]);
-
-// todo: dummy data, remove/refactor later
+const followingList = computed(() => webSocketStore.userFollowingList);
+/** updateFollowingList updates the following list from server*/
 function updateFollowingList() {
-  // Code to get the user list goes here
-  const users: User[] = [
-    { id: 1, name: 'John' },
-    { id: 2, name: 'Jane' },
-    { id: 3, name: 'Bob' },
-    { id: 4, name: 'Alice' },
-    { id: 5, name: 'Mike' },
-    { id: 6, name: 'Sara' },
-    { id: 7, name: 'Tom' },
-    { id: 8, name: 'Kate' },
-    { id: 9, name: 'David' },
-    { id: 10, name: 'Emily' },
-  ];
-  followingList.value = users;
-  console.log('Following list updated');
+  webSocketStore.sendMessage({
+    type: WSMessageType.USER_FOLLOWING_LIST,
+    data: {
+      user_uuid: storeUUID.getUUID,
+      target_email: profileStore.getTargetUserEmail,
+    } as TargetProfileRequest,
+  })
 }
 
-const followersList = ref<User[]>([]);
+const followersList = computed(() => webSocketStore.userFollowersList);
 
 // todo: dummy data, remove/refactor later
 function updateFollowersList() {
-  // Code to get the user list goes here
-  const users: User[] = [
-    { id: 1, name: 'John follower' },
-    { id: 2, name: 'Jane follower' },
-    { id: 3, name: 'Bob follower' },
-    { id: 4, name: 'Alice follower' },
-    { id: 5, name: 'Mike follower' },
-    { id: 6, name: 'Sara follower' },
-    { id: 7, name: 'Tom follower' },
-    { id: 8, name: 'Kate follower' },
-    { id: 9, name: 'David follower' },
-    { id: 10, name: 'Emily follower' },
-  ];
-  followersList.value = users;
-  console.log('Followers list updated');
+  webSocketStore.sendMessage({
+    type: WSMessageType.USER_FOLLOWERS_LIST,
+    data: {
+      user_uuid: storeUUID.getUUID,
+      target_email: profileStore.getTargetUserEmail,
+    } as TargetProfileRequest,
+  })
 }
 
 // user posts section

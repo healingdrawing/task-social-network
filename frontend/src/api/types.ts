@@ -108,3 +108,9 @@ export interface UserProfile {
   about_me: string;
   public: boolean;
 }
+
+export interface UserForList {
+  email: string;
+  first_name: string;
+  last_name: string;
+}

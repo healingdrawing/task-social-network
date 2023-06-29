@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { WSMessage, WSMessageType, Post, UserProfile } from '@/api/types';
+import { WSMessage, WSMessageType, Post, UserProfile, UserForList } from '@/api/types';
 
 
 export const useWebSocketStore = defineStore({
@@ -46,6 +46,9 @@ export const useWebSocketStore = defineStore({
         case WSMessageType.USER_PROFILE:
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.USER_PROFILE);
           break;
+        case WSMessageType.USER_FOLLOWING_LIST:
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.USER_FOLLOWING_LIST);
+          break;
         default:
           console.log('SKIP clearMessages default==============================');
       }
@@ -60,6 +63,16 @@ export const useWebSocketStore = defineStore({
       const profile = profile_messages.map((message) => message.data as UserProfile)[0];
       return profile;
     },
+    userFollowingList(): UserForList[] {
+      const followingListMessages = this.messages.filter((message) => message.type === WSMessageType.USER_FOLLOWING_LIST)
+      const followingList = followingListMessages.map((message) => message.data as UserForList)
+      return followingList
+    },
+    userFollowersList(): UserForList[] {
+      const followersListMessages = this.messages.filter((message) => message.type === WSMessageType.USER_FOLLOWERS_LIST)
+      const followersList = followersListMessages.map((message) => message.data as UserForList)
+      return followersList
+    },
     postsList(): Post[] {
       const fresh_posts_messages = this.messages.filter((message) => message.type === WSMessageType.POST_RESPONSE);
       const fresh_posts = fresh_posts_messages.map((message) => message.data as Post);
@@ -72,6 +85,7 @@ export const useWebSocketStore = defineStore({
       const posts = [...fresh_posts, ...history_posts];
       return posts;
     },
+
     commentsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.COMMENTS_LIST) },
     chatUsersList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.CHAT_USERS_LIST) },
     followRequestsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.FOLLOW_REQUESTS_LIST) },
@@ -81,8 +95,8 @@ export const useWebSocketStore = defineStore({
     groupRequestsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_REQUESTS_LIST) },
     groupEventsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_EVENTS_LIST) },
     groupEventParticipantsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_EVENT_PARTICIPANTS_LIST) },
-    userFollowingList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.USER_FOLLOWING_LIST) },
-    userFollowersList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.USER_FOLLOWERS_LIST) },
+
+
     userPostsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.USER_POSTS_LIST) },
 
     // chatMessages(): Message[] {
