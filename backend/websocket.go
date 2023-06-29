@@ -124,6 +124,8 @@ func reader(conn *websocket.Conn) {
 				wsUserProfileHandler(conn, data.Data)
 			case string(WS_USER_PRIVACY):
 				wsChangePrivacyHandler(conn, data.Data)
+			case string(WS_USER_FOLLOWING_LIST):
+				wsFollowingListHandler(conn, data.Data)
 			case "login":
 				clients.Store(conn, data.Data["username"])
 				sendStatus(data.Data["username"].(string), true)

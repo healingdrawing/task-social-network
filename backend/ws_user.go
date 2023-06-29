@@ -42,18 +42,21 @@ func wsUserProfileHandler(conn *websocket.Conn, messageData map[string]interface
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
+		return
 	}
 
 	target_email, ok := messageData["target_email"].(string)
 	if !ok {
 		log.Println("failed to get target email", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get target email"})
+		return
 	}
 
 	target_id, err := getIDbyEmail(target_email)
 	if err != nil {
 		log.Println("failed to get ID of the target user", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the target user"})
+		return
 	}
 
 	isFollower, err := isFollowing(target_id, user_id)
@@ -82,8 +85,8 @@ func wsUserProfileHandler(conn *websocket.Conn, messageData map[string]interface
 	rows.Close()
 
 	if target_id != user_id && !isFollower && profile.Privacy == "private" {
-		log.Println("user is not a friend of the target user")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnauthorized) + " user is not a friend of the target user"})
+		log.Println("user does not have permissions to see the target user profile")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusForbidden) + " user does not have permissions to see the target user profile"})
 		return
 	}
 
