@@ -82,9 +82,7 @@ const profileStore = useProfileStore();
 
 
 const profile = computed(() => webSocketStore.userProfile);
-
-
-/** Function to update the profile data using dummy data at the moment*/
+/** Function to update the profile data from server*/
 function updateProfile() {
   webSocketStore.sendMessage({
     type: WSMessageType.USER_PROFILE,
