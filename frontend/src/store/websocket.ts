@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { WSMessage, WSMessageType, Post, UserProfile, UserForList } from '@/api/types';
+import { WSMessage, WSMessageType, Post, UserProfile, UserForList, UserVisitorStatus as Visitor } from '@/api/types';
 
 
 export const useWebSocketStore = defineStore({
@@ -49,6 +49,19 @@ export const useWebSocketStore = defineStore({
         case WSMessageType.USER_FOLLOWING_LIST:
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.USER_FOLLOWING_LIST);
           break;
+        case WSMessageType.USER_FOLLOWERS_LIST:
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.USER_FOLLOWERS_LIST);
+          break;
+        case WSMessageType.USER_FOLLOW:
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.USER_FOLLOW);
+          break;
+        case WSMessageType.USER_UNFOLLOW:
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.USER_UNFOLLOW);
+          break;
+        case WSMessageType.USER_VISITOR_STATUS:
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.USER_VISITOR_STATUS);
+          break;
+
         default:
           console.log('SKIP clearMessages default==============================');
       }
@@ -58,18 +71,24 @@ export const useWebSocketStore = defineStore({
     isConnected(): boolean {
       return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
     },
+    visitor(): Visitor {
+      const visitor_messages = this.messages.filter((message) => message.type === WSMessageType.USER_VISITOR_STATUS);
+      const visitor = visitor_messages.map((message) => message.data as Visitor)[0];
+      return visitor;
+
+    },
     userProfile(): UserProfile {
       const profile_messages = this.messages.filter((message) => message.type === WSMessageType.USER_PROFILE);
       const profile = profile_messages.map((message) => message.data as UserProfile)[0];
       return profile;
     },
     userFollowingList(): UserForList[] {
-      const followingListMessages = this.messages.filter((message) => message.type === WSMessageType.USER_FOLLOWING_LIST)
+      const followingListMessages = this.messages.filter((message) => message.type === WSMessageType.USER_FOLLOWING_LIST && message.data !== null && message.data !== undefined)
       const followingList = followingListMessages.map((message) => message.data as UserForList)
       return followingList
     },
     userFollowersList(): UserForList[] {
-      const followersListMessages = this.messages.filter((message) => message.type === WSMessageType.USER_FOLLOWERS_LIST)
+      const followersListMessages = this.messages.filter((message) => message.type === WSMessageType.USER_FOLLOWERS_LIST && message.data !== null && message.data !== undefined)
       const followersList = followersListMessages.map((message) => message.data as UserForList)
       return followersList
     },

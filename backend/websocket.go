@@ -124,8 +124,20 @@ func reader(conn *websocket.Conn) {
 				wsUserProfileHandler(conn, data.Data)
 			case string(WS_USER_PRIVACY):
 				wsChangePrivacyHandler(conn, data.Data)
+
 			case string(WS_USER_FOLLOWING_LIST):
 				wsFollowingListHandler(conn, data.Data)
+			case string(WS_USER_FOLLOWERS_LIST):
+				wsFollowersListHandler(conn, data.Data)
+			case string(WS_USER_FOLLOW):
+				wsFollowHandler(conn, data.Data)
+			case string(WS_USER_UNFOLLOW):
+				wsUnfollowHandler(conn, data.Data)
+			case string(WS_FOLLOW_REQUESTS_LIST):
+				wsFollowRequestsListHandler(conn, data.Data)
+			case string(WS_USER_VISITOR_STATUS):
+				wsUserVisitorStatusHandler(conn, data.Data)
+
 			case "login":
 				clients.Store(conn, data.Data["username"])
 				sendStatus(data.Data["username"].(string), true)
@@ -219,6 +231,78 @@ func wsSendPostsList(postsList WS_POSTS_LIST_DTO) {
 func wsSendUserProfile(profile WS_USER_PROFILE_RESPONSE_DTO) {
 
 	outputMessage, err := wsCreateResponseMessage(WS_USER_PROFILE, profile)
+
+	if err != nil {
+		log.Println(err)
+	}
+	clients.Range(func(key, value interface{}) bool {
+		if c, ok := key.(*websocket.Conn); ok {
+			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return true
+	})
+}
+
+func wsSendFollowingList(following_list WS_FOLLOWING_LIST_DTO) {
+
+	outputMessage, err := wsCreateResponseMessage(WS_USER_FOLLOWING_LIST, following_list)
+
+	if err != nil {
+		log.Println(err)
+	}
+	clients.Range(func(key, value interface{}) bool {
+		if c, ok := key.(*websocket.Conn); ok {
+			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return true
+	})
+}
+
+func wsSendFollowersList(following_list WS_FOLLOWERS_LIST_DTO) {
+
+	outputMessage, err := wsCreateResponseMessage(WS_USER_FOLLOWERS_LIST, following_list)
+
+	if err != nil {
+		log.Println(err)
+	}
+	clients.Range(func(key, value interface{}) bool {
+		if c, ok := key.(*websocket.Conn); ok {
+			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return true
+	})
+}
+
+func wsSendFollowRequestsList(follow_requests_list WS_FOLLOW_REQUESTS_LIST_DTO) {
+
+	outputMessage, err := wsCreateResponseMessage(WS_FOLLOW_REQUESTS_LIST, follow_requests_list)
+
+	if err != nil {
+		log.Println(err)
+	}
+	clients.Range(func(key, value interface{}) bool {
+		if c, ok := key.(*websocket.Conn); ok {
+			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return true
+	})
+}
+
+func wsSendUserVisitorStatus(user_visitor_status WS_USER_VISITOR_STATUS_DTO) {
+
+	outputMessage, err := wsCreateResponseMessage(WS_USER_VISITOR_STATUS, user_visitor_status)
 
 	if err != nil {
 		log.Println(err)

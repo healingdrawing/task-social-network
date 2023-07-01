@@ -48,6 +48,7 @@ export enum WSMessageType {
   USER_PROFILE = "user_profile", //  userProfileHandler
   USER_REGISTER = "user_register", //  userRegisterHandler
   USER_UNFOLLOW = "user_unfollow", //  unfollowHandler
+  USER_VISITOR_STATUS = "user_visitor_status", //  not implemented in old code
 }
 
 export interface WSMessage {
@@ -113,4 +114,8 @@ export interface UserForList {
   email: string;
   first_name: string;
   last_name: string;
+}
+
+export interface UserVisitorStatus {
+  status: string;
 }

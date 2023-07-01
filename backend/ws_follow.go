@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -17,12 +16,19 @@ type UserForList struct {
 
 type WS_FOLLOWING_LIST_DTO []UserForList
 
-// # followingHandler returns list of users that the target userID is following
-//
-// - If: the request has a JSON body, it will be decoded into a DTO, and the email of the user will be extracted
-// and the user id will be extracted from the email
-//
-// - Else: the cookie of the current user will be extracted and the user id will be extracted from the uuid
+type WS_FOLLOWERS_LIST_DTO []UserForList
+
+type WS_FOLLOW_REQUESTS_LIST_DTO []UserForList
+
+/*
+wsFollowingHandler returns list of users that the target user is following,
+
+if user has permission to view the target user's following list.
+
+Otherwise, it returns an error:
+
+"403 user does not have permissions to see the target user profile"
+*/
 func wsFollowingListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
 
@@ -93,172 +99,184 @@ func wsFollowingListHandler(conn *websocket.Conn, messageData map[string]interfa
 		var id int
 		err := rows.Scan(&id)
 		if err != nil {
-			jsonResponse(w, http.StatusInternalServerError, " scan allFollowingIds for loop failed")
+			log.Println("failed to scan following list", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to scan following list"})
 			return
 		}
 		allFollowingIds = append(allFollowingIds, id)
 	}
 
-	var followings []Following
-
+	var followings []UserForList
 	for _, id := range allFollowingIds {
-		var nickname string
-		var followingProfile Following
-		err = statements["getUserbyID"].QueryRow(id).Scan(&followingProfile.Email, &followingProfile.firstName, &followingProfile.lastName, &nickname)
+		var user UserForList
+		err = statements["getUserbyID"].QueryRow(id).Scan(&user.Email, &user.First_name, &user.Last_name)
 		if err != nil {
-			jsonResponse(w, http.StatusInternalServerError, " getUserbyID query failed")
+			log.Println("failed to scan into user for list", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to scan user for following list"})
 			return
 		}
-		followingProfile.FullName = followingProfile.firstName + " " + followingProfile.lastName
-		followings = append(followings, followingProfile)
+		followings = append(followings, user)
 	}
-	jsonResponseObj, _ := json.Marshal(followings)
-	// write the response
-	_, err = w.Write(jsonResponseObj)
-	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, " w.Write(jsonResponseObj)<-followings failed")
-		return
-	}
+
+	wsSendFollowingList(followings)
 }
 
-func followersHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	defer recovery(w)
-	var userID int
+/*
+wsFollowersHandler returns list of users that are following the target user,
 
-	// if the incoming request has a JSON body, decode it into the DTO, else get the cookie of current user
-	// and get the list of users that the current user is following
-	if r.Header.Get("Content-Type") == "application/json" {
-		data := struct {
-			Email string `json:"email"`
-		}{}
-		incomingData := map[string]any{}
-		// decode the request body into the DTO
-		decoder := json.NewDecoder(r.Body)
-		decoder.DisallowUnknownFields()
-		err := decoder.Decode(&incomingData)
-		if err != nil {
-			jsonResponse(w, http.StatusBadRequest, "")
-			return
-		}
-		data.Email = incomingData["email"].(string)
-		// get the user id from the email
+if user has permission to view the target user's followers list.
 
-		err = statements["getIDbyEmail"].QueryRow(data.Email).Scan(&userID)
-		if err != nil {
-			jsonResponse(w, http.StatusInternalServerError, " getIDbyEmail query failed")
-			return
-		}
-	} else {
-		err := error(nil)
-		userID, err = getRequestSenderID(r)
-		if err != nil {
-			jsonResponse(w, http.StatusUnauthorized, err.Error())
-			return
-		}
-	}
+Otherwise, it returns an error:
 
-	// get the list of users that follow the target userID
-	rows, err := statements["getFollowers"].Query(userID)
+"403 user does not have permissions to see the target user profile"
+*/
+func wsFollowersListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+	defer wsRecover()
+
+	uuid := messageData["user_uuid"].(string)
+	user_id, err := getIDbyUUID(uuid)
 	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, " getFollowers query failed")
+		log.Println("failed to get ID of the request sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
 		return
 	}
-	// create a slice of Follower
-	var followers []Following
-	// iterate over the rows
+
+	target_email, ok := messageData["target_email"].(string)
+	if !ok {
+		log.Println("failed to get target email", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get target email"})
+		return
+	}
+
+	target_id, err := getIDbyEmail(target_email)
+	if err != nil {
+		log.Println("failed to get ID of the target user", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the target user"})
+		return
+	}
+
+	isFollower, err := isFollowing(target_id, user_id)
+	if err != nil {
+		log.Println("failed to check if user is a follower of the target user", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a follower of the target user"})
+		return
+	}
+
+	var profile WS_USER_PROFILE_DTO
+	rows, err := statements["getUserProfile"].Query(target_id)
+	if err != nil {
+		log.Println("failed to get user profile", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user profile"})
+		return
+	}
+	defer rows.Close()
+	rows.Next()
+	err = rows.Scan(&profile.Email, &profile.First_name, &profile.Last_name, &profile.Dob,
+		&profile.avatar_bytes, &profile.Nickname, &profile.About_me, &profile.Privacy)
+	if err != nil {
+		log.Println("failed to scan user profile", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to scan user profile"})
+		return
+	}
+	rows.Close()
+
+	if target_id != user_id && !isFollower && profile.Privacy == "private" {
+		log.Println("user does not have permissions to see the target user profile")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusForbidden) + " user does not have permissions to see the target user profile"})
+		return
+	}
+
+	rows, err = statements["getFollowers"].Query(target_id)
+	if err != nil {
+		log.Println("failed to get followers list", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get followers list"})
+		return
+	}
+
+	allFollowersIds := []int{}
 	for rows.Next() {
-		// create a new Follower
-		var follower Following
-		// scan the row into the Follower
-		err := rows.Scan(&follower.id)
+		var id int
+		err := rows.Scan(&id)
 		if err != nil {
-			jsonResponse(w, http.StatusInternalServerError, " scan getFollowers &follower.id for loop failed")
+			log.Println("failed to scan followers list", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to scan followers list"})
 			return
 		}
-		// get the email, first_name, last_name of the follower
-		var nickname string
-		err = statements["getUserbyID"].QueryRow(follower.id).Scan(&follower.Email, &follower.firstName, &follower.lastName, &nickname)
+		allFollowersIds = append(allFollowersIds, id)
+	}
+
+	var followers []UserForList
+	for _, id := range allFollowersIds {
+		var user UserForList
+		err = statements["getUserbyID"].QueryRow(id).Scan(&user.Email, &user.First_name, &user.Last_name)
 		if err != nil {
-			jsonResponse(w, http.StatusInternalServerError, " getUserbyID query failed")
+			log.Println("failed to scan into user for list", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to scan user for following list"})
 			return
 		}
-		follower.FullName = follower.firstName + " " + follower.lastName
-		followers = append(followers, follower)
+		followers = append(followers, user)
 	}
 
-	jsonResponseObj, err := json.Marshal(followers)
-	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, " json.Marshal(followers) failed")
-		return
-	}
-	_, err = w.Write(jsonResponseObj)
-	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, " w.Write(jsonResponseObj)<-followers failed")
-		return
-	}
-
+	wsSendFollowersList(followers)
 }
 
-// # followHandler adds the current user to the followers list of the target user
+// followHandler manages the current user follow target user request.
 //
 // - If: the target user is private, the current user will be added to the followers_pending table
 //
 // - Else: the current user will be added to the followers table
-func followHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	defer recovery(w)
-	userID, err := getRequestSenderID(r)
+func wsFollowHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+	defer wsRecover()
+	uuid := messageData["user_uuid"].(string)
+	user_id, err := getIDbyUUID(uuid)
 	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, err.Error())
+		log.Println("failed to get ID of the request sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
 		return
 	}
 
-	// incoming DTO UserFollowerRequest
-	data := struct {
-		Email string `json:"email"`
-	}{}
-	// decode the request body into the DTO
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&data)
-	if err != nil {
-		jsonResponse(w, http.StatusBadRequest, "")
+	target_email, ok := messageData["target_email"].(string)
+	if !ok {
+		log.Println("failed to get target email", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get target email"})
 		return
 	}
-	// get the user id from the email
-	var targetUserID int
-	err = statements["getIDbyEmail"].QueryRow(data.Email).Scan(&targetUserID)
+
+	target_id, err := getIDbyEmail(target_email)
 	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, " getIDbyEmail query failed")
+		log.Println("failed to get ID of the target user", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the target user"})
 		return
 	}
 
 	// check if our target whom we want to follow is private or public
 	var privacy string
-	err = statements["getUserPrivacy"].QueryRow(targetUserID).Scan(&privacy)
+	err = statements["getUserPrivacy"].QueryRow(target_id).Scan(&privacy)
 	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, " getUserPrivacy query failed")
+		log.Println("failed to get target user privacy", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get target user privacy"})
 		return
 	}
 
 	if privacy == "private" {
 		// if the target is private, add the follower to the followers_pending table
-		_, err = statements["addFollowerPending"].Exec(targetUserID, userID)
+		_, err = statements["addFollowerPending"].Exec(target_id, user_id)
 		if err != nil {
-			jsonResponse(w, http.StatusInternalServerError, " addFollowerPending query failed")
+			log.Println("failed to add follower to followers_pending table", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to add follower to followers_pending table"})
 			return
 		}
-		jsonResponse(w, http.StatusOK, "request sent to follow the user")
+		wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " request sent to follow the user"})
 		return
 	} else {
 		// if the target is public, add the follower to the followers table
-		_, err = statements["addFollower"].Exec(targetUserID, userID)
+		_, err = statements["addFollower"].Exec(target_id, user_id)
 		if err != nil {
-			jsonResponse(w, http.StatusInternalServerError, " addFollower query failed")
+			log.Println("failed to add follower to followers table", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to add follower to followers table"})
 			return
 		}
-		jsonResponse(w, http.StatusOK, "user followed")
+		wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " user followed"})
 		return
 	}
 }
@@ -267,79 +285,78 @@ func followHandler(w http.ResponseWriter, r *http.Request) {
 //
 // - If the followers table has a row with the current loggedin user as follower_id and the target user as user_id,
 // the row will be deleted
-func unfollowHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	defer recovery(w)
-	userID, err := getRequestSenderID(r)
+func wsUnfollowHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+	defer wsRecover()
+
+	uuid := messageData["user_uuid"].(string)
+	user_id, err := getIDbyUUID(uuid)
 	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, err.Error())
+		log.Println("failed to get ID of the request sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
 		return
 	}
-	// incoming DTO UserFollowerRequest
-	data := struct {
-		Email string `json:"email"`
-	}{}
-	// decode the request body into the DTO
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&data)
-	if err != nil {
-		jsonResponse(w, http.StatusBadRequest, "")
+
+	target_email, ok := messageData["target_email"].(string)
+	if !ok {
+		log.Println("failed to get target email", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get target email"})
 		return
 	}
-	// get the user id from the email
-	var targetUserID int
-	err = statements["getIDbyEmail"].QueryRow(data.Email).Scan(&targetUserID)
+
+	target_id, err := getIDbyEmail(target_email)
 	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, " getIDbyEmail->targetUserID query failed")
+		log.Println("failed to get ID of the target user", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the target user"})
 		return
 	}
-	_, err = statements["removeFollower"].Exec(targetUserID, userID)
+
+	_, err = statements["removeFollower"].Exec(target_id, user_id)
 	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, " removeFollower query failed")
+		log.Println("failed to remove follower from followers table", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to remove follower from followers table"})
 		return
 	}
-	jsonResponse(w, http.StatusOK, "user unfollowed")
+	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " user unfollowed"})
 	return
 }
 
-// # FollowRequestListHandler returns a list of users that have sent a follow request to the current user
-//
-// - No JSON body is required
-func followRequestListHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	defer recovery(w)
-	userID, err := getRequestSenderID(r)
+// FollowRequestListHandler returns a list of users that have sent a follow request to the current user
+func wsFollowRequestsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+	defer wsRecover()
+
+	uuid := messageData["user_uuid"].(string)
+	user_id, err := getIDbyUUID(uuid)
 	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, err.Error())
+		log.Println("failed to get ID of the request sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
 		return
 	}
-	rows, err := statements["getFollowersPending"].Query(userID)
+
+	rows, err := statements["getFollowersPending"].Query(user_id)
 	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, " getFollowersPending query failed")
+		log.Println("failed to get followers pending", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to get followers pending"})
 		return
 	}
-	var followers []Follower
+	var follow_requests_list []UserForList
 	for rows.Next() {
-		var follower Follower
-		err = rows.Scan(&follower.id)
+		var follow_requester_id int
+		var follow_requester UserForList
+		err = rows.Scan(&follow_requester_id)
 		if err != nil {
-			jsonResponse(w, http.StatusInternalServerError, " &follower.id scan for loop failed")
+			log.Println("failed to scan followers pending", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to scan followers pending"})
 			return
 		}
-		var nickname string
-		err = statements["getUserbyID"].QueryRow(follower.id).Scan(&follower.Email, &follower.firstName, &follower.lastName, &nickname)
+
+		err = statements["getUserbyID"].QueryRow(follow_requester_id).Scan(&follow_requester.Email, &follow_requester.First_name, &follow_requester.Last_name)
 		if err != nil {
-			jsonResponse(w, http.StatusInternalServerError, " getUserbyID query failed")
+			log.Println("failed to get user by ID", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to get user by ID"})
 			return
 		}
-		follower.FullName = follower.firstName + " " + follower.lastName
-		followers = append(followers, follower)
+		follow_requests_list = append(follow_requests_list, follow_requester)
 	}
-	jsonResponseObj, _ := json.Marshal(followers)
-	_, err = w.Write(jsonResponseObj)
-	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, "w.Write(jsonResponseObj)<-followers failed")
-		return
-	}
+
+	wsSendFollowRequestsList(follow_requests_list)
 }

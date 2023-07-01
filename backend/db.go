@@ -171,14 +171,15 @@ func statementsCreation() {
 		"getEventParticipantStatus": `SELECT status FROM event_participants WHERE event_id = ? AND user_id = ? LIMIT 1;`,
 		"getUserIDwithEventCount":   `SELECT COUNT(*) FROM event_participants WHERE event_id = ? AND user_id = ?;`,
 
-		"getFollowers":          `SELECT follower_id FROM followers WHERE user_id = ?;`,
-		"getFollowersPending":   `SELECT follower_id FROM followers_pending WHERE user_id = ?;`,
-		"addFollower":           `INSERT INTO followers (user_id, follower_id) VALUES (?, ?);`,
-		"addFollowerPending":    `INSERT INTO followers_pending (user_id, follower_id) VALUES (?, ?);`,
-		"removeFollower":        `DELETE FROM followers WHERE user_id = ? AND follower_id = ?;`,
-		"removeFollowerPending": `DELETE FROM followers_pending WHERE user_id = ? AND follower_id = ?;`,
-		"getFollowing":          `SELECT user_id FROM followers WHERE follower_id = ?;`,
-		"doesSecondFollowFirst": `SELECT * FROM followers WHERE user_id = ? AND follower_id = ? LIMIT 1;`,
+		"getFollowers":                   `SELECT follower_id FROM followers WHERE user_id = ?;`,
+		"getFollowersPending":            `SELECT follower_id FROM followers_pending WHERE user_id = ?;`,
+		"addFollower":                    `INSERT INTO followers (user_id, follower_id) VALUES (?, ?);`,
+		"addFollowerPending":             `INSERT INTO followers_pending (user_id, follower_id) VALUES (?, ?);`,
+		"removeFollower":                 `DELETE FROM followers WHERE user_id = ? AND follower_id = ?;`,
+		"removeFollowerPending":          `DELETE FROM followers_pending WHERE user_id = ? AND follower_id = ?;`,
+		"getFollowing":                   `SELECT user_id FROM followers WHERE follower_id = ?;`,
+		"doesSecondFollowFirst":          `SELECT * FROM followers WHERE user_id = ? AND follower_id = ? LIMIT 1;`,
+		"doesSecondRequesterFollowFirst": `SELECT * FROM followers_pending WHERE user_id = ? AND follower_id = ? LIMIT 1;`,
 	} {
 		err := error(nil)
 		statements[key], err = db.Prepare(query)

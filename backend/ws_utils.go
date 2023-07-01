@@ -61,6 +61,7 @@ const (
 	WS_USER_PROFILE        WSMT = "user_profile"
 	WS_USER_REGISTER       WSMT = "user_register"
 	WS_USER_UNFOLLOW       WSMT = "user_unfollow"
+	WS_USER_VISITOR_STATUS WSMT = "user_visitor_status"
 )
 
 /*
@@ -71,6 +72,8 @@ func wsCreateResponseMessage(messageType WSMT, data interface{}) ([]byte, error)
 		Type: messageType,
 		Data: data,
 	}
+
+	log.Println("wsCreateResponseMessage: ", messageType)
 
 	jsonData, err := json.Marshal(response)
 	if err != nil {
@@ -83,56 +86,8 @@ func wsCreateResponseMessage(messageType WSMT, data interface{}) ([]byte, error)
 	return jsonData, nil
 }
 
-////////////////////////////
-// bottom code is based on old version
-////////////////////////////
-
-// # jsonResponse marshals and forwards json response writing to http.ResponseWriter
-//
-// @params {w http.ResponseWriter, statusCode int, data any}
-// @sideEffect {jsonResponse -> w}
-func wsJsonMarshal(data any) []byte {
-
-	jsonMarshaledObj := []byte{}
-	// if data type is string
-	if message, ok := data.(string); ok {
-		jsonMarshaledObj, _ = json.Marshal(map[string]string{
-			"message": ": " + message,
-		})
-	}
-	// if data type is int
-	if message, ok := data.(int); ok {
-		jsonMarshaledObj, _ = json.Marshal(map[string]int{
-			"message": message,
-		})
-	}
-	// if data type is bool
-	if message, ok := data.(bool); ok {
-		jsonMarshaledObj, _ = json.Marshal(map[string]bool{
-			"message": message,
-		})
-	}
-	// if data type is slice
-	if _, ok := data.([]any); ok {
-		jsonMarshaledObj, _ = json.Marshal(map[string][]any{
-			"data": data.([]any),
-		})
-	}
-	// if data type is object
-	if _, ok := data.(map[string]any); ok {
-		jsonMarshaledObj, _ = json.Marshal(map[string]any{
-			"data": data.(map[string]any),
-		})
-	}
-
-	return jsonMarshaledObj
-}
-
-// # recovery is a utility function to recover from panic and send a json err response over http
-//
-// @sideEffect {log, debug}
-//
-// - for further debugging uncomment {print stack trace}
+// todo: CHECK IT! old version refactored, raw code
+// wsRecover recover from panic and send a json err response over websocket
 func wsRecover() {
 	if r := recover(); r != nil {
 		fmt.Println("=====================================")
@@ -153,14 +108,12 @@ func wsRecover() {
 		}
 		relevantPanicLine := strings.Join(relevantPanicLines, "\n")
 		log.Println(relevantPanicLines)
-		wsJsonMarshal(relevantPanicLine)
+
+		wsSendError(WS_ERROR_RESPONSE_DTO{
+			Content: relevantPanicLine,
+		})
 		fmt.Println("=====================================")
 		// to print the full stack trace
 		log.Println(string(stackTrace))
 	}
-}
-
-type WSRecover struct {
-	messageType string
-	data        string
 }

@@ -1,12 +1,11 @@
 <template>
   <h1>Profile:</h1>
 
-  <div>
-    <button @click="handleFollowing()">
-      {{ isVisitorNotFollowerAndNotRequester ? 'Request To Follow' : 'Unfollow' }}
-    </button>
+  <div v-if="visitor">
+    <button @click="handleFollowing()">{{ button_text }}</button>
   </div>
-
+  <div v-else>wtf where is visitor [{{ visitor }}]</div>
+ 
   <div v-if="isProfilePublicOrVisitorFollower">
     <!-- todo: remove later . show id for dev needs-->
     <p>target_email: {{ profileStore.getTargetUserEmail }}</p>
@@ -26,14 +25,18 @@
     </div>
     <!-- add following list. The other users followed by the user -->
     <h2>Following:</h2>
-    <div class="user-list" style="height: 100px; overflow-y: scroll;">
+    <div v-if="followingList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;">{{ followingList.length }}
       <div v-for="user in followingList" :key="user.email">{{ `${user.first_name} ${user.last_name} (${user.email})` }}</div>
     </div>
+    <div v-else>No following</div>
+
     <!-- add followers list. The other users following the user -->
     <h2>Followers:</h2>
-    <div class="user-list" style="height: 100px; overflow-y: scroll;">
+    <div v-if="followersList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;">
       <div v-for="user in followersList" :key="user.email">{{ `${user.first_name} ${user.last_name} (${user.email})` }}</div>
     </div>
+    <div v-else>No followers</div>
+
     <!-- add user posts list. The posts created by the user -->
     <h2>Posts:</h2>
     <div v-for="post in postsList"
@@ -56,17 +59,55 @@ import { usePostStore } from '@/store/post';
 import { useProfileStore } from '@/store/profile';
 import { WSMessageType, TargetProfileRequest, UserProfile } from '@/api/types';
 
-// if true/false, then show follow/unfollow text on button
-const isVisitorNotFollowerAndNotRequester = ref(true);
 
-watch(isVisitorNotFollowerAndNotRequester, (newValue, oldValue) => {
-  alert(`isVisitorNotFollowerAndDidNotRequested: ${newValue}`);
-  // handleFollowing(newValue);
+
+const wss = useWebSocketStore();
+const visitor = computed(() => wss.visitor); // Replace with actual logic to determine visitor status
+
+function updateVisitorStatus() {
+  wss.sendMessage({
+    type: WSMessageType.USER_VISITOR_STATUS,
+    data: {
+      user_uuid: storeUUID.getUUID,
+      target_email: profileStore.getTargetUserEmail,
+    } as TargetProfileRequest,
+  })
+}
+
+const button_text = computed(() => {
+  if (visitor.value.status === 'visitor') {
+    return 'Follow'
+  } else if (visitor.value.status === 'follower') {
+    return 'Unfollow';
+  } else if (visitor.value.status === 'requester') {
+    return 'Waiting for Decision';
+  } else {
+    return 'Train Finger Muscles';
+  }
 });
 
 function handleFollowing() {
-  // Call your method here
-  isVisitorNotFollowerAndNotRequester.value = !isVisitorNotFollowerAndNotRequester.value;
+  if (visitor.value.status === 'visitor') {
+    wss.sendMessage({
+      type: WSMessageType.USER_FOLLOW,
+      data: {
+        user_uuid: storeUUID.getUUID,
+        target_email: profileStore.getTargetUserEmail,
+      } as TargetProfileRequest,
+    })
+  } else if (visitor.value.status === 'follower') {
+    wss.sendMessage({
+      type: WSMessageType.USER_UNFOLLOW,
+      data: {
+        user_uuid: storeUUID.getUUID,
+        target_email: profileStore.getTargetUserEmail,
+      } as TargetProfileRequest,
+    })
+  } else if (visitor.value.status === 'requester') {
+    alert("Agree!!! it is too long to wait.")
+  } else {
+    alert("Your prestige is raising!!!")
+  }
 }
 
 // if true then show all profile information on screen
@@ -76,15 +117,14 @@ function getImgUrl(imageNameWithExtension: string) {
   return require(`../assets/${imageNameWithExtension}`)
 }
 
-const webSocketStore = useWebSocketStore();
 const storeUUID = useUUIDStore();
 const profileStore = useProfileStore();
 
 
-const profile = computed(() => webSocketStore.userProfile);
+const profile = computed(() => wss.userProfile);
 /** updateProfile updates the profile data from server*/
 function updateProfile() {
-  webSocketStore.sendMessage({
+  wss.sendMessage({
     type: WSMessageType.USER_PROFILE,
     data: {
       user_uuid: storeUUID.getUUID,
@@ -92,10 +132,10 @@ function updateProfile() {
     } as TargetProfileRequest,
   })
 }
-const followingList = computed(() => webSocketStore.userFollowingList);
+const followingList = computed(() => wss.userFollowingList);
 /** updateFollowingList updates the following list from server*/
 function updateFollowingList() {
-  webSocketStore.sendMessage({
+  wss.sendMessage({
     type: WSMessageType.USER_FOLLOWING_LIST,
     data: {
       user_uuid: storeUUID.getUUID,
@@ -104,11 +144,10 @@ function updateFollowingList() {
   })
 }
 
-const followersList = computed(() => webSocketStore.userFollowersList);
-
+const followersList = computed(() => wss.userFollowersList);
 // todo: dummy data, remove/refactor later
 function updateFollowersList() {
-  webSocketStore.sendMessage({
+  wss.sendMessage({
     type: WSMessageType.USER_FOLLOWERS_LIST,
     data: {
       user_uuid: storeUUID.getUUID,
@@ -152,6 +191,7 @@ const piniaManageData = (post: Post) => {
 
 onMounted(() => {
   console.log('profile.value', profile)
+  updateVisitorStatus();
   updateProfile();
   updateFollowingList();
   updateFollowersList();

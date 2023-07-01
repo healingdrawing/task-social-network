@@ -34,6 +34,92 @@ type WS_USER_PROFILE_RESPONSE_DTO struct {
 	Public     bool   `json:"public"`
 }
 
+type WS_USER_VISITOR_STATUS_DTO struct {
+	Status string `json:"status"`
+}
+
+func wsUserVisitorStatusHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+	defer wsRecover()
+
+	uuid := messageData["user_uuid"].(string)
+	user_id, err := getIDbyUUID(uuid)
+	if err != nil {
+		log.Println("failed to get ID of the request sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
+		return
+	}
+
+	target_email, ok := messageData["target_email"].(string)
+	if !ok {
+		log.Println("failed to get target email", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get target email"})
+		return
+	}
+
+	target_id, err := getIDbyEmail(target_email)
+	if err != nil {
+		log.Println("failed to get ID of the target user", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the target user"})
+		return
+	}
+
+	isFollower, err := isFollowing(target_id, user_id)
+	if err != nil {
+		log.Println("failed to check if user is a follower of the target user", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a follower of the target user"})
+		return
+	}
+
+	var profile WS_USER_PROFILE_DTO
+	rows, err := statements["getUserProfile"].Query(target_id)
+	if err != nil {
+		log.Println("failed to get user profile", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user profile"})
+		return
+	}
+	defer rows.Close()
+	rows.Next()
+	err = rows.Scan(&profile.Email, &profile.First_name, &profile.Last_name, &profile.Dob,
+		&profile.avatar_bytes, &profile.Nickname, &profile.About_me, &profile.Privacy)
+	if err != nil {
+		log.Println("failed to scan user profile", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to scan user profile"})
+		return
+	}
+	rows.Close()
+
+	visitor := WS_USER_VISITOR_STATUS_DTO{}
+	if target_id == user_id {
+		visitor.Status = "owner"
+	} else if isFollower {
+		visitor.Status = "follower"
+	} else {
+		is_requester, err := isRequester(user_id, target_id)
+		if err != nil {
+			log.Println("failed to check if user is a requester of the target user", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a requester of the target user"})
+			return
+		}
+		if is_requester {
+			visitor.Status = "requester"
+		} else {
+			visitor.Status = "visitor"
+		}
+	}
+
+	log.Println("sending user visitor status", visitor)
+	wsSendUserVisitorStatus(visitor)
+}
+
+/*
+wsUserProfileHandler returns the profile of the target user,
+
+if user has permission to view the target user's profile.
+
+Otherwise, it returns an error:
+
+"403 user does not have permissions to see the target user profile"
+*/
 func wsUserProfileHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
 
@@ -137,4 +223,19 @@ func wsChangePrivacyHandler(conn *websocket.Conn, messageData map[string]interfa
 	}
 
 	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " privacy updated"})
+}
+
+func isRequester(user_id int, target_id int) (bool, error) {
+	rows, err := statements["doesSecondRequesterFollowFirst"].Query(target_id, user_id)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	// check length of rows
+	// if length is 0, return false
+	// else return true
+	if rows.Next() {
+		return true, nil
+	}
+	return false, nil
 }
