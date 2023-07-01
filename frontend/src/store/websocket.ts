@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { WSMessage, WSMessageType, Post, UserProfile, UserForList, UserVisitorStatus as Visitor, SuccessResponse, SuccessContent, VisitorStatus } from '@/api/types';
+import { WSMessage, WSMessageType, Post, UserProfile, UserForList, UserVisitorStatus as Visitor, SuccessResponse, SuccessContent, VisitorStatus, Bell } from '@/api/types';
 
 
 export const useWebSocketStore = defineStore({
@@ -81,21 +81,6 @@ export const useWebSocketStore = defineStore({
       const visitor_messages = this.messages.filter((message) => message.type === WSMessageType.USER_VISITOR_STATUS);
       const visitor = visitor_messages.map((message) => message.data as Visitor)[0];
 
-      // filter success messages , with visitor status text in content
-      // const success = this.messages
-      //   .filter((message) => message.type === WSMessageType.SUCCESS_RESPONSE)
-      //   .map((message) => message.data as SuccessResponse)
-      //   .find((successResponse) =>
-      //     successResponse.message === SuccessContent.FOLLOWER_WAS_ADDED ||
-      //     successResponse.message === SuccessContent.FOLLOW_REQUEST_WAS_ADDED
-      //   ); //find returns THE FIRST element that satisfies the condition
-      // if (success) {
-      //   if (success.message === SuccessContent.FOLLOWER_WAS_ADDED) {
-      //     visitor.status = VisitorStatus.FOLLOWER;
-      //   } else if (success.message === SuccessContent.FOLLOW_REQUEST_WAS_ADDED) {
-      //     visitor.status = VisitorStatus.REQUESTER;
-      //   }
-      // }
       console.log('visitor.status========getter========', visitor);
       return visitor;
 
@@ -128,10 +113,25 @@ export const useWebSocketStore = defineStore({
       const posts = [...fresh_posts, ...history_posts];
       return posts;
     },
+    followRequestsList(): Bell[] {
+      const fresh_follow_requests_messages = this.messages.filter((message) => message.type === WSMessageType.FOLLOW_REQUESTS_RESPONSE)
+      const fresh_follow_requests = fresh_follow_requests_messages.map((message) => message.data as Bell)
+
+
+      const history_follow_requests_messages_list = this.messages.filter((message) => message.type === WSMessageType.FOLLOW_REQUESTS_LIST)
+      const history_follow_requests = history_follow_requests_messages_list.map((message) =>
+        (message.data as Bell[]).map((bell) => bell)
+      ).flat()
+
+      const follow_requests = [...fresh_follow_requests, ...history_follow_requests]
+      return follow_requests
+    },
+    bellsList(): Bell[] {
+      return [...this.followRequestsList] //TODO: add other bells x4 summary
+    },
 
     commentsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.COMMENTS_LIST) },
     chatUsersList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.CHAT_USERS_LIST) },
-    followRequestsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.FOLLOW_REQUESTS_LIST) },
     groupsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUPS_LIST) },
     groupPostsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_POSTS_LIST) },
     groupPostCommentsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_POST_COMMENTS_LIST) },

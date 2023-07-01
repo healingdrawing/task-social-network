@@ -12,6 +12,7 @@ export enum WSMessageType {
   FOLLOW_REQUEST_REJECT = "follow_request_reject", //  rejectFollowerHandler
   FOLLOW_REQUEST_ACCEPT = "follow_request_accept", //  approveFollowerHandler
   FOLLOW_REQUESTS_LIST = "follow_requests_list", //  followRequestListHandler
+  FOLLOW_REQUESTS_RESPONSE = "follow_requests_response", //  NEW
 
   POST_SUBMIT = "post_submit", //  postNewHandler
   POST_RESPONSE = "post_response",
@@ -137,4 +138,29 @@ export interface UserForList {
 
 export interface UserVisitorStatus {
   status: VisitorStatus;
+}
+
+export type BellType =
+  | 'event'
+  | 'following'
+  | 'invitation'
+  | 'request';
+
+export interface Bell {
+  type: BellType;
+
+  group_id: number; // invitation to group , and request to join group, and event
+  group_name: string; // invitation to group , and request to join group , and event
+
+  event_id: number; // event
+  event_name: string; // event
+
+  email: string; // invitation to group , and request to join group, following
+  first_name: string; // invitation to group , and request to join group, following
+  last_name: string; // invitation to group , and request to join group, following
+  // todo: tables not ready even
+}
+
+export interface BellState {
+  bells: Bell[];
 }

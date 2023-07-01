@@ -61,13 +61,12 @@
 
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue';
-import { useBellStore } from '@/store/bell';
-import { Bell } from '@/store/bell';
+import { useWebSocketStore } from '@/store/websocket';
 import router from '@/router';
 import { useGroupStore } from '@/store/group';
 
-const bellStore = useBellStore();
-const bells = ref<Bell[]>([]);
+const wss = useWebSocketStore()
+const bells = computed(() => wss.bellsList);
 
 const currentPage = ref(1);
 const itemsPerPage = 3;
