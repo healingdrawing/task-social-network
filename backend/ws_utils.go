@@ -28,6 +28,7 @@ const (
 	WS_POST_SUBMIT   WSMT = "post_submit"
 	WS_POST_RESPONSE WSMT = "post_response"
 	WS_POSTS_LIST    WSMT = "posts_list"
+	// WS_ANY_PROFILE_VIEW_POSTS_LIST WSMT = "any_profile_view_posts_list"
 
 	WS_GROUPS_LIST               WSMT = "groups_list"
 	WS_GROUP_SUBMIT              WSMT = "group_submit"
@@ -61,6 +62,7 @@ const (
 	WS_USER_PROFILE        WSMT = "user_profile"
 	WS_USER_REGISTER       WSMT = "user_register"
 	WS_USER_UNFOLLOW       WSMT = "user_unfollow"
+
 	WS_USER_VISITOR_STATUS WSMT = "user_visitor_status"
 )
 

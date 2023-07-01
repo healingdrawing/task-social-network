@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { WSMessage, WSMessageType, Post, UserProfile, UserForList, UserVisitorStatus as Visitor } from '@/api/types';
+import { WSMessage, WSMessageType, Post, UserProfile, UserForList, UserVisitorStatus as Visitor, SuccessResponse, SuccessContent, VisitorStatus } from '@/api/types';
 
 
 export const useWebSocketStore = defineStore({
@@ -36,9 +36,14 @@ export const useWebSocketStore = defineStore({
       this.socket?.close();
       this.socket = null;
     },
+    /**clearMessages removes all the messages of type = message.Type, before fetch fresh, to prevent duplication of messages in getters ( -> screen/view) */
     clearMessages(message: WSMessage) {
       console.log('clearMessages==============================', message.type);
+
+      this.messages = this.messages.filter((message) => message.type !== WSMessageType.SUCCESS_RESPONSE);
+
       switch (message.type) {
+        case WSMessageType.USER_POSTS_LIST:
         case WSMessageType.POSTS_LIST:
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.POST_RESPONSE);
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.POSTS_LIST);
@@ -63,7 +68,7 @@ export const useWebSocketStore = defineStore({
           break;
 
         default:
-          console.log('SKIP clearMessages default==============================');
+          console.log('SKIP clearMessages default============', message.type);
       }
     },
   },
@@ -72,8 +77,26 @@ export const useWebSocketStore = defineStore({
       return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
     },
     visitor(): Visitor {
+      // filter in exact visitor status response messages
       const visitor_messages = this.messages.filter((message) => message.type === WSMessageType.USER_VISITOR_STATUS);
       const visitor = visitor_messages.map((message) => message.data as Visitor)[0];
+
+      // filter success messages , with visitor status text in content
+      // const success = this.messages
+      //   .filter((message) => message.type === WSMessageType.SUCCESS_RESPONSE)
+      //   .map((message) => message.data as SuccessResponse)
+      //   .find((successResponse) =>
+      //     successResponse.message === SuccessContent.FOLLOWER_WAS_ADDED ||
+      //     successResponse.message === SuccessContent.FOLLOW_REQUEST_WAS_ADDED
+      //   ); //find returns THE FIRST element that satisfies the condition
+      // if (success) {
+      //   if (success.message === SuccessContent.FOLLOWER_WAS_ADDED) {
+      //     visitor.status = VisitorStatus.FOLLOWER;
+      //   } else if (success.message === SuccessContent.FOLLOW_REQUEST_WAS_ADDED) {
+      //     visitor.status = VisitorStatus.REQUESTER;
+      //   }
+      // }
+      console.log('visitor.status========getter========', visitor);
       return visitor;
 
     },
@@ -92,6 +115,7 @@ export const useWebSocketStore = defineStore({
       const followersList = followersListMessages.map((message) => message.data as UserForList)
       return followersList
     },
+    /**all the posts able to see by user. Excludes group posts(separated view)*/
     postsList(): Post[] {
       const fresh_posts_messages = this.messages.filter((message) => message.type === WSMessageType.POST_RESPONSE);
       const fresh_posts = fresh_posts_messages.map((message) => message.data as Post);
@@ -116,7 +140,7 @@ export const useWebSocketStore = defineStore({
     groupEventParticipantsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_EVENT_PARTICIPANTS_LIST) },
 
 
-    userPostsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.USER_POSTS_LIST) },
+    // userPostsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.USER_POSTS_LIST) },
 
     // chatMessages(): Message[] {
     //   return this.messages.filter((message) => message.type === 'chat');

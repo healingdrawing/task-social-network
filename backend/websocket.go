@@ -120,6 +120,9 @@ func reader(conn *websocket.Conn) {
 				wsPostSubmitHandler(conn, data.Data)
 			case string(WS_POSTS_LIST):
 				wsPostsListHandler(conn, data.Data)
+			case string(WS_USER_POSTS_LIST):
+				wsUserPostsListHandler(conn, data.Data)
+
 			case string(WS_USER_PROFILE):
 				wsUserProfileHandler(conn, data.Data)
 			case string(WS_USER_PRIVACY):

@@ -146,7 +146,7 @@ func wsPostsListHandler(conn *websocket.Conn, messageData map[string]interface{}
 
 	rows, err := statements["getPostsAbleToSee"].Query(user_id, user_id, user_id)
 	if err != nil {
-		log.Println("getPosts query failed", err.Error())
+		log.Println("getPostsAbleToSee query failed", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getPostsAbleToSee query failed"})
 		return
 	}
@@ -166,6 +166,57 @@ func wsPostsListHandler(conn *websocket.Conn, messageData map[string]interface{}
 		postsList = append(postsList, post)
 	}
 
+	wsSendPostsList(postsList)
+
+}
+
+/** includes the posts created by user, BUT NOT GROUP POSTS, created by user */
+func wsUserPostsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+	defer wsRecover()
+
+	log.Println("wsUserPostsListHandler golang ===================")
+
+	user_uuid := messageData["user_uuid"].(string)
+	user_id, err := getIDbyUUID(user_uuid)
+	if err != nil {
+		log.Println("failed to get ID of the request sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
+		return
+	}
+
+	target_email := messageData["target_email"].(string)
+	log.Println("target_email ", target_email)
+	target_id, err := getIDbyEmail(target_email)
+	if err != nil {
+		log.Println("failed to get ID of the target", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the target"})
+		return
+	}
+
+	rows, err := statements["getPostsAbleToSeeToVisitor"].Query(target_id, user_id, target_id, target_id, target_id, target_id, user_id, target_id, user_id)
+	if err != nil {
+		log.Println("getPostsAbleToSeeToVisitor query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getPostsAbleToSeeToVisitor query failed"})
+		return
+	}
+	defer rows.Close()
+
+	var postsList WS_POSTS_LIST_DTO
+	for rows.Next() {
+		var post WS_POST_RESPONSE_DTO
+		pictureBytes := []byte{}
+		err = rows.Scan(&post.ID, &post.Title, &post.Content, &post.Categories, &pictureBytes, &post.Privacy, &post.Created_at, &post.Email, &post.First_name, &post.Last_name)
+		if err != nil {
+			log.Println("post scan failed", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " post scan failed"})
+			return
+		}
+		post.Picture = base64.StdEncoding.EncodeToString(pictureBytes)
+		postsList = append(postsList, post)
+	}
+	for _, post := range postsList {
+		log.Println("post.Email ", post.Email) //todo: remove
+	}
 	wsSendPostsList(postsList)
 
 }

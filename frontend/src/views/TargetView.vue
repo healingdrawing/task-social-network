@@ -41,10 +41,26 @@
     <h2>Posts:</h2>
     <div v-for="post in postsList"
       :key="post.id">
+      <hr>
       <router-link
-      :to="{ name: 'post' }"
-      @click="piniaManageData(post)">
-        {{ post.title }}
+        :to="{ name: 'post' }"
+        @click="piniaManageDataPost(post)">
+        <p>Post id: {{ post.id }}</p>
+        <p>Post title: {{ post.title }}</p>
+        <p>Post tags: {{ post.categories }}</p>
+        <p>Post content: {{ post.content }}</p>
+        <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
+        <p>Post picture: {{ post.picture }}</p>
+        <p>Post created: {{ post.created_at }}</p>
+      </router-link>
+      <router-link
+      :to="{ name: 'target' }"
+      @click="piniaManageDataProfile(post.email)">
+        <h3>
+          Author: {{ post.first_name }}
+          {{ post.last_name }} 
+          ({{ post.email }})
+        </h3>
       </router-link>
     </div>
     <!-- ( :to="{ name: 'post' }" ) also can be ( :to="'/post'" ) -->
@@ -108,6 +124,7 @@ function handleFollowing() {
   } else {
     alert("Your prestige is raising!!!")
   }
+  updateVisitorStatus();
 }
 
 // if true then show all profile information on screen
@@ -119,6 +136,9 @@ function getImgUrl(imageNameWithExtension: string) {
 
 const storeUUID = useUUIDStore();
 const profileStore = useProfileStore();
+function piniaManageDataProfile(email: string) {
+  profileStore.setTargetUserEmail(email);
+}
 
 
 const profile = computed(() => wss.userProfile);
@@ -162,39 +182,32 @@ interface Post {
   title: string;
 }
 
-const postsList = ref<Post[]>([]);
+const postsList = computed(() => wss.postsList);
 
 // todo: dummy data, remove/refactor later
 function updatePostsList() {
-  // Code to get the user posts goes here
-  const posts: Post[] = [
-    { id: 1, title: 'Dummy Post 1 Title' },
-    { id: 2, title: 'Dummy Post 2 Title' },
-    { id: 3, title: 'Dummy Post 3 Title' },
-    { id: 4, title: 'Dummy Post 4 Title' },
-    { id: 5, title: 'Dummy Post 5 Title' },
-    { id: 6, title: 'Dummy Post 6 Title' },
-    { id: 7, title: 'Dummy Post 7 Title' },
-    { id: 8, title: 'Dummy Post 8 Title' },
-    { id: 9, title: 'Dummy Post 9 Title' },
-    { id: 10, title: 'Dummy Post 10 Title' },
-  ];
-  postsList.value = posts;
+  wss.sendMessage({
+    type: WSMessageType.USER_POSTS_LIST, // todo: do not forget filter by able to see
+    data: {
+      user_uuid: storeUUID.getUUID,
+      target_email: profileStore.getTargetUserEmail,
+    } as TargetProfileRequest,
+  })
   console.log('Posts list updated');
 }
 
 
 const postStore = usePostStore()
-const piniaManageData = (post: Post) => {
-  postStore.setPostId(post.id)
+function piniaManageDataPost(post: Post) {
+  postStore.setPostId(post.id);
 }
 
 onMounted(() => {
   console.log('profile.value', profile)
   updateVisitorStatus();
-  updateProfile();
-  updateFollowingList();
-  updateFollowersList();
+  // updateProfile();
+  // updateFollowingList();
+  // updateFollowersList();
   updatePostsList();
 });
 

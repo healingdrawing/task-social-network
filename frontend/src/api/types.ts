@@ -1,6 +1,7 @@
 // message type enum
 export enum WSMessageType {
-  ERROR = "error", //  errorHandler // not sure this needed
+  ERROR_RESPONSE = "error_response", //  errorHandler // not sure this needed
+  SUCCESS_RESPONSE = "success_response", //  successHandler // not sure this needed
 
   COMMENT_SUBMIT = "comment_submit", //  commentNewHandler
   COMMENTS_LIST = "comments_list", //  commentsGetHandler
@@ -15,6 +16,7 @@ export enum WSMessageType {
   POST_SUBMIT = "post_submit", //  postNewHandler
   POST_RESPONSE = "post_response",
   POSTS_LIST = "posts_list", //  postsGetHandler
+  // ANY_PROFILE_VIEW_POSTS_LIST = "any_profile_view_posts_list", // NEW
 
   GROUPS_LIST = "groups_list", //  !!!groupsGetHandler //todo: NOT IMPLEMENTED ON OLD BACKEND
   GROUP_SUBMIT = "group_submit", //  groupNewHandler
@@ -48,7 +50,20 @@ export enum WSMessageType {
   USER_PROFILE = "user_profile", //  userProfileHandler
   USER_REGISTER = "user_register", //  userRegisterHandler
   USER_UNFOLLOW = "user_unfollow", //  unfollowHandler
+
   USER_VISITOR_STATUS = "user_visitor_status", //  not implemented in old code
+}
+
+export enum SuccessContent {
+  FOLLOWER_WAS_ADDED = "Follower was added",
+  FOLLOW_REQUEST_WAS_ADDED = "Request to become a follower was added",
+}
+
+export enum VisitorStatus {
+  OWNER = "owner",
+  FOLLOWER = "follower",
+  REQUESTER = "requester",
+  VISITOR = "visitor",
 }
 
 export interface WSMessage {
@@ -59,6 +74,10 @@ export interface WSMessage {
 
 // used in NavBar.vue signup.ts login.ts
 export interface ErrorResponse {
+  message: string;
+}
+
+export interface SuccessResponse {
   message: string;
 }
 
@@ -117,5 +136,5 @@ export interface UserForList {
 }
 
 export interface UserVisitorStatus {
-  status: string;
+  status: VisitorStatus;
 }
