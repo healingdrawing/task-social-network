@@ -146,8 +146,13 @@ export type BellType =
   | 'invitation'
   | 'request';
 
+export type BellStatus =
+  | 'visible'
+  | 'hidden';
+
 export interface Bell {
   type: BellType;
+  status: BellStatus; // to remove from list, or to hide
 
   group_id: number; // invitation to group , and request to join group, and event
   group_name: string; // invitation to group , and request to join group , and event

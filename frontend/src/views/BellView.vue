@@ -29,24 +29,26 @@
       <li v-for="(bell, index) in paginatedBells" :key="index">
         <hr>
         <div v-if="bell.type === 'event'">
-          {{ bell.type }} | {{ bell.message }}
-          <button @click="openGroup(bell.groupId)">Open Group</button>
-          <button @click="removeBell(index)">Close</button>
+          type: {{ bell.type }} | {{ bell.event_name }}
+          <br> group: {{ bell.group_name }}
+          <br> <button @click="openGroup(bell)">Open Group</button>
+          <button @click="removeBell(bell)">Close</button>
         </div>
         <div v-else-if="bell.type === 'following'">
-          {{ bell.type }} | {{ bell.message }}
-          <button @click="acceptFollowRequest(bell.userId)">Accept</button>
-          <button @click="rejectFollowRequest(index)">Reject</button>
+          type: {{ bell.type }} | {{ bell.first_name }} {{ bell.last_name }} ({{ bell.email }})
+          <br> <button @click="acceptFollowRequest(bell)">Accept</button>
+          <button @click="rejectFollowRequest(bell)">Reject</button>
         </div>
         <div v-else-if="bell.type === 'invitation'">
-          {{ bell.type }} | {{ bell.message }}
-          <button @click="acceptInvitation(bell.groupId)">Accept</button>
-          <button @click="rejectInvitation(index)">Reject</button>
+          type: {{ bell.type }} | {{ bell.group_name }}
+          <br> <button @click="openGroup(bell)">Open Group</button>
+          <br> <button @click="acceptInvitation(bell)">Accept</button>
+          <button @click="rejectInvitation(bell)">Reject</button>
         </div>
         <div v-else-if="bell.type === 'request'">
-          {{ bell.type }} | {{ bell.message }}
-          <button @click="allowJoinRequest(bell.groupId, bell.userId)">Accept</button>
-          <button @click="rejectJoinRequest(index)">Reject</button>
+          type: {{ bell.type }} | {{ bell.group_name }}
+          <button @click="allowJoinRequest(bell)">Accept</button>
+          <button @click="rejectJoinRequest(bell)">Reject</button>
         </div>
       </li>
     </ul>
@@ -64,6 +66,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useWebSocketStore } from '@/store/websocket';
 import router from '@/router';
 import { useGroupStore } from '@/store/group';
+import { Bell } from '@/api/types';
 
 const wss = useWebSocketStore()
 const bells = computed(() => wss.bellsList);
@@ -90,13 +93,13 @@ function updateTotalPages() {
 }
 
 const groupStore = useGroupStore();
-function openGroup(groupId: number) {
+function openGroup(bell: Bell) {
   // code to open group
-  groupStore.setGroupId(groupId);
+  groupStore.setGroupId(bell.group_id);
   router.push({ name: 'group' });
 }
 
-function removeBell(index: number) {
+function removeBell(bell: Bell) {
   bells.value.splice(index, 1);
   bellStore.setBells(bells.value);
 
@@ -105,32 +108,32 @@ function removeBell(index: number) {
 
 }
 
-function acceptFollowRequest(userId: number) {
+function acceptFollowRequest(bell: Bell) {
   // code to accept follow request
 }
 
-function rejectFollowRequest(index: number) {
+function rejectFollowRequest(bell: Bell) {
   bells.value.splice(index, 1);
   bellStore.setBells(bells.value);
   updateTotalPages();
 }
 
-function acceptInvitation(groupId: number) {
+function acceptInvitation(bell: Bell) {
   // code to accept invitation
 }
 
-function rejectInvitation(index: number) {
+function rejectInvitation(bell: Bell) {
   bells.value.splice(index, 1);
   bellStore.setBells(bells.value);
   updateTotalPages();
 }
 
-function allowJoinRequest(groupId: number, userId: number) {
+function allowJoinRequest(bell: Bell) {
   // code to allow join request
 }
 
-function rejectJoinRequest(index: number) {
-  bells.value.splice(index, 1);
+function rejectJoinRequest(bell: Bell) {
+  bells.value.splice(email, 1);
   bellStore.setBells(bells.value);
   updateTotalPages();
 }
