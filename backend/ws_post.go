@@ -40,14 +40,36 @@ type WS_POSTS_LIST_DTO []WS_POST_RESPONSE_DTO
 func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
 
+	//todo: CHECK THE NEW ERROR HANDLING! AND REMOVE COMMENTED CODE
+	// var data WS_POST_SUBMIT_DTO
+	// data.User_uuid = messageData["user_uuid"].(string)
+	// data.Title = messageData["title"].(string)
+	// data.Categories = messageData["categories"].(string)
+	// data.Content = messageData["content"].(string)
+	// data.Privacy = messageData["privacy"].(string)
+	// data.Picture = messageData["picture"].(string)
+	// data.Able_to_see = (messageData["able_to_see"]).(string)
+
 	var data WS_POST_SUBMIT_DTO
-	data.User_uuid = messageData["user_uuid"].(string)
-	data.Title = messageData["title"].(string)
-	data.Categories = messageData["categories"].(string)
-	data.Content = messageData["content"].(string)
-	data.Privacy = messageData["privacy"].(string)
-	data.Picture = messageData["picture"].(string)
-	data.Able_to_see = (messageData["able_to_see"]).(string)
+	fields := map[string]*string{
+		"user_uuid":   &data.User_uuid,
+		"title":       &data.Title,
+		"categories":  &data.Categories,
+		"content":     &data.Content,
+		"privacy":     &data.Privacy,
+		"picture":     &data.Picture,
+		"able_to_see": &data.Able_to_see,
+	}
+
+	for key, ptr := range fields {
+		value, ok := messageData[key].(string)
+		if !ok {
+			log.Printf("failed to get %s from messageData\n", key)
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprintf("%d failed to get %s from messageData", http.StatusUnprocessableEntity, key)})
+			return
+		}
+		*ptr = value
+	}
 
 	data.Categories = sanitizeCategories(data.Categories)
 	// process the picture
@@ -136,8 +158,13 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 func wsPostsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
 
-	user_uuid := messageData["user_uuid"].(string)
-	user_id, err := getIDbyUUID(user_uuid)
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("failed to get user_uuid from messageData")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
+		return
+	}
+	user_id, err := getIDbyUUID(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
@@ -176,8 +203,13 @@ func wsUserPostsListHandler(conn *websocket.Conn, messageData map[string]interfa
 
 	log.Println("wsUserPostsListHandler golang ===================")
 
-	user_uuid := messageData["user_uuid"].(string)
-	user_id, err := getIDbyUUID(user_uuid)
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("failed to get user_uuid from messageData")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
+		return
+	}
+	user_id, err := getIDbyUUID(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})

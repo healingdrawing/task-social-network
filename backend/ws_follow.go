@@ -32,7 +32,13 @@ Otherwise, it returns an error:
 func wsFollowingListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
 
-	uuid := messageData["user_uuid"].(string)
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("failed to get user_uuid from message data")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from message data"})
+		return
+	}
+
 	user_id, err := getIDbyUUID(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
@@ -133,7 +139,12 @@ Otherwise, it returns an error:
 func wsFollowersListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
 
-	uuid := messageData["user_uuid"].(string)
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("failed to get user_uuid from message data")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from message data"})
+		return
+	}
 	user_id, err := getIDbyUUID(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
@@ -227,7 +238,12 @@ func wsFollowersListHandler(conn *websocket.Conn, messageData map[string]interfa
 // - Else: the current user will be added to the followers table
 func wsFollowHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
-	uuid := messageData["user_uuid"].(string)
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("failed to get user_uuid from message data")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from message data"})
+		return
+	}
 	user_id, err := getIDbyUUID(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
@@ -288,7 +304,12 @@ func wsFollowHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 func wsUnfollowHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
 
-	uuid := messageData["user_uuid"].(string)
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("failed to get user_uuid from message data")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from message data"})
+		return
+	}
 	user_id, err := getIDbyUUID(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
@@ -324,7 +345,12 @@ func wsUnfollowHandler(conn *websocket.Conn, messageData map[string]interface{})
 func wsFollowRequestsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
 
-	uuid := messageData["user_uuid"].(string)
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("failed to get user_uuid from message data")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from message data"})
+		return
+	}
 	user_id, err := getIDbyUUID(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())

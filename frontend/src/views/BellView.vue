@@ -66,7 +66,9 @@ import { ref, computed, onMounted } from 'vue';
 import { useWebSocketStore } from '@/store/websocket';
 import router from '@/router';
 import { useGroupStore } from '@/store/group';
-import { Bell } from '@/api/types';
+import { Bell, TargetProfileRequest, WSMessageType } from '@/api/types';
+import { useUUIDStore } from '@/store/uuid';
+import { useProfileStore } from '@/store/profile';
 
 const wss = useWebSocketStore()
 const bells = computed(() => wss.bellsList);
@@ -113,8 +115,15 @@ function acceptFollowRequest(bell: Bell) {
 }
 
 function rejectFollowRequest(bell: Bell) {
-  bells.value.splice(index, 1);
-  bellStore.setBells(bells.value);
+  wss.sendMessage({
+    type: WSMessageType.FOLLOW_REQUEST_REJECT,
+    data: {
+      user_uuid: storeUUID.getUUID,
+      target_email: profileStore.getTargetUserEmail,
+    } as TargetProfileRequest,
+  })
+  // bells.value.splice(index, 1);
+  // bellStore.setBells(bells.value);
   updateTotalPages();
 }
 
@@ -123,8 +132,8 @@ function acceptInvitation(bell: Bell) {
 }
 
 function rejectInvitation(bell: Bell) {
-  bells.value.splice(index, 1);
-  bellStore.setBells(bells.value);
+  // bells.value.splice(index, 1);
+  // bellStore.setBells(bells.value);
   updateTotalPages();
 }
 
@@ -133,8 +142,8 @@ function allowJoinRequest(bell: Bell) {
 }
 
 function rejectJoinRequest(bell: Bell) {
-  bells.value.splice(email, 1);
-  bellStore.setBells(bells.value);
+  // bells.value.splice(email, 1);
+  // bellStore.setBells(bells.value);
   updateTotalPages();
 }
 
@@ -151,13 +160,28 @@ function nextPage() {
 }
 
 function clearAll() {
-  bells.value = [];
-  bellStore.setBells(bells.value);
+  // bells.value = [];
+  // bellStore.setBells(bells.value);
+}
+
+const storeUUID = useUUIDStore();
+const profileStore = useProfileStore();
+function updateBells() {
+  // todo: add x4 cases for each type of bell
+  wss.sendMessage({
+    type: WSMessageType.FOLLOW_REQUESTS_LIST,
+    data: {
+      user_uuid: storeUUID.getUUID,
+      target_email: profileStore.getTargetUserEmail,
+    } as TargetProfileRequest,
+  })
+
 }
 
 onMounted(() => {
-  bells.value = createDummyData();
-  bellStore.setBells(bells.value);
+  updateBells();
+  // bells.value = createDummyData();
+  // bellStore.setBells(bells.value);
   updateTotalPages();
 });
 

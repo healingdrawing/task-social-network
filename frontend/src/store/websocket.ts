@@ -43,6 +43,11 @@ export const useWebSocketStore = defineStore({
       this.messages = this.messages.filter((message) => message.type !== WSMessageType.SUCCESS_RESPONSE);
 
       switch (message.type) {
+        //todo: add x4 cases for each type of bell
+        case WSMessageType.FOLLOW_REQUESTS_LIST:
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUESTS_RESPONSE);
+          break;
+
         case WSMessageType.USER_POSTS_LIST:
         case WSMessageType.POSTS_LIST:
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.POST_RESPONSE);
