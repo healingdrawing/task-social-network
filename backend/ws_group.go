@@ -30,6 +30,16 @@ type WS_GROUP_RESPONSE_DTO struct {
 	Last_name     string    `json:"last_name"`
 }
 
+// AS IN DB
+type WS_GROUP_CHECK_DTO struct {
+	Id          int       `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Creator_id  int       `json:"creator_id"`
+	Created_at  time.Time `json:"created_at"`
+	Privacy     string    `json:"privacy"`
+}
+
 type WS_GROUP_MEMBER struct {
 	Email    int `json:"email"`
 	Group_id int `json:"group_id"`
@@ -133,54 +143,58 @@ func wsGroupSubmitHandler(conn *websocket.Conn, messageData map[string]interface
 // groupGetHandler makes the user join the group
 //
 // @params: group_id
-func groupJoinHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	defer recovery(w)
-	requestorID, err := getRequestSenderID(r)
+func wsGroupJoinHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+	defer wsRecover()
+
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("failed to get user_uuid from messageData")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
+		return
+	}
+	user_id, err := getIDbyUUID(uuid)
 	if err != nil {
-		jsonResponse(w, 401, err.Error())
+		log.Println("failed to get ID of the request sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
 		return
 	}
 
-	var data struct {
-		GroupID int `json:"group_id"`
-	}
-
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&data)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusUnprocessableEntity, " malformed json, bad request")
+	group_id, ok := messageData["group_id"].(int)
+	if !ok {
+		log.Println("failed to get group_id from messageData")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from messageData"})
 		return
 	}
+
 	// check if group is private
-	var group Group
-	err = statements["getGroup"].QueryRow(data.GroupID).Scan(&group.ID, &group.Name, &group.Description, &group.CreatorId, &group.CreationDate, &group.Privacy)
+	var group WS_GROUP_CHECK_DTO
+	err = statements["getGroup"].QueryRow(group_id).Scan(&group.Id, &group.Name, &group.Description, &group.Creator_id, &group.Created_at, &group.Privacy)
 	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "getGroup query failed, group not found")
+		log.Println("getGroup query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroup query failed"})
 		return
 	}
 	if group.Privacy == "private" {
 		// add the member to the groupPendingMembers table
-		_, err = statements["addGroupPendingMember"].Exec(data.GroupID, requestorID)
+		_, err = statements["addGroupPendingMember"].Exec(group_id, user_id)
 		if err != nil {
-			log.Println(err.Error())
-			jsonResponse(w, http.StatusInternalServerError, "addGroupPendingMember query failed, failed to add user to group pending members")
+			log.Println("addGroupPendingMember query failed", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupPendingMember query failed"})
 			return
 		}
-		jsonResponse(w, http.StatusOK, "group joining request sent to group creator, waiting for approval")
+
+		wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " group joining request sent to group creator, waiting for approval"})
 		return
 	}
 
-	_, err = statements["addGroupMember"].Exec(data.GroupID, requestorID)
+	_, err = statements["addGroupMember"].Exec(group_id, user_id)
 	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "addGroupMember query failed to add user to group membership")
+		log.Println("addGroupMember query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupMember query failed"})
 		return
 	}
-	jsonResponse(w, http.StatusOK, "group joined")
+
+	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " group joined"})
 }
 
 // groupGetHandler makes the user leave the group
