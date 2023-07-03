@@ -130,10 +130,16 @@ export const useWebSocketStore = defineStore({
       ).flat()
 
       const follow_requests = [...fresh_follow_requests, ...history_follow_requests]
+      console.log('pinia \n follow_requests========== ', follow_requests,
+        '\n fresh_follow_requests_messages========== ', fresh_follow_requests_messages,
+        '\n fresh_follow_requests========== ', fresh_follow_requests,
+        '\n history_follow_requests_messages_list========== ', history_follow_requests_messages_list,
+        '\n history_follow_requests========== ', history_follow_requests);
       return follow_requests
     },
     bellsList(): Bell[] {
-      return [...this.followRequestsList] //TODO: add other bells x4 summary
+      //TODO: add other bells x4 summary
+      return [...this.followRequestsList]
     },
 
     commentsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.COMMENTS_LIST) },

@@ -21,9 +21,10 @@ const (
 	WS_CHAT_USERS_LIST     WSMT = "chat_users_list"
 	WS_CHAT_MESSAGE_SUBMIT WSMT = "chat_message_submit"
 
-	WS_FOLLOW_REQUEST_REJECT WSMT = "follow_request_reject"
-	WS_FOLLOW_REQUEST_ACCEPT WSMT = "follow_request_accept"
-	WS_FOLLOW_REQUESTS_LIST  WSMT = "follow_requests_list"
+	WS_FOLLOW_REQUEST_RESPONSE WSMT = "follow_request_response" // NEW when broadcast the follow request from fan user, to idol user. Not implemented yet
+	WS_FOLLOW_REQUEST_REJECT   WSMT = "follow_request_reject"
+	WS_FOLLOW_REQUEST_ACCEPT   WSMT = "follow_request_accept"
+	WS_FOLLOW_REQUESTS_LIST    WSMT = "follow_requests_list"
 
 	WS_POST_SUBMIT   WSMT = "post_submit"
 	WS_POST_RESPONSE WSMT = "post_response"

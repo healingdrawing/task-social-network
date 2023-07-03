@@ -21,6 +21,9 @@
 <div>
   paginatedBells: {{ paginatedBells.length }}
 </div>
+<div>
+  bells: {{ bells.length }}
+</div>
 
   <div v-if="paginatedBells.length > 0">
     <h1>Bells</h1>
@@ -78,11 +81,13 @@ const wss = useWebSocketStore()
 const bells = computed(() => wss.bellsList);
 
 const currentPage = ref(1);
-const itemsPerPage = 3;
+const itemsPerPage = 2;
 
 const paginatedBells = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
   const end = start + itemsPerPage;
+  console.log("currentPage ", currentPage.value, " itemsPerPage ", itemsPerPage)
+  console.log("start ", start, " end ", end);
   return bells.value.slice(start, end);
 });
 
