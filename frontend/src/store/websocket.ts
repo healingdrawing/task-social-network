@@ -9,8 +9,8 @@ export const useWebSocketStore = defineStore({
     messages: [] as WSMessage[],
   }),
   actions: {
-    connect() {
-      this.socket = new WebSocket('ws://localhost:8080/ws');
+    connect(uuid: string) {
+      this.socket = new WebSocket(`ws://localhost:8080/ws?uuid=${uuid}`);
 
       this.socket.onopen = () => {
         console.log('WebSocket connected');
@@ -45,7 +45,8 @@ export const useWebSocketStore = defineStore({
       switch (message.type) {
         //todo: add x4 cases for each type of bell
         case WSMessageType.FOLLOW_REQUESTS_LIST:
-          this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUESTS_RESPONSE);
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUEST_RESPONSE);
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUESTS_LIST);
           break;
 
         case WSMessageType.USER_POSTS_LIST:
@@ -119,11 +120,11 @@ export const useWebSocketStore = defineStore({
       return posts;
     },
     followRequestsList(): Bell[] {
-      const fresh_follow_requests_messages = this.messages.filter((message) => message.type === WSMessageType.FOLLOW_REQUESTS_RESPONSE)
+      const fresh_follow_requests_messages = this.messages.filter((message) => message.type === WSMessageType.FOLLOW_REQUEST_RESPONSE)
       const fresh_follow_requests = fresh_follow_requests_messages.map((message) => message.data as Bell)
 
-
-      const history_follow_requests_messages_list = this.messages.filter((message) => message.type === WSMessageType.FOLLOW_REQUESTS_LIST)
+      // todo: not clear place, tried not null check, and for another lists too
+      const history_follow_requests_messages_list = this.messages.filter((message) => message.type === WSMessageType.FOLLOW_REQUESTS_LIST && message.data !== null)
       const history_follow_requests = history_follow_requests_messages_list.map((message) =>
         (message.data as Bell[]).map((bell) => bell)
       ).flat()

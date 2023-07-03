@@ -12,7 +12,7 @@ export enum WSMessageType {
   FOLLOW_REQUEST_REJECT = "follow_request_reject", //  rejectFollowerHandler
   FOLLOW_REQUEST_ACCEPT = "follow_request_accept", //  approveFollowerHandler
   FOLLOW_REQUESTS_LIST = "follow_requests_list", //  followRequestListHandler
-  FOLLOW_REQUESTS_RESPONSE = "follow_requests_response", //  NEW
+  FOLLOW_REQUEST_RESPONSE = "follow_request_response", //  NEW , potential use when new follow request raised
 
   POST_SUBMIT = "post_submit", //  postNewHandler
   POST_RESPONSE = "post_response",

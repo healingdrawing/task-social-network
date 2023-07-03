@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -87,11 +88,17 @@ func wsConnection(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	reader(ws)
+	uuid := strings.TrimSpace(r.URL.Query().Get("uuid"))
+	log.Println("wsConnection uuid: ", uuid) //todo: delete debug
+	if uuid == "" {
+		log.Println("uuid is empty")
+		return
+	}
+	reader(ws, uuid)
 }
 
-func reader(conn *websocket.Conn) {
-	clients.Store(conn, "")
+func reader(conn *websocket.Conn, uuid string) {
+	clients.Store(conn, uuid)
 	defer clients.Delete(conn)
 	defer conn.Close()
 	for {
@@ -138,6 +145,8 @@ func reader(conn *websocket.Conn) {
 				wsUnfollowHandler(conn, data.Data)
 			case string(WS_FOLLOW_REQUESTS_LIST):
 				wsFollowRequestsListHandler(conn, data.Data)
+			case string(WS_GROUP_REQUESTS_LIST):
+				wsGroupRequestsListHandler(conn, data.Data)
 			case string(WS_USER_VISITOR_STATUS):
 				wsUserVisitorStatusHandler(conn, data.Data)
 
@@ -324,6 +333,24 @@ func wsSendUserVisitorStatus(user_visitor_status WS_USER_VISITOR_STATUS_DTO) {
 func wsSendInvitesList(invites_list WS_GROUP_INVITES_LIST_DTO) {
 
 	outputMessage, err := wsCreateResponseMessage(WS_GROUP_INVITES_LIST, invites_list)
+
+	if err != nil {
+		log.Println(err)
+	}
+	clients.Range(func(key, value interface{}) bool {
+		if c, ok := key.(*websocket.Conn); ok {
+			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return true
+	})
+}
+
+func wsSendGroupRequestsList(requests_list WS_GROUP_REQUESTS_LIST_DTO) {
+
+	outputMessage, err := wsCreateResponseMessage(WS_GROUP_REQUESTS_LIST, requests_list)
 
 	if err != nil {
 		log.Println(err)

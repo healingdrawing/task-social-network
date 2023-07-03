@@ -109,7 +109,7 @@ const signup = async () => {
     } else {
       console.log("UUID: " + storeUUID.getUUID);
       storeUUID.setUUID(store.getData.UUID)
-      webSocketStore.connect();
+      webSocketStore.connect(storeUUID.getUUID);
       router.push('/profile');
     }
 

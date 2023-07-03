@@ -18,9 +18,13 @@
     
   </pre>
 
-  <div>
+<div>
+  paginatedBells: {{ paginatedBells.length }}
+</div>
+
+  <div v-if="paginatedBells.length > 0">
     <h1>Bells</h1>
-    <div v-if="paginatedBells.length > 0">
+    <div>
       <button @click="previousPage" :disabled="currentPage === 1">Previous Page</button>
       <button @click="nextPage" :disabled="currentPage === totalPages">Next Page</button>
       <button @click="clearAll">Execute Everyone</button>
@@ -52,7 +56,7 @@
         </div>
       </li>
     </ul>
-    <div v-if="paginatedBells.length > 0">
+    <div>
       <button @click="previousPage" :disabled="currentPage === 1">Previous Page</button>
       <button @click="nextPage" :disabled="currentPage === totalPages">Next Page</button>
       <button @click="clearAll">Execute Everyone</button>
@@ -102,8 +106,7 @@ function openGroup(bell: Bell) {
 }
 
 function removeBell(bell: Bell) {
-  bells.value.splice(index, 1);
-  bellStore.setBells(bells.value);
+  bell.status = 'hidden'
 
   // Update totalPages when removing the last event from the last page
   updateTotalPages();
@@ -111,6 +114,13 @@ function removeBell(bell: Bell) {
 }
 
 function acceptFollowRequest(bell: Bell) {
+  wss.sendMessage({
+    type: WSMessageType.FOLLOW_REQUEST_ACCEPT,
+    data: {
+      user_uuid: storeUUID.getUUID,
+      target_email: bell.email,
+    } as TargetProfileRequest,
+  })
   // code to accept follow request
 }
 
@@ -119,7 +129,7 @@ function rejectFollowRequest(bell: Bell) {
     type: WSMessageType.FOLLOW_REQUEST_REJECT,
     data: {
       user_uuid: storeUUID.getUUID,
-      target_email: profileStore.getTargetUserEmail,
+      target_email: bell.email,
     } as TargetProfileRequest,
   })
   // bells.value.splice(index, 1);
@@ -160,6 +170,7 @@ function nextPage() {
 }
 
 function clearAll() {
+  alert("Become the Emperor first!!! 😏 It is not royal level, kid.");
   // bells.value = [];
   // bellStore.setBells(bells.value);
 }
@@ -175,6 +186,14 @@ function updateBells() {
       target_email: profileStore.getTargetUserEmail,
     } as TargetProfileRequest,
   })
+  // wss.sendMessage({
+  //   type: WSMessageType.GROUP_REQUESTS_LIST,
+  //   data: {
+  //     user_uuid: storeUUID.getUUID,
+  //     target_email: profileStore.getTargetUserEmail,
+  //   } as TargetProfileRequest,
+  // })
+
 
 }
 
@@ -187,56 +206,6 @@ onMounted(() => {
 
 // todo: refactor/comment later. Dummy data section, should be replaced with real data from the backend
 
-function createDummyData(): Bell[] {
-  const dummyData: Bell[] = [];
-
-  for (let i = 0; i < 7; i++) {
-    const randomTypeIndex = Math.floor(Math.random() * 4);
-    const randomType: string = ['event', 'following', 'invitation', 'request'][randomTypeIndex];
-
-    let bell: Bell;
-
-    if (randomType === 'event') {
-      const groupId = generateRandomId();
-      bell = {
-        type: 'event',
-        message: `New event created in Group ${groupId}`,
-        groupId,
-        userId: -1,
-      };
-    } else if (randomType === 'following') {
-      const userId = generateRandomId();
-      bell = {
-        type: 'following',
-        message: `User ${userId} sent you a follow request`,
-        groupId: -1,
-        userId,
-      };
-    } else if (randomType === 'invitation') {
-      const groupId = generateRandomId();
-      bell = {
-        type: 'invitation',
-        message: `You've been invited to join Group ${groupId}`,
-        groupId,
-        userId: -1,
-      };
-    } else {
-      const groupId = -1;
-      const userId = -1;
-      bell = {
-        type: 'request',
-        message: `User ${userId} requested to join Group ${groupId}`,
-        groupId,
-        userId,
-      };
-    }
-
-    dummyData.push(bell);
-  }
-
-  return dummyData;
-}
-
 function generateRandomInteger(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -244,7 +213,5 @@ function generateRandomInteger(min: number, max: number): number {
 function generateRandomId(): number {
   return generateRandomInteger(1, 1000);
 }
-
-
 
 </script>

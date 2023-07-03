@@ -12,6 +12,7 @@ type UserForList struct {
 	Email      string `json:"email"`
 	First_name string `json:"first_name"`
 	Last_name  string `json:"last_name"`
+	Nickname   string `json:"nickname"`
 }
 
 type WS_FOLLOWING_LIST_DTO []UserForList
@@ -375,7 +376,7 @@ func wsFollowRequestsListHandler(conn *websocket.Conn, messageData map[string]in
 			return
 		}
 
-		err = statements["getUserbyID"].QueryRow(follow_requester_id).Scan(&follow_requester.Email, &follow_requester.First_name, &follow_requester.Last_name)
+		err = statements["getUserbyID"].QueryRow(follow_requester_id).Scan(&follow_requester.Email, &follow_requester.First_name, &follow_requester.Last_name, &follow_requester.Nickname)
 		if err != nil {
 			log.Println("failed to get user by ID", err.Error())
 			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to get user by ID"})

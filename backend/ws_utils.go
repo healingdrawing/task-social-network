@@ -85,6 +85,8 @@ func wsCreateResponseMessage(messageType WSMT, data interface{}) ([]byte, error)
 		return stableJsonErrorData, err
 	}
 
+	log.Println("CREATED ================ \nwsCreateResponseMessage: ", string(jsonData))
+
 	return jsonData, nil
 }
 

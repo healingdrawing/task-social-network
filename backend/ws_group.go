@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -453,86 +452,33 @@ func wsGroupRequestsListHandler(conn *websocket.Conn, messageData map[string]int
 
 	// use getCreatorAllGroupsPendings and user_id, to get all pendings for the groups, where user_id is creator of the group
 
-	row, err := statements["getCreatorAllGroupsPendings"].Query(user_id)
+	rows, err := statements["getCreatorAllGroupsPendings"].Query(user_id)
 	if err != nil {
 		log.Println("getCreatorAllGroupsPendings query failed", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getCreatorAllGroupsPendings query failed"})
 		return
 	}
-	defer row.Close()
+	defer rows.Close()
 
 	var requests_list WS_GROUP_REQUESTS_LIST_DTO
-
-	//todo: need extending to return all group requests/pendings for group created by user_id, to send the into list as part of notifications
-
-	group_id, ok := messageData["group_id"].(int)
-	if !ok {
-		log.Println("failed to get group_id from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from messageData"})
-		return
-	}
-
-	var group WS_GROUP_CHECK_DTO
-	err = statements["getGroup"].QueryRow(group_id).Scan(&group.Id, &group.Name, &group.Description, &group.Creator_id, &group.Created_at, &group.Privacy)
-	if err != nil {
-		log.Println("getGroup query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroup query failed"})
-		return
-	}
-
-	if group.Creator_id != user_id {
-		log.Println("user is not the creator of the group")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusForbidden) + " user is not the creator of the group"})
-		return
-	}
-
-	// get the list of users invited to the group
-	type pendingUserData struct {
-		PendingUserID int
-	}
-	var pendingUsers []pendingUserData
-	rows, err := statements["getGroupPendingMembers"].Query(data.GroupID)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "getGroupPendingMembers query failed")
-		return
-	}
 	for rows.Next() {
-		var pendingUser pendingUserData
-		err = rows.Scan(&pendingUser.PendingUserID)
+		var request WS_GROUP_REQUEST_RESPONSE_DTO
+		err = rows.Scan(
+			&request.Group_id,
+			&request.Member_id,
+			&request.Name,
+			&request.Description,
+			&request.Email,
+			&request.First_name,
+			&request.Last_name,
+		)
 		if err != nil {
-			log.Println(err.Error())
-			jsonResponse(w, http.StatusInternalServerError, "failed to scan pending user id")
+			log.Println("request scan failed", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " request scan failed"})
 			return
 		}
-		pendingUsers = append(pendingUsers, pendingUser)
-	}
-	// send the array of name and email of the pending users as response
-	type outgoingData struct {
-		FullName string `json:"full_name"`
-		Email    string `json:"email"`
-	}
-	// get the full name and email of the pending users
-	pendingUsersInfo := []outgoingData{}
-	for _, pendingUserID := range pendingUsers {
-		var pendingUserInfo outgoingData
-		var pendingFirstName, pendingLastName, pendingNick string
-		err = statements["getUserbyID"].QueryRow(pendingUserID.PendingUserID).Scan(&pendingUserInfo.Email, &pendingFirstName, &pendingLastName, &pendingNick)
-		if err != nil {
-			log.Println(err.Error())
-			jsonResponse(w, http.StatusInternalServerError, "getUserbyID query failed")
-			return
-		}
-		pendingUserInfo.FullName = pendingFirstName + " " + pendingLastName
-		pendingUsersInfo = append(pendingUsersInfo, pendingUserInfo)
+		requests_list = append(requests_list, request)
 	}
 
-	w.WriteHeader(200)
-	jsonResponseObj, _ := json.Marshal(pendingUsersInfo)
-	_, err = w.Write(jsonResponseObj)
-	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, "w.Write(jsonResponseObj)<-pendingUsersInfo failed")
-		return
-	}
-
+	wsSendGroupRequestsList(requests_list)
 }
