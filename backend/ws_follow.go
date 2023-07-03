@@ -282,7 +282,7 @@ func wsFollowHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to add follower to followers_pending table"})
 			return
 		}
-		wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{"Request to become a follower was added"})
+		wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + "Request to become a follower was added"})
 		return
 	} else {
 		// if the target is public, add the follower to the followers table
@@ -292,7 +292,7 @@ func wsFollowHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to add follower to followers table"})
 			return
 		}
-		wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{"Follower was added"})
+		wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + "Follower was added"})
 		return
 	}
 }

@@ -153,7 +153,10 @@ func statementsCreation() {
 		"removeGroupPendingMember": `DELETE FROM group_pending_members WHERE group_id = ? AND member_id = ?;`,
 		"removeGroupMember":        `DELETE FROM group_members WHERE group_id = ? AND member_id = ?;`,
 
-		"addGroupInvitedUser":    `INSERT INTO group_invited_users (user_id, group_id, inviter_id, created_at) VALUES (?, ?, ?, ?);`,
+		"addGroupInvitedUser": `INSERT INTO group_invited_users (user_id, group_id, inviter_id, created_at) VALUES (?, ?, ?, ?);`,
+
+		"getUserInvites": `SELECT groups.id, groups.name, groups.description, group_invited_users.created_at, users.email, users.first_name, users.last_name FROM group_invited_users JOIN groups ON groups.id = group_invited_users.group_id JOIN users ON users.id = group_invited_users.inviter_id WHERE group_invited_users.user_id = ?;`,
+
 		"getGroupInvitedUsers":   `SELECT user_id, group_id, inviter_id, created_at FROM group_invited_users WHERE group_id = ?;`,
 		"removeGroupInvitedUser": `DELETE FROM group_invited_users WHERE user_id = ? AND group_id = ?;`,
 

@@ -9,14 +9,14 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type GroupMemberRequest struct {
-	GroupID int    `json:"group_id"`
-	Email   string `json:"member_email"`
-}
+// type GroupMemberRequest struct {
+// 	GroupID int    `json:"group_id"`
+// 	Email   string `json:"member_email"`
+// }
 
-type UserFollowerRequest struct {
-	Email string `json:"email"` // the user who wants to follow you
-}
+// type UserFollowerRequest struct {
+// 	Email string `json:"email"` // the user who wants to follow you
+// }
 
 // wsGroupRequestAcceptHandler is the handler for accepting a group request
 //
@@ -67,38 +67,39 @@ func wsGroupRequestAcceptHandler(conn *websocket.Conn, messageData map[string]in
 	}
 	defer rows.Close()
 
-	group := Group{}
+	var group WS_GROUP_CHECK_DTO
 
 	for rows.Next() {
-		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.CreatorId, &group.CreationDate, &group.Privacy)
+		err = rows.Scan(&group.Id, &group.Name, &group.Description, &group.Creator_id, &group.Created_at, &group.Privacy)
 		if err != nil {
-			log.Println(err.Error())
-			jsonResponse(w, http.StatusInternalServerError, "failed to scan group")
+			log.Println("failed to scan group", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to scan group"})
 			return
 		}
 	}
 
-	if group.CreatorId != LoggedinUserID {
-		jsonResponse(w, http.StatusUnauthorized, "you are not the creator of the group")
+	if group.Creator_id != group_creator_id {
+		log.Println("request sender is not the creator of the group")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnauthorized) + " request sender is not the creator of the group"})
 		return
 	}
 
-	_, err = statements["addGroupMember"].Exec(data.GroupID, memberID)
+	_, err = statements["addGroupMember"].Exec(group_id, requester_id)
 	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "addGroupMember query failed")
+		log.Println("addGroupMember query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupMember query failed"})
 		return
 	}
 
-	_, err = statements["removeGroupPendingMember"].Exec(data.GroupID, memberID)
+	_, err = statements["removeGroupPendingMember"].Exec(group_id, requester_id)
 	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "removeGroupPendingMember query failed")
+		log.Println("removeGroupPendingMember query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " removeGroupPendingMember query failed"})
 		return
 	}
 
-	jsonResponse(w, http.StatusOK, "success: you approved the group membership")
-	return
+	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + "success: you approved the group membership"})
+
 }
 
 // # groupRequestRejectHandler is the handler for rejecting a group request
@@ -318,7 +319,7 @@ func wsRejectFollowerHandler(conn *websocket.Conn, messageData map[string]interf
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " removeFollowerPending query failed"})
 		return
 	}
-	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{"Success: you rejected the follow request"})
+	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + "Success: you rejected the follow request"})
 	return
 }
 

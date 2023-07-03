@@ -321,6 +321,24 @@ func wsSendUserVisitorStatus(user_visitor_status WS_USER_VISITOR_STATUS_DTO) {
 	})
 }
 
+func wsSendInvitesList(invites_list WS_GROUP_INVITES_LIST_DTO) {
+
+	outputMessage, err := wsCreateResponseMessage(WS_GROUP_INVITES_LIST, invites_list)
+
+	if err != nil {
+		log.Println(err)
+	}
+	clients.Range(func(key, value interface{}) bool {
+		if c, ok := key.(*websocket.Conn); ok {
+			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return true
+	})
+}
+
 ////////////////////////////
 // old code
 ////////////////////////////

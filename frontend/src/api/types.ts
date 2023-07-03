@@ -26,8 +26,8 @@ export enum WSMessageType {
   GROUP_POST_COMMENT_SUBMIT = "group_post_comment_submit", //  groupCommentNewHandler
   GROUP_POST_COMMENTS_LIST = "group_post_comments_list", //  groupCommentsGetHandler
   GROUP_JOIN = "group_join", //  groupJoinHandler
-  GROUP_INVITE = "group_invite", //  groupInviteHandler
-  GROUP_INVITES_LIST = "group_invited_list", //todo: attention  groupInvitedHandler
+  GROUP_INVITES_SUBMIT = "group_invite", //  groupInviteHandler
+  GROUP_INVITES_LIST = "group_invites_list", //todo: attention, FOR USER
   GROUP_INVITE_ACCEPT = "group_invite_accept", //  groupInviteAcceptHandler
   GROUP_INVITE_REJECT = "group_invite_reject", //  groupInviteRejectHandler
   GROUP_REQUESTS_LIST = "group_requests_list", //  groupRequestsHandler
