@@ -40,6 +40,18 @@ type WS_GROUP_CHECK_DTO struct {
 	Privacy     string    `json:"privacy"`
 }
 
+type WS_GROUP_REQUEST_RESPONSE_DTO struct {
+	Group_id    int    `json:"group_id"`  // accept or reject in frontend
+	Member_id   int    `json:"member_id"` // accept or reject in frontend
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Email       string `json:"email"`
+	First_name  string `json:"first_name"`
+	Last_name   string `json:"last_name"`
+}
+
+type WS_GROUP_REQUESTS_LIST_DTO []WS_GROUP_REQUEST_RESPONSE_DTO
+
 type WS_INVITE_RESPONSE_DTO struct {
 	Group_id           int       `json:"group_id"`
 	Group_name         string    `json:"group_name"`
@@ -287,12 +299,46 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 	}
 
 	// check if the user is already a member of the group
-	var user_ids []int
+	var not_member_user_ids []int
 	for _, id := range invited_user_ids {
 		_, ok := group_member_ids[id]
 		if ok {
 			log.Printf("user with ID [%d] is already a member of the group with ID [%d]", id, group_id)
 			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " user is already a member of the group"})
+			err_counter++
+			continue
+		}
+		not_member_user_ids = append(not_member_user_ids, id)
+	}
+
+	// check if the user is already invited to the group
+	rows, err = statements["getGroupInvitedUsers"].Query(group_id)
+	if err != nil {
+		log.Println("getGroupInvitedUsers query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroupInvitedUsers query failed"})
+		return
+	}
+	defer rows.Close()
+
+	group_invited_user_ids := map[int]int{}
+	for rows.Next() {
+		var group_invited_user_id int
+		err = rows.Scan(&group_invited_user_id)
+		if err != nil {
+			log.Println("group_invited_user_id scan failed", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " scan failed"})
+			return
+		}
+		group_invited_user_ids[group_invited_user_id] = group_invited_user_id
+	}
+
+	var user_ids []int
+	// check if the user is already invited to the group
+	for _, id := range not_member_user_ids {
+		_, ok := group_invited_user_ids[id]
+		if ok {
+			log.Printf("user with ID [%d] is already invited to the group with ID [%d]", id, group_id)
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " user is already invited to the group"})
 			err_counter++
 			continue
 		}
@@ -386,41 +432,57 @@ func wsGroupInvitesListHandler(conn *websocket.Conn, messageData map[string]inte
 }
 
 // todo: refactor later
-// # groupRequestsHandler gets a list of all the requests to join the group from group_pending_members table
+// wsGroupRequestsHandler gets a list of all the requests to join the group from group_pending_members table
 //
-// @r.params: {group_id : int}
-func wsGroupRequestsHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	defer recovery(w)
-	requestSenderID, err := getRequestSenderID(r)
-	if err != nil {
-		jsonResponse(w, 401, err.Error())
+// @params: {group_id : int}
+func wsGroupRequestsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+	defer wsRecover()
+
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("failed to get user_uuid from messageData")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
 		return
 	}
-	// check if request sender is the group creator
-	var data struct {
-		GroupID int `json:"group_id"`
-	}
-
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&data)
+	user_id, err := getIDbyUUID(uuid)
 	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusBadRequest, "")
+		log.Println("failed to get ID of the request sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
 		return
 	}
 
-	var group Group
-	err = statements["getGroup"].QueryRow(data.GroupID).Scan(&group.ID, &group.Name, &group.Description, &group.CreatorId, &group.CreationDate, &group.Privacy)
+	// use getCreatorAllGroupsPendings and user_id, to get all pendings for the groups, where user_id is creator of the group
+
+	row, err := statements["getCreatorAllGroupsPendings"].Query(user_id)
 	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusNotFound, "getGroup query failed, group not found")
+		log.Println("getCreatorAllGroupsPendings query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getCreatorAllGroupsPendings query failed"})
+		return
+	}
+	defer row.Close()
+
+	var requests_list WS_GROUP_REQUESTS_LIST_DTO
+
+	//todo: need extending to return all group requests/pendings for group created by user_id, to send the into list as part of notifications
+
+	group_id, ok := messageData["group_id"].(int)
+	if !ok {
+		log.Println("failed to get group_id from messageData")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from messageData"})
 		return
 	}
 
-	if group.CreatorId != requestSenderID {
-		jsonResponse(w, http.StatusForbidden, "only group creator can view requests")
+	var group WS_GROUP_CHECK_DTO
+	err = statements["getGroup"].QueryRow(group_id).Scan(&group.Id, &group.Name, &group.Description, &group.Creator_id, &group.Created_at, &group.Privacy)
+	if err != nil {
+		log.Println("getGroup query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroup query failed"})
+		return
+	}
+
+	if group.Creator_id != user_id {
+		log.Println("user is not the creator of the group")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusForbidden) + " user is not the creator of the group"})
 		return
 	}
 

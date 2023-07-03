@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -336,86 +335,141 @@ func wsRejectFollowerHandler(conn *websocket.Conn, messageData map[string]interf
 	return
 }
 
-// groupInviteAcceptHandler is the handler for accepting a group invite
+// wsGroupInviteAcceptHandler is the handler for accepting a group invite
 //
 // @r.param {group_id int}
-func groupInviteAcceptHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	defer recovery(w)
+func wsGroupInviteAcceptHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+	defer wsRecover()
 
-	requestorId, err := getRequestSenderID(r)
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, err.Error())
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("failed to get user_uuid from message data")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from message data"})
 		return
 	}
 
-	var data struct {
-		GroupId int `json:"group_id"`
-	}
-
-	// get the group id from the request body
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&data)
+	user_id, err := getIDbyUUID(uuid)
 	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusBadRequest, "failed to get group id from request body")
+		log.Println("failed to get ID of the accept request sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the accept request sender"})
 		return
 	}
 
-	// add the person to the group_members table
-	_, err = statements["addGroupMember"].Exec(data.GroupId, requestorId)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "failed to add person to group_members table")
+	group_id, ok := messageData["group_id"].(int)
+	if !ok {
+		log.Println("failed to get group_id from message data")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from message data"})
 		return
 	}
 
-	// remove the person from the group_invited_users table
-	_, err = statements["removeGroupInvitedUser"].Exec(requestorId, data.GroupId)
+	// check if the user was invited to the group, using getGroupInvitedUsers statement
+	rows, err := statements["getGroupInvitedUsers"].Query(group_id)
+	defer rows.Close()
 	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "failed to remove person from group_invited_users table")
+		log.Println("getGroupInvitedUsers query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroupInvitedUsers query failed"})
 		return
 	}
-	jsonResponse(w, http.StatusOK, "success: you accepted the group invite")
-	return
+	var invited_user_id int
+	var invited_user_ids map[int]int
+	for rows.Next() {
+		err = rows.Scan(&invited_user_id)
+		if err != nil {
+			log.Println("failed to scan invited users", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to scan invited users"})
+			return
+		}
+		invited_user_ids[invited_user_id] = invited_user_id
+	}
+	// check if the user is in the list of invited users
+	_, ok = invited_user_ids[user_id]
+
+	if !ok {
+		log.Println("the user is not in the list of invited users")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusBadRequest) + " the user is not in the list of invited users"})
+		return
+	}
+
+	_, err = statements["addGroupMember"].Exec(group_id, user_id)
+	if err != nil {
+		log.Println("addGroupMember query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupMember query failed"})
+		return
+	}
+
+	_, err = statements["removeGroupInvitedUser"].Exec(user_id, group_id)
+	if err != nil {
+		log.Println("removeGroupInvitedUser query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " removeGroupInvitedUser query failed"})
+		return
+	}
+
+	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + "success: you accepted the group invite"})
+
 }
 
-// groupInviteRejectHandler is the handler for rejecting a group invite
+// wsGroupInviteRejectHandler is the handler for rejecting a group invite
 //
-// @r.param {group_id int}
-func groupInviteRejectHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	defer recovery(w)
+// @param {group_id int}
+func wsGroupInviteRejectHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+	defer wsRecover()
 
-	requestorId, err := getRequestSenderID(r)
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, err.Error())
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("failed to get user_uuid from message data")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from message data"})
 		return
 	}
 
-	var data struct {
-		GroupId int `json:"group_id"`
-	}
-
-	// get the group id from the request body
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&data)
+	user_id, err := getIDbyUUID(uuid)
 	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusBadRequest, "failed to get group id from request body")
+		log.Println("failed to get ID of the accept request sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the accept request sender"})
 		return
 	}
 
-	// remove the person from the group_invited_users table
-	_, err = statements["removeGroupInvitedUser"].Exec(requestorId, data.GroupId)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "failed to remove person from group_invited_users table")
+	group_id, ok := messageData["group_id"].(int)
+	if !ok {
+		log.Println("failed to get group_id from message data")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from message data"})
 		return
 	}
-	jsonResponse(w, http.StatusOK, "success: you rejected the group invite")
-	return
+
+	// check if the user was invited to the group, using getGroupInvitedUsers statement
+	rows, err := statements["getGroupInvitedUsers"].Query(group_id)
+	defer rows.Close()
+	if err != nil {
+		log.Println("getGroupInvitedUsers query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroupInvitedUsers query failed"})
+		return
+	}
+	var invited_user_id int
+	var invited_user_ids map[int]int
+	for rows.Next() {
+		err = rows.Scan(&invited_user_id)
+		if err != nil {
+			log.Println("failed to scan invited users", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to scan invited users"})
+			return
+		}
+		invited_user_ids[invited_user_id] = invited_user_id
+	}
+	// check if the user is in the list of invited users
+	_, ok = invited_user_ids[user_id]
+
+	if !ok {
+		log.Println("the user is not in the list of invited users")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusBadRequest) + " the user is not in the list of invited users"})
+		return
+	}
+
+	_, err = statements["removeGroupInvitedUser"].Exec(user_id, group_id)
+	if err != nil {
+		log.Println("removeGroupInvitedUser query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " removeGroupInvitedUser query failed"})
+		return
+	}
+
+	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + "success: you rejected the group invite"})
+
 }
