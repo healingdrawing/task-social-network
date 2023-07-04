@@ -208,14 +208,4 @@ onMounted(() => {
   updateTotalPages();
 });
 
-// todo: refactor/comment later. Dummy data section, should be replaced with real data from the backend
-
-function generateRandomInteger(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function generateRandomId(): number {
-  return generateRandomInteger(1, 1000);
-}
-
 </script>
