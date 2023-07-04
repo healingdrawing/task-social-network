@@ -19,7 +19,9 @@
   </pre>
 
   <div v-if="bells.length > 0">
-    {{ bells }}
+    <div>
+      bells: {{ bells }} // todo: remove debug
+    </div>
     <h1>
       Your Majesty! The streets are not calm again.
       <br> Intervention of Your Majesty is required!
