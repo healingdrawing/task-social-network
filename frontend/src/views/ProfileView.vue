@@ -1,5 +1,5 @@
 <template>
-  <router-link to="/bell">Express Royal Will</router-link>
+  <router-link to="/bell" @click="wss.facepalm()" >Express Royal Will</router-link>
   <h1>Profile:</h1>
   <!-- todo: add button to open BellView.vue this button should be highlighted in case of still present a new, not marked by user as read already, notifications -->
   <!-- add checkbox to make profile public -->
@@ -59,10 +59,10 @@ watch(isPublic, (newValue, oldValue) => {
   handleCheckboxChange(newValue);
 });
 
-const webSocketStore = useWebSocketStore();
+const wss = useWebSocketStore();
 const storeUUID = useUUIDStore();
 function handleCheckboxChange(value: boolean) {
-  webSocketStore.sendMessage({
+  wss.sendMessage({
     type: WSMessageType.USER_PRIVACY,
     data: {
       user_uuid: storeUUID.getUUID,

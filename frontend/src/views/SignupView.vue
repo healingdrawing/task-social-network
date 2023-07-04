@@ -63,7 +63,13 @@ import { useWebSocketStore } from '@/store/websocket';
 const store = useSignupStore();
 const error = store.error
 const storeUUID = useUUIDStore();
-const webSocketStore = useWebSocketStore();
+const wss = useWebSocketStore();
+
+function resetPiniaStores() {
+  store.$reset();
+  storeUUID.$reset();
+  wss.$reset();
+}
 
 const email = ref('');
 const password = ref('');
@@ -82,6 +88,7 @@ function handleAvatarChange(event: Event) {
 }
 
 const signup = async () => {
+  resetPiniaStores();
   try {
     /* todo: should happen only if signup is successful */
     await store.fetchData({
@@ -109,7 +116,7 @@ const signup = async () => {
     } else {
       console.log("UUID: " + storeUUID.getUUID);
       storeUUID.setUUID(store.getData.UUID)
-      webSocketStore.connect(storeUUID.getUUID);
+      wss.connect(storeUUID.getUUID);
       router.push('/profile');
     }
 
@@ -141,7 +148,6 @@ const signup = async () => {
   //   public: false
   // })
 };
-
 
 // todo: remove later
 const crap = () => {

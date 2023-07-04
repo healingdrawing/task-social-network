@@ -97,7 +97,7 @@ func wsGroupRequestAcceptHandler(conn *websocket.Conn, messageData map[string]in
 		return
 	}
 
-	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + "success: you approved the group membership"})
+	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Success: you approved the group membership"})
 
 }
 
@@ -174,11 +174,11 @@ func wsGroupRequestRejectHandler(conn *websocket.Conn, messageData map[string]in
 		return
 	}
 
-	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + "success: you rejected the group membership"})
+	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Success: you rejected the group membership"})
 
 }
 
-// swRejectFollowerHandler is the handler for rejecting a follower request
+// wsApproveFollowerHandler is the handler for approving a follower request
 //
 // @rparam {email string}
 func wsApproveFollowerHandler(conn *websocket.Conn, messageData map[string]interface{}) {
@@ -222,7 +222,7 @@ func wsApproveFollowerHandler(conn *websocket.Conn, messageData map[string]inter
 		return
 	}
 	var follower_id int
-	var followers_pending map[int]int
+	followers_pending := map[int]int{}
 	for rows.Next() {
 		err = rows.Scan(&follower_id)
 		if err != nil {
@@ -256,11 +256,11 @@ func wsApproveFollowerHandler(conn *websocket.Conn, messageData map[string]inter
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " removeFollowerPending query failed"})
 		return
 	}
-	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + "Success: you rejected the follow request"})
+	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Success: you approved the follow request"})
 	return
 }
 
-// swRejectFollowerHandler is the handler for rejecting a follower request
+// wsRejectFollowerHandler is the handler for rejecting a follower request
 //
 // @rparam invited_emails (string space separated}
 func wsRejectFollowerHandler(conn *websocket.Conn, messageData map[string]interface{}) {
@@ -304,7 +304,7 @@ func wsRejectFollowerHandler(conn *websocket.Conn, messageData map[string]interf
 		return
 	}
 	var follower_id int
-	var followers_pending map[int]int
+	followers_pending := map[int]int{}
 	for rows.Next() {
 		err = rows.Scan(&follower_id)
 		if err != nil {
@@ -331,7 +331,7 @@ func wsRejectFollowerHandler(conn *websocket.Conn, messageData map[string]interf
 		return
 	}
 
-	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + "Success: you rejected the follow request"})
+	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Success: you rejected the follow request"})
 	return
 }
 
@@ -371,7 +371,7 @@ func wsGroupInviteAcceptHandler(conn *websocket.Conn, messageData map[string]int
 		return
 	}
 	var invited_user_id int
-	var invited_user_ids map[int]int
+	invited_user_ids := map[int]int{}
 	for rows.Next() {
 		err = rows.Scan(&invited_user_id)
 		if err != nil {
@@ -404,7 +404,7 @@ func wsGroupInviteAcceptHandler(conn *websocket.Conn, messageData map[string]int
 		return
 	}
 
-	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + "success: you accepted the group invite"})
+	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Success: you accepted the group invite"})
 
 }
 
@@ -444,7 +444,7 @@ func wsGroupInviteRejectHandler(conn *websocket.Conn, messageData map[string]int
 		return
 	}
 	var invited_user_id int
-	var invited_user_ids map[int]int
+	invited_user_ids := map[int]int{}
 	for rows.Next() {
 		err = rows.Scan(&invited_user_id)
 		if err != nil {
@@ -470,6 +470,6 @@ func wsGroupInviteRejectHandler(conn *websocket.Conn, messageData map[string]int
 		return
 	}
 
-	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + "success: you rejected the group invite"})
+	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Success: you rejected the group invite"})
 
 }

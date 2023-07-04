@@ -28,15 +28,30 @@ import { ErrorResponse } from '@/api/types';
 import { useBellStore } from '@/store/bell';
 import { useChatsStore } from '@/store/chats';
 import { useGroupStore } from '@/store/group';
+
 import { useUUIDStore } from '@/store/uuid';
 import { useLoginStore } from '@/store/login';
 import { useSignupStore } from '@/store/signup';
+import { useWebSocketStore } from '@/store/websocket';
 
 const logoutError = ref('');
 
-const storeUUID = useUUIDStore();
-const storeLogin = useLoginStore();
-const storeSignup = useSignupStore();
+const uuidStore = useUUIDStore();
+const loginStore = useLoginStore();
+const signupStore = useSignupStore();
+const wss = useWebSocketStore();
+
+//todo: reset all pinia stores. Add more later if needed
+function resetPiniaStores() {
+  uuidStore.$reset();
+  loginStore.$reset();
+  signupStore.$reset();
+  wss.$reset();
+}
+
+function disconnectWebSocket() {
+  wss.disconnect();
+}
 
 async function logout() {
   console.log("stage 0")
@@ -59,12 +74,13 @@ async function logout() {
     }
     console.log("stage 3")
 
+
+
     console.log(data);
     logoutError.value = '';
-    storeUUID.$reset();
-    storeLogin.$reset();
-    storeSignup.$reset();
-    //todo: reset all pinia stores later
+
+    disconnectWebSocket();
+    resetPiniaStores();
 
   } catch (error) {
     const errorResponse = error as ErrorResponse;

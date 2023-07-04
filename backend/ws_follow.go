@@ -275,6 +275,7 @@ func wsFollowHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 		return
 	}
 
+	// bug: add works even if the user is already a follower, perhaps can be fixed when profile is loaded
 	if privacy == "private" {
 		// if the target is private, add the follower to the followers_pending table
 		_, err = statements["addFollowerPending"].Exec(target_id, user_id)

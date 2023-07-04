@@ -77,13 +77,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted } from 'vue';
+import { computed, onBeforeMount, onMounted } from 'vue';
 import { useWebSocketStore } from '@/store/websocket';
 import router from '@/router';
 import { useGroupStore } from '@/store/group';
-import { BellType, Bell, TargetProfileRequest, WSMessageType } from '@/api/types';
+import { BellType, Bell, TargetProfileRequest, WSMessageType, WSMessage } from '@/api/types';
 import { useUUIDStore } from '@/store/uuid';
 import { useProfileStore } from '@/store/profile';
+import { mapGetters } from 'pinia';
 
 const wss = useWebSocketStore()
 const bells = computed(() => wss.bellsList);
@@ -107,7 +108,7 @@ function acceptFollowRequest(bell: Bell) {
       target_email: bell.email,
     } as TargetProfileRequest,
   })
-  // code to accept follow request
+  updateBells();
 }
 
 function rejectFollowRequest(bell: Bell) {
@@ -118,7 +119,7 @@ function rejectFollowRequest(bell: Bell) {
       target_email: bell.email,
     } as TargetProfileRequest,
   })
-
+  updateBells();
 }
 
 function acceptInvitation(bell: Bell) {

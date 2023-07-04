@@ -147,6 +147,11 @@ func reader(conn *websocket.Conn, uuid string) {
 				wsFollowRequestsListHandler(conn, data.Data)
 			case string(WS_GROUP_REQUESTS_LIST):
 				wsGroupRequestsListHandler(conn, data.Data)
+			case string(WS_FOLLOW_REQUEST_ACCEPT):
+				wsApproveFollowerHandler(conn, data.Data)
+			case string(WS_FOLLOW_REQUEST_REJECT):
+				wsRejectFollowerHandler(conn, data.Data)
+
 			case string(WS_USER_VISITOR_STATUS):
 				wsUserVisitorStatusHandler(conn, data.Data)
 

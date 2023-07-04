@@ -37,13 +37,20 @@ import { useWebSocketStore } from '@/store/websocket';
 const store = useLoginStore();
 const storeUUID = useUUIDStore();
 const profileStore = useProfileStore();
-const webSocketStore = useWebSocketStore();
+const wss = useWebSocketStore();
+
+function resetPiniaStores() {
+  store.$reset();
+  storeUUID.$reset();
+  profileStore.$reset();
+  wss.$reset();
+}
 
 const email = ref('');
 const password = ref('');
 
 const login = async () => {
-
+  resetPiniaStores();
   try {
     /* todo: should happen only if signup is successful */
     await store.fetchData({
@@ -52,12 +59,12 @@ const login = async () => {
     });
 
     if (store.getData.UUID === undefined) {
-      store.error = "Error: UUID is undefined. Signup failed.";
+      store.error = "Error: UUID is undefined. Login failed.";
       throw new Error(store.error);
     } else {
       console.log("UUID: " + storeUUID.getUUID);
       storeUUID.setUUID(store.getData.UUID)
-      webSocketStore.connect(storeUUID.getUUID);
+      wss.connect(storeUUID.getUUID);
       router.push('/profile');
     }
 

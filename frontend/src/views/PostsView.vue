@@ -79,14 +79,15 @@ import { useProfileStore } from '@/store/pinia';
 import { usePictureStore } from '@/store/pinia';
 import { useWebSocketStore } from '@/store/websocket';
 import { WSMessage, WSMessageType, PostSubmit, Post, PostsListRequest, TargetProfileRequest } from '@/api/types';
+import { onBeforeRouteLeave, useRoute } from 'vue-router';
 
 interface Follower {
   full_name: string;
   email: string;
 }
 
-const webSocketStore = useWebSocketStore();
-const postsList = computed(() => webSocketStore.postsList); // ref and reactive failed to work here, so computed used. Straight way put webSocketStore.postsList to template works too,
+const wss = useWebSocketStore();
+const postsList = computed(() => wss.postsList); // ref and reactive failed to work here, so computed used. Straight way put webSocketStore.postsList to template works too,
 
 const postTitle = ref('');
 const postTags = ref('');
@@ -124,7 +125,7 @@ async function addPost() {
     type: WSMessageType.POST_SUBMIT,
     data: postSubmit,
   };
-  webSocketStore.sendMessage(message);
+  wss.sendMessage(message);
 
   // postsList.value.unshift(post);
 
@@ -160,7 +161,7 @@ function piniaManageDataProfile(email: string) {
 function updatePostsList() {
   console.log('=======FIRED======= updatePostsList');
 
-  webSocketStore.sendMessage({
+  wss.sendMessage({
     type: WSMessageType.POSTS_LIST,
     data: {
       user_uuid: storeUUID.getUUID,
@@ -182,6 +183,13 @@ const crap = () => {
 
 watch(postsList, (newVal, oldVal) => {
   console.log('Posts list:', newVal);
+});
+
+onBeforeRouteLeave((to, from, next) => {
+  wss.facepalm();
+  // wss.clearOnBeforeRouteLeave(from.path) // todo: clear the messages. ugly but works
+  console.log('onBeforeRouteLeave fired');
+  next();
 });
 
 </script>

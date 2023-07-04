@@ -9,6 +9,12 @@ export const useWebSocketStore = defineStore({
     messages: [] as WSMessage[],
   }),
   actions: {
+    /**remove all the messages from the store */
+    facepalm() {
+      this.$state.messages = [];
+      console.log('===facepalm===');
+    },
+
     connect(uuid: string) {
       this.socket = new WebSocket(`ws://localhost:8080/ws?uuid=${uuid}`);
 
@@ -33,27 +39,48 @@ export const useWebSocketStore = defineStore({
       this.socket?.send(messageString);
     },
     disconnect() {
+      console.log('WebSocket disconnecting'); // never happens after logout
       this.socket?.close();
       this.socket = null;
+      console.log('socket', this.socket);
     },
     /**clearMessages removes all the messages of type = message.Type, before fetch fresh, to prevent duplication of messages in getters ( -> screen/view) */
     clearMessages(message: WSMessage) {
-      console.log('clearMessages==============================', message.type);
+      console.log('==================\n=clearMessages===', message.type, '\n==================');
 
       this.messages = this.messages.filter((message) => message.type !== WSMessageType.SUCCESS_RESPONSE);
 
       switch (message.type) {
         //todo: add x4 cases for each type of bell
+        case WSMessageType.FOLLOW_REQUEST_ACCEPT:
+          console.log('case clearMessages==============================', message.type);
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUEST_RESPONSE);
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUESTS_LIST);
+          break;
+        case WSMessageType.FOLLOW_REQUEST_REJECT:
+          console.log('case clearMessages==============================', message.type);
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUEST_RESPONSE);
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUESTS_LIST);
+          break;
         case WSMessageType.FOLLOW_REQUESTS_LIST:
+          console.log('case clearMessages==============================', message.type);
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUEST_RESPONSE);
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUESTS_LIST);
           break;
 
         case WSMessageType.USER_POSTS_LIST:
-        case WSMessageType.POSTS_LIST:
-          this.messages = this.messages.filter((message) => message.type !== WSMessageType.POST_RESPONSE);
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.POSTS_LIST);
           break;
+        case WSMessageType.POSTS_LIST:
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.POSTS_LIST);
+          break;
+        case WSMessageType.POST_RESPONSE:
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.POST_RESPONSE);
+          break;
+        case WSMessageType.POST_SUBMIT:
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.POST_SUBMIT);
+          break;
+
         case WSMessageType.USER_PROFILE:
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.USER_PROFILE);
           break;
@@ -76,6 +103,16 @@ export const useWebSocketStore = defineStore({
         default:
           console.log('SKIP clearMessages default============', message.type);
       }
+    },
+
+    /** try to prevent artefacts between routing. Looks like it works, but facepalm generally */
+    clearOnBeforeRouteLeave(path: string) {
+      if (path == "/posts") {
+        this.messages = this.messages.filter((message) => message.type !== WSMessageType.POSTS_LIST);
+        this.messages = this.messages.filter((message) => message.type !== WSMessageType.POST_SUBMIT);
+        this.messages = this.messages.filter((message) => message.type !== WSMessageType.POST_RESPONSE);
+      }
+      console.log('clearBeforeRouteChange ==============================');
     },
   },
   getters: {
@@ -111,7 +148,7 @@ export const useWebSocketStore = defineStore({
       const fresh_posts_messages = this.messages.filter((message) => message.type === WSMessageType.POST_RESPONSE);
       const fresh_posts = fresh_posts_messages.map((message) => message.data as Post);
 
-      const history_posts_messages_list = this.messages.filter((message) => message.type === WSMessageType.POSTS_LIST);
+      const history_posts_messages_list = this.messages.filter((message) => message.type === WSMessageType.POSTS_LIST && message.data !== null);
       const history_posts = history_posts_messages_list.map((message) =>
         (message.data as Post[]).map((post) => post)
       ).flat();
@@ -136,11 +173,11 @@ export const useWebSocketStore = defineStore({
         bell.type = BellType.FOLLOWING
       })
 
-      console.log('pinia \n follow_requests========== ', follow_requests,
-        '\n fresh_follow_requests_messages========== ', fresh_follow_requests_messages,
-        '\n fresh_follow_requests========== ', fresh_follow_requests,
-        '\n history_follow_requests_messages_list========== ', history_follow_requests_messages_list,
-        '\n history_follow_requests========== ', history_follow_requests);
+      console.log('pinia \n follow_requests========== ', follow_requests.length,
+        '\n fresh_follow_requests_messages========== ', fresh_follow_requests_messages.length,
+        '\n fresh_follow_requests========== ', fresh_follow_requests.length,
+        '\n history_follow_requests_messages_list========== ', history_follow_requests_messages_list.length,
+        '\n history_follow_requests========== ', history_follow_requests.length);
       return follow_requests
     },
     bellsList(): Bell[] {
