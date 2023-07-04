@@ -140,11 +140,12 @@ export interface UserVisitorStatus {
   status: VisitorStatus;
 }
 
-export type BellType =
-  | 'event'
-  | 'following'
-  | 'invitation'
-  | 'request';
+export enum BellType {
+  EVENT = "event",
+  FOLLOWING = "following",
+  INVITATION = "invitation",
+  REQUEST = "request",
+}
 
 export type BellStatus =
   | 'visible'

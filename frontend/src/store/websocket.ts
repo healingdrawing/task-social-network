@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { WSMessage, WSMessageType, Post, UserProfile, UserForList, UserVisitorStatus as Visitor, SuccessResponse, SuccessContent, VisitorStatus, Bell } from '@/api/types';
+import { WSMessage, WSMessageType, Post, UserProfile, UserForList, UserVisitorStatus as Visitor, SuccessResponse, SuccessContent, VisitorStatus, Bell, BellType } from '@/api/types';
 
 
 export const useWebSocketStore = defineStore({
@@ -130,6 +130,12 @@ export const useWebSocketStore = defineStore({
       ).flat()
 
       const follow_requests = [...fresh_follow_requests, ...history_follow_requests]
+
+      // prepare for display, fill the empty fields
+      follow_requests.forEach((bell) => {
+        bell.type = BellType.FOLLOWING
+      })
+
       console.log('pinia \n follow_requests========== ', follow_requests,
         '\n fresh_follow_requests_messages========== ', fresh_follow_requests_messages,
         '\n fresh_follow_requests========== ', fresh_follow_requests,

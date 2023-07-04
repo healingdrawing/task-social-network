@@ -18,90 +18,73 @@
     
   </pre>
 
-<div>
-  paginatedBells: {{ paginatedBells.length }}
-</div>
-<div>
-  bells: {{ bells.length }}
-</div>
-
-  <div v-if="paginatedBells.length > 0">
+  <div v-if="bells.length > 0">
+    {{ bells }}
+    <h1>
+      Your Majesty! The streets are not calm again.
+      <br> Intervention of Your Majesty is required!
+    </h1>
     <h1>Bells</h1>
-    <div>
-      <button @click="previousPage" :disabled="currentPage === 1">Previous Page</button>
-      <button @click="nextPage" :disabled="currentPage === totalPages">Next Page</button>
-      <button @click="clearAll">Execute Everyone</button>
-    </div>
     <ul>
-      <li v-for="(bell, index) in paginatedBells" :key="index">
+      <li v-for="(bell, index) in bells" :key="index">
         <hr>
-        <div v-if="bell.type === 'event'">
+        <div v-if="bell.type === BellType.EVENT">
           type: {{ bell.type }} | {{ bell.event_name }}
           <br> group: {{ bell.group_name }}
           <br> <button @click="openGroup(bell)">Open Group</button>
           <button @click="removeBell(bell)">Close</button>
         </div>
-        <div v-else-if="bell.type === 'following'">
-          type: {{ bell.type }} | {{ bell.first_name }} {{ bell.last_name }} ({{ bell.email }})
-          <br> <button @click="acceptFollowRequest(bell)">Accept</button>
-          <button @click="rejectFollowRequest(bell)">Reject</button>
+        <div v-else-if="bell.type === BellType.FOLLOWING">
+          Your Majesty! A peasant named 
+          <br> {{ bell.first_name }} {{ bell.last_name }} ({{ bell.email }})
+          <br> is in revolt.
+          <br> Says that a member of the royal family
+          <br> from a neighboring kingdom.
+          <br> Also says there is not enough snow in their market.
+          <br> <button title="Accept" @click="acceptFollowRequest(bell)">
+            Outrageous! Open the gate!
+            <br> A matter of extreme importance!
+            <br> So my majesty should
+            <br> powder his nose first...
+          </button>
+          <button title="Reject" @click="rejectFollowRequest(bell)">
+            Terrible! Can't you see I'm eating!
+            <br> In shock, I spilled the spirit on my pants.
+            <br> Bring me the head of this poor peasant.
+            <br> I want to look into those dishonest eyes.
+          </button>
+          <h6>
+            type: {{ bell.type }} | {{ bell.first_name }} {{ bell.last_name }} ({{ bell.email }})
+          </h6>
         </div>
-        <div v-else-if="bell.type === 'invitation'">
+        <div v-else-if="bell.type === BellType.INVITATION">
           type: {{ bell.type }} | {{ bell.group_name }}
           <br> <button @click="openGroup(bell)">Open Group</button>
           <br> <button @click="acceptInvitation(bell)">Accept</button>
           <button @click="rejectInvitation(bell)">Reject</button>
         </div>
-        <div v-else-if="bell.type === 'request'">
+        <div v-else-if="bell.type === BellType.REQUEST">
           type: {{ bell.type }} | {{ bell.group_name }}
           <button @click="allowJoinRequest(bell)">Accept</button>
           <button @click="rejectJoinRequest(bell)">Reject</button>
         </div>
       </li>
     </ul>
-    <div>
-      <button @click="previousPage" :disabled="currentPage === 1">Previous Page</button>
-      <button @click="nextPage" :disabled="currentPage === totalPages">Next Page</button>
-      <button @click="clearAll">Execute Everyone</button>
-    </div>
   </div>
 
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useWebSocketStore } from '@/store/websocket';
 import router from '@/router';
 import { useGroupStore } from '@/store/group';
-import { Bell, TargetProfileRequest, WSMessageType } from '@/api/types';
+import { BellType, Bell, TargetProfileRequest, WSMessageType } from '@/api/types';
 import { useUUIDStore } from '@/store/uuid';
 import { useProfileStore } from '@/store/profile';
 
 const wss = useWebSocketStore()
 const bells = computed(() => wss.bellsList);
-
-const currentPage = ref(1);
-const itemsPerPage = 2;
-
-const paginatedBells = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  console.log("currentPage ", currentPage.value, " itemsPerPage ", itemsPerPage)
-  console.log("start ", start, " end ", end);
-  return bells.value.slice(start, end);
-});
-
-const totalPages = ref(Math.ceil(bells.value.length / itemsPerPage));
-
-function updateTotalPages() {
-  const totalItems = bells.value.length;
-  const lastPage = Math.ceil(totalItems / itemsPerPage);
-  if (currentPage.value > lastPage) {
-    currentPage.value = lastPage;
-  }
-  totalPages.value = lastPage;
-  console.log("pages ", totalPages.value, " paginatedBells.value.length ", paginatedBells.value.length, "bells.value.length ", bells.value.length);
-}
 
 const groupStore = useGroupStore();
 function openGroup(bell: Bell) {
@@ -112,10 +95,6 @@ function openGroup(bell: Bell) {
 
 function removeBell(bell: Bell) {
   bell.status = 'hidden'
-
-  // Update totalPages when removing the last event from the last page
-  updateTotalPages();
-
 }
 
 function acceptFollowRequest(bell: Bell) {
@@ -137,9 +116,7 @@ function rejectFollowRequest(bell: Bell) {
       target_email: bell.email,
     } as TargetProfileRequest,
   })
-  // bells.value.splice(index, 1);
-  // bellStore.setBells(bells.value);
-  updateTotalPages();
+
 }
 
 function acceptInvitation(bell: Bell) {
@@ -147,9 +124,7 @@ function acceptInvitation(bell: Bell) {
 }
 
 function rejectInvitation(bell: Bell) {
-  // bells.value.splice(index, 1);
-  // bellStore.setBells(bells.value);
-  updateTotalPages();
+  //gap
 }
 
 function allowJoinRequest(bell: Bell) {
@@ -157,27 +132,7 @@ function allowJoinRequest(bell: Bell) {
 }
 
 function rejectJoinRequest(bell: Bell) {
-  // bells.value.splice(email, 1);
-  // bellStore.setBells(bells.value);
-  updateTotalPages();
-}
-
-function previousPage() {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-  }
-}
-
-function nextPage() {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-  }
-}
-
-function clearAll() {
-  alert("Become the Emperor first!!! 😏 It is not royal level, kid.");
-  // bells.value = [];
-  // bellStore.setBells(bells.value);
+  //gap
 }
 
 const storeUUID = useUUIDStore();
@@ -203,9 +158,6 @@ function updateBells() {
 
 onMounted(() => {
   updateBells();
-  // bells.value = createDummyData();
-  // bellStore.setBells(bells.value);
-  updateTotalPages();
 });
 
 </script>
