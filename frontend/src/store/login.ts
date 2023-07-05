@@ -7,6 +7,7 @@ export interface LoginSubmit {
 }
 export interface LoginResponse {
   UUID: string;
+  email: string;
 }
 
 export const useLoginStore = defineStore('login', {

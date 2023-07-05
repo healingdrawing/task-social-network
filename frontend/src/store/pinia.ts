@@ -15,3 +15,4 @@ export { useGroupStore } from '@/store/group';
 export { useBellStore } from '@/store/bell';
 export { useSignupStore } from '@/store/signup';
 export { useUUIDStore } from '@/store/uuid';
+export { useWebSocketStore } from '@/store/websocket';

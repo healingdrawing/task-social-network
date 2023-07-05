@@ -31,7 +31,7 @@
     </div>
     <!-- add following list. The other users followed by the user -->
     <h2>Following:</h2>
-    <div v-if="followingList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;">{{ followingList.length }}
+    <div v-if="followingList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;">{{ followingList.length }} <br> {{ followingList }}
       <div v-for="user in followingList" :key="user.email">{{ `${user.first_name} ${user.last_name} (${user.email})` }}</div>
     </div>
     <div v-else>No following</div>
@@ -212,7 +212,7 @@ onMounted(() => {
   console.log('profile.value', profile)
   updateVisitorStatus();
   updateProfile();
-  // updateFollowingList();
+  updateFollowingList();
   // updateFollowersList();
   updatePostsList();
 });

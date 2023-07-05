@@ -116,7 +116,7 @@ func wsFollowingListHandler(conn *websocket.Conn, messageData map[string]interfa
 	var followings []UserForList
 	for _, id := range allFollowingIds {
 		var user UserForList
-		err = statements["getUserbyID"].QueryRow(id).Scan(&user.Email, &user.First_name, &user.Last_name)
+		err = statements["getUserbyID"].QueryRow(id).Scan(&user.Email, &user.First_name, &user.Last_name, &user.Nickname)
 		if err != nil {
 			log.Println("failed to scan into user for list", err.Error())
 			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to scan user for following list"})
@@ -220,7 +220,7 @@ func wsFollowersListHandler(conn *websocket.Conn, messageData map[string]interfa
 	var followers []UserForList
 	for _, id := range allFollowersIds {
 		var user UserForList
-		err = statements["getUserbyID"].QueryRow(id).Scan(&user.Email, &user.First_name, &user.Last_name)
+		err = statements["getUserbyID"].QueryRow(id).Scan(&user.Email, &user.First_name, &user.Last_name, &user.Nickname)
 		if err != nil {
 			log.Println("failed to scan into user for list", err.Error())
 			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to scan user for following list"})

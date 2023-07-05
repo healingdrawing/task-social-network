@@ -52,7 +52,7 @@ import { useWebSocketStore } from '@/store/websocket';
 import { useUUIDStore } from '@/store/uuid';
 import { usePostStore } from '@/store/post';
 import { useProfileStore } from '@/store/profile';
-import { WSMessageType, ChangePrivacyRequest } from '@/api/types';
+import { WSMessageType, ChangePrivacyRequest, TargetProfileRequest } from '@/api/types';
 
 const wss = useWebSocketStore();
 
@@ -115,16 +115,13 @@ function fillDummyProfileData(userId: number): Profile {
 const profileStore = useProfileStore();
 /** Function to update the profile data using dummy data at the moment*/
 function updateProfile() {
-  //todo: get data from backend based on user id from profileStore
-  const profile = fillDummyProfileData(profileStore.getUserId);
-
-  email.value = profile.email;
-  firstName.value = profile.firstName;
-  lastName.value = profile.lastName;
-  dob.value = profile.dob;
-  avatar.value = profile.avatar;//todo: placeholder.it must be image(uploaded or anonymous placeholder), so or from assets, like it is now, or from public folder(requires another code) * /
-  nickname.value = profile.nickname;
-  aboutMe.value = profile.aboutMe;
+  wss.sendMessage({
+    type: WSMessageType.USER_PROFILE,
+    data: {
+      user_uuid: storeUUID.getUUID,
+      target_email: profileStore.getUserEmail,
+    } as TargetProfileRequest,
+  })
 }
 
 // following and followers section

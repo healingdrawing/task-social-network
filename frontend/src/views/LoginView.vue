@@ -34,14 +34,14 @@ import { useUUIDStore } from '@/store/uuid';
 import { useProfileStore } from '@/store/profile';
 import { useWebSocketStore } from '@/store/websocket';
 
-const store = useLoginStore();
-const storeUUID = useUUIDStore();
+const loginStore = useLoginStore();
+const UUIDStore = useUUIDStore();
 const profileStore = useProfileStore();
 const wss = useWebSocketStore();
 
 function resetPiniaStores() {
-  store.$reset();
-  storeUUID.$reset();
+  loginStore.$reset();
+  UUIDStore.$reset();
   profileStore.$reset();
   wss.$reset();
 }
@@ -53,18 +53,30 @@ const login = async () => {
   resetPiniaStores();
   try {
     /* todo: should happen only if signup is successful */
-    await store.fetchData({
+    await loginStore.fetchData({
       email: email.value,
       password: password.value,
     });
 
-    if (store.getData.UUID === undefined) {
-      store.error = "Error: UUID is undefined. Login failed.";
-      throw new Error(store.error);
+    if (loginStore.getData.UUID === undefined) {
+      loginStore.error = "Error: UUID is undefined. Login failed.";
+      throw new Error(loginStore.error);
     } else {
-      console.log("UUID: " + storeUUID.getUUID);
-      storeUUID.setUUID(store.getData.UUID)
-      wss.connect(storeUUID.getUUID);
+      console.log("UUID: " + UUIDStore.getUUID);
+      UUIDStore.setUUID(loginStore.getData.UUID)
+      profileStore.setUserEmail(loginStore.getData.email);
+      wss.connect(UUIDStore.getUUID);
+
+      // slowdown this... masterpeice ... to wait for websocket to establish connection
+      if (wss.socket) {
+        const socket = wss.socket
+        await new Promise((resolve) => {
+          socket.onopen = resolve;
+        });
+      } else {
+        throw new Error('WebSocket connection is null');
+      }
+
       router.push('/profile');
     }
 

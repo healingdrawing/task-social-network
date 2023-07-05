@@ -20,6 +20,7 @@ export interface SignupSubmit {
 }
 export interface SignupResponse {
   UUID: string;
+  email: string;
 }
 
 export const useSignupStore = defineStore('signup', {

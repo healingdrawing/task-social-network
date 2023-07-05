@@ -160,7 +160,7 @@ export const useWebSocketStore = defineStore({
     },
     userFollowingList(): UserForList[] {
       const followingListMessages = this.messages.filter((message) => message.type === WSMessageType.USER_FOLLOWING_LIST && message.data !== null && message.data !== undefined)
-      const followingList = followingListMessages.map((message) => message.data as UserForList)
+      const followingList = followingListMessages.map((message) => message.data as UserForList).flat()
       return followingList
     },
     userFollowersList(): UserForList[] {

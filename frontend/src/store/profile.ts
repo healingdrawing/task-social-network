@@ -1,25 +1,29 @@
 import { defineStore } from 'pinia';
 
 interface ProfileState {
-  userId: number;
-  targetUserEmail: string; // used when the user visit other user's profile
+  user_id: number;
+  user_email: string;
+  target_user_email: string; // used when the user visit other user's profile
 }
 
 export const useProfileStore = defineStore({
   id: 'profile',
   state: (): ProfileState => ({
     // Define your state properties here
-    userId: -1,// the order of these properties is not matter. it is object
-    targetUserEmail: "",
+    user_id: -1,// the order of these properties is not matter. it is object
+    user_email: "",
+    target_user_email: "",
   }),
   getters: {
     // Define your getters here
-    getUserId(): number { return this.userId; },
-    getTargetUserEmail(): string { return this.targetUserEmail; },
+    getUserId(): number { return this.user_id; },
+    getUserEmail(): string { return this.user_email; },
+    getTargetUserEmail(): string { return this.target_user_email; },
   },
   actions: {
     // Define your actions here
-    setUserId(userId: number) { this.userId = userId; },
-    setTargetUserEmail(targetUserEmail: string) { this.targetUserEmail = targetUserEmail; },
+    setUserId(user_id: number) { this.user_id = user_id; },
+    setUserEmail(user_email: string) { this.user_email = user_email; },
+    setTargetUserEmail(target_user_email: string) { this.target_user_email = target_user_email; },
   },
 });

@@ -23,7 +23,7 @@ type WS_POST_SUBMIT_DTO struct {
 }
 
 type WS_POST_RESPONSE_DTO struct {
-	ID         int    `json:"id"` // post section. use to get comments
+	Id         int    `json:"id"` // post section. use to get comments
 	Title      string `json:"title"`
 	Content    string `json:"content"`
 	Categories string `json:"categories"`
@@ -144,13 +144,23 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 	var post WS_POST_RESPONSE_DTO
 	pictureBytes := []byte{}
 	rows.Next()
-	err = rows.Scan(&post.ID, &post.Title, &post.Content, &post.Categories, &pictureBytes, &post.Privacy, &post.Created_at, &post.Email, &post.First_name, &post.Last_name)
+	err = rows.Scan(&post.Id, &post.Title, &post.Content, &post.Categories, &pictureBytes, &post.Privacy, &post.Created_at, &post.Email, &post.First_name, &post.Last_name)
 	if err != nil {
 		log.Println("post scan failed", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " post scan failed"})
 		return
 	}
 	post.Picture = base64.StdEncoding.EncodeToString(pictureBytes)
+
+	//todo: debug, some weird lag happen, when all data is correct except email, and only in this case. when posts list collected from db, email is correct
+
+	log.Println("==============new post================")
+	log.Println("user_uuid", data.User_uuid)
+	log.Println("user_id", user_id)
+	user_email, _ := getUserEmailbyID(user_id)
+	log.Println("user_email from user_id", user_email)
+	log.Println("post content", post.Content)
+	log.Println("post email", post.Email)
 
 	wsSendPost(post)
 }
@@ -183,7 +193,7 @@ func wsPostsListHandler(conn *websocket.Conn, messageData map[string]interface{}
 	for rows.Next() {
 		var post WS_POST_RESPONSE_DTO
 		pictureBytes := []byte{}
-		err = rows.Scan(&post.ID, &post.Title, &post.Content, &post.Categories, &pictureBytes, &post.Privacy, &post.Created_at, &post.Email, &post.First_name, &post.Last_name)
+		err = rows.Scan(&post.Id, &post.Title, &post.Content, &post.Categories, &pictureBytes, &post.Privacy, &post.Created_at, &post.Email, &post.First_name, &post.Last_name)
 		if err != nil {
 			log.Println("post scan failed", err.Error())
 			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " post scan failed"})
@@ -237,7 +247,7 @@ func wsUserPostsListHandler(conn *websocket.Conn, messageData map[string]interfa
 	for rows.Next() {
 		var post WS_POST_RESPONSE_DTO
 		pictureBytes := []byte{}
-		err = rows.Scan(&post.ID, &post.Title, &post.Content, &post.Categories, &pictureBytes, &post.Privacy, &post.Created_at, &post.Email, &post.First_name, &post.Last_name)
+		err = rows.Scan(&post.Id, &post.Title, &post.Content, &post.Categories, &pictureBytes, &post.Privacy, &post.Created_at, &post.Email, &post.First_name, &post.Last_name)
 		if err != nil {
 			log.Println("post scan failed", err.Error())
 			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " post scan failed"})
