@@ -165,7 +165,7 @@ export const useWebSocketStore = defineStore({
     },
     userFollowersList(): UserForList[] {
       const followersListMessages = this.messages.filter((message) => message.type === WSMessageType.USER_FOLLOWERS_LIST && message.data !== null && message.data !== undefined)
-      const followersList = followersListMessages.map((message) => message.data as UserForList)
+      const followersList = followersListMessages.map((message) => message.data as UserForList).flat()
       return followersList
     },
     /**all the posts able to see by user. Excludes group posts(separated view)*/
