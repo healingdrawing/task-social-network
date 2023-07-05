@@ -224,6 +224,7 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 func isFollowing(myID int, ID int) (bool, error) {
 	rows, err := statements["doesSecondFollowFirst"].Query(ID, myID)
 	if err != nil {
+		log.Println("doesSecondFollowFirst query failed", err.Error())
 		return false, err
 	}
 	defer rows.Close()

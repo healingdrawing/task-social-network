@@ -61,7 +61,7 @@ func wsFollowingListHandler(conn *websocket.Conn, messageData map[string]interfa
 		return
 	}
 
-	isFollower, err := isFollowing(target_id, user_id)
+	isFollower, err := isFollowing(user_id, target_id)
 	if err != nil {
 		log.Println("failed to check if user is a follower of the target user", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a follower of the target user"})
@@ -167,7 +167,7 @@ func wsFollowersListHandler(conn *websocket.Conn, messageData map[string]interfa
 		return
 	}
 
-	isFollower, err := isFollowing(target_id, user_id)
+	isFollower, err := isFollowing(user_id, target_id)
 	if err != nil {
 		log.Println("failed to check if user is a follower of the target user", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a follower of the target user"})

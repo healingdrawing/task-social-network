@@ -6,14 +6,20 @@
   </div>
   <div v-else>wtf where is visitor [{{ visitor }}]</div>
  
-  <div v-if="isProfilePublicOrVisitorFollower">
-    <!-- todo: remove later . show id for dev needs-->
-    <p>target_email: {{ profileStore.getTargetUserEmail }}</p>
-    <!-- add user information -->
+  <!-- todo: remove later . show id for dev needs-->
+  <p>target_email: {{ profileStore.getTargetUserEmail }}</p>
+  <!-- add user information -->
+  <div v-if="profile">
+    <p>Email: {{ profile.email }}</p>
+    <p>First Name: {{ profile.first_name }}</p>
+    <p>Last Name: {{ profile.last_name }}</p>
+  </div>
+  <div v-else>no profile</div>
+
+  <div v-if="profile && (profile.public ||
+    visitor && visitor.status == VisitorStatus.FOLLOWER ||
+    visitor && visitor.status == VisitorStatus.OWNER)">
     <div v-if="profile">
-      <p>Email: {{ profile.email }}</p>
-      <p>First Name: {{ profile.first_name }}</p>
-      <p>Last Name: {{ profile.last_name }}</p>
       <p>Date of Birth: {{ profile.dob }}</p>
       <p>Nickname: {{ profile.nickname }}</p>
       <p>About Me: {{ profile.about_me }}</p>
@@ -73,7 +79,7 @@ import { useWebSocketStore } from '@/store/websocket';
 import { useUUIDStore } from '@/store/uuid';
 import { usePostStore } from '@/store/post';
 import { useProfileStore } from '@/store/profile';
-import { WSMessageType, TargetProfileRequest, UserProfile } from '@/api/types';
+import { WSMessageType, TargetProfileRequest, UserProfile, VisitorStatus } from '@/api/types';
 
 
 
@@ -205,7 +211,7 @@ function piniaManageDataPost(post: Post) {
 onMounted(() => {
   console.log('profile.value', profile)
   updateVisitorStatus();
-  // updateProfile();
+  updateProfile();
   // updateFollowingList();
   // updateFollowersList();
   updatePostsList();

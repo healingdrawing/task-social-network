@@ -68,12 +68,14 @@ func wsUserVisitorStatusHandler(conn *websocket.Conn, messageData map[string]int
 		return
 	}
 
-	isFollower, err := isFollowing(target_id, user_id)
+	isFollower, err := isFollowing(user_id, target_id)
 	if err != nil {
 		log.Println("failed to check if user is a follower of the target user", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a follower of the target user"})
 		return
 	}
+
+	log.Print("isFollower: ", isFollower, " target_id: ", target_id, " user_id: ", user_id)
 
 	var profile WS_USER_PROFILE_DTO
 	rows, err := statements["getUserProfile"].Query(target_id)
@@ -155,7 +157,7 @@ func wsUserProfileHandler(conn *websocket.Conn, messageData map[string]interface
 		return
 	}
 
-	isFollower, err := isFollowing(target_id, user_id)
+	isFollower, err := isFollowing(user_id, target_id)
 	if err != nil {
 		log.Println("failed to check if user is a follower of the target user", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a follower of the target user"})
@@ -180,10 +182,11 @@ func wsUserProfileHandler(conn *websocket.Conn, messageData map[string]interface
 	}
 	rows.Close()
 
+	full_profile := true
 	if target_id != user_id && !isFollower && profile.Privacy == "private" {
 		log.Println("user does not have permissions to see the target user profile")
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusForbidden) + " user does not have permissions to see the target user profile"})
-		return
+		full_profile = false
 	}
 
 	profileDTO := WS_USER_PROFILE_RESPONSE_DTO{}
@@ -191,14 +194,16 @@ func wsUserProfileHandler(conn *websocket.Conn, messageData map[string]interface
 	profileDTO.Email = profile.Email
 	profileDTO.First_name = profile.First_name
 	profileDTO.Last_name = profile.Last_name
-	profileDTO.Dob = profile.Dob
-	profileDTO.Avatar = base64.StdEncoding.EncodeToString(profile.avatar_bytes)
-	profileDTO.Nickname = profile.Nickname
-	profileDTO.About_me = profile.About_me
-	if profile.Privacy == "public" {
-		profileDTO.Public = true
-	} else {
-		profileDTO.Public = false
+	if full_profile {
+		profileDTO.Dob = profile.Dob
+		profileDTO.Avatar = base64.StdEncoding.EncodeToString(profile.avatar_bytes)
+		profileDTO.Nickname = profile.Nickname
+		profileDTO.About_me = profile.About_me
+		if profile.Privacy == "public" {
+			profileDTO.Public = true
+		} else {
+			profileDTO.Public = false
+		}
 	}
 	log.Println("sending user profile", profileDTO)
 	wsSendUserProfile(profileDTO)
