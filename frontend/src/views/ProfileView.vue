@@ -4,23 +4,24 @@
   <!-- todo: add button to open BellView.vue this button should be highlighted in case of still present a new, not marked by user as read already, notifications -->
   <!-- add checkbox to make profile public -->
   <div>
-    <label>
-      <input type="checkbox" v-model="isPublic" />
+    <label v-if="profile">
+      <input type="checkbox" v-model="profile.public" />
       is public
     </label>
   </div>
   <!-- add user information -->
-  <div>
-    <p>Email: {{ email }}</p>
-    <p>First Name: {{ firstName }}</p>
-    <p>Last Name: {{ lastName }}</p>
-    <p>Date of Birth: {{ dob }}</p>
-    <p>Nickname: {{ nickname }}</p>
-    <p>About Me: {{ aboutMe }}</p>
+  <div v-if="profile">
+    <p>Email: {{ profile.email }}</p>
+    <p>First Name: {{ profile.first_name }}</p>
+    <p>Last Name: {{ profile.last_name }}</p>
+    <p>Date of Birth: {{ profile.dob }}</p>
+    <p>Nickname: {{ profile.nickname }}</p>
+    <p>About Me: {{ profile.about_me }}</p>
+    <p>Public: {{ profile.public }}</p>
   </div>
   <!-- separately add avatar, perhaps it should be on the right half of screen -->
-  <div>
-    <p>Avatar: <img :src="getImgUrl(avatar)" alt="fail again"></p>
+  <div v-if="profile">
+    <p>Avatar: {{ profile.avatar }}</p>
   </div>
   <!-- add following list. The other users followed by the user -->
   <h2>Following:</h2>
@@ -46,12 +47,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { useWebSocketStore } from '@/store/websocket';
 import { useUUIDStore } from '@/store/uuid';
 import { usePostStore } from '@/store/post';
 import { useProfileStore } from '@/store/profile';
 import { WSMessageType, ChangePrivacyRequest } from '@/api/types';
+
+const wss = useWebSocketStore();
+
+const profile = computed(() => wss.userProfile);
 
 const isPublic = ref(false);
 
@@ -59,7 +64,6 @@ watch(isPublic, (newValue, oldValue) => {
   handleCheckboxChange(newValue);
 });
 
-const wss = useWebSocketStore();
 const storeUUID = useUUIDStore();
 function handleCheckboxChange(value: boolean) {
   wss.sendMessage({

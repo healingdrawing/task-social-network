@@ -5,11 +5,39 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 
 import NavBar from './components/NavBar.vue'
 import NavBarGuest from './components/NavBarGuest.vue'
+import { useWebSocketStore } from './store/websocket';
+import { createDecorator } from 'vue-class-component';
+
+const wss = useWebSocketStore();
+
+window.onbeforeunload = function () {
+  alert("onbeforeunload event listener triggered")
+  console.log("====================================")
+  console.log("onbeforeunload event listener triggered")
+  console.log("====================================")
+  wss.killThemAll();
+}
+
+// Register the beforeunload event listener
+// window.addEventListener('beforeunload', () => {
+//   alert("beforeunload event listener triggered")
+//   console.log("====================================")
+//   console.log("beforeunload event listener triggered")
+//   console.log("====================================")
+//   wss.killThemAll();
+// });
+
+// Unregister the event listener when the component is unmounted
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeunload', () => {
+    wss.killThemAll();
+  });
+});
 
 const route = useRoute()
 

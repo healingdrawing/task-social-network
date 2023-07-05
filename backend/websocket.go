@@ -91,7 +91,9 @@ func wsConnection(w http.ResponseWriter, r *http.Request) {
 	uuid := strings.TrimSpace(r.URL.Query().Get("uuid"))
 	log.Println("wsConnection uuid: ", uuid) //todo: delete debug
 	if uuid == "" {
+		log.Println("====================================")
 		log.Println("uuid is empty")
+		log.Println("====================================")
 		return
 	}
 	reader(ws, uuid)
@@ -105,6 +107,7 @@ func reader(conn *websocket.Conn, uuid string) {
 		messageType, incoming, err := conn.ReadMessage()
 		if err != nil {
 			log.Println(err)
+			log.Println("=== error in reader , before delete and close ws ===")
 			return
 		}
 

@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import { WSMessage, WSMessageType, Post, UserProfile, UserForList, UserVisitorStatus as Visitor, SuccessResponse, SuccessContent, VisitorStatus, Bell, BellType } from '@/api/types';
+import router from '@/router/index';
 
+const websockets: (WebSocket | null)[] = [];
 
 export const useWebSocketStore = defineStore({
   id: 'websocket',
@@ -15,8 +17,31 @@ export const useWebSocketStore = defineStore({
       console.log('===facepalm===');
     },
 
+    /**
+     * close all the websockets and empty the global array const websockets: (WebSocket | null)[] = [];
+     * Attempt to prevent creation of artefacts for emergency case, hardreload etc*/
+    killThemAll() {
+      console.log('===killThemAll===');
+      console.log('websockets', websockets.length);
+      websockets.forEach((websocket) => {
+        console.log('============================')
+        console.log('forEach websocket disconnecting');
+        console.log('forEach websocket', websocket);
+        websocket?.close(1000, 'killThemAll');
+        websocket = null;
+        console.log('forEach websocket', websocket);
+      });
+      // websockets.length = 0; // it is const so "= []" raises error
+      this.facepalm();
+      router.push({ name: 'login' });
+      console.log('========\n=======before reset and after push ======\n======');
+      // this.$reset();
+    },
+
     connect(uuid: string) {
       this.socket = new WebSocket(`ws://localhost:8080/ws?uuid=${uuid}`);
+
+      websockets.unshift(this.socket);
 
       this.socket.onopen = () => {
         console.log('WebSocket connected');
@@ -39,7 +64,7 @@ export const useWebSocketStore = defineStore({
       this.socket?.send(messageString);
     },
     disconnect() {
-      console.log('WebSocket disconnecting'); // never happens after logout
+      console.log('WebSocket disconnecting');
       this.socket?.close();
       this.socket = null;
       console.log('socket', this.socket);
@@ -207,7 +232,18 @@ export const useWebSocketStore = defineStore({
     //   return this.messages.filter((message) => message.type === 'notification');
     // },
   },
+
 });
+
+// // Register the beforeunload event listener
+// window.addEventListener('beforeunload', () => {
+//   // Get the Pinia store instance
+//   alert('beforeunload');
+//   const wss = useWebSocketStore()
+
+//   // Call the removeConnections action
+//   wss.killThemAll()
+// })
 
 // Usage in a component
 // <script lang="ts" setup >

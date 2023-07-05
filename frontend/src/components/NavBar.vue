@@ -46,7 +46,7 @@ function resetPiniaStores() {
   uuidStore.$reset();
   loginStore.$reset();
   signupStore.$reset();
-  wss.$reset();
+  window.dispatchEvent(new Event('beforeunload'));
 }
 
 function disconnectWebSocket() {

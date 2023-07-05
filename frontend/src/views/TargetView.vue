@@ -1,5 +1,5 @@
 <template>
-  <h1>Profile:</h1>
+  <h1>Target Profile:</h1>
 
   <div v-if="visitor">
     <button @click="handleFollowing()">{{ button_text }}</button>
