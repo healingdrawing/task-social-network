@@ -20,7 +20,7 @@ export const useAvatarStore = defineStore({
     getAvatarBlob(): Blob | null {
       return this.avatarBlob;
     },
-    getAvatarString(): string {
+    getAvatarBase64String(): string {
       return this.avatarBase64String;
     },
   },
@@ -81,7 +81,7 @@ export const useAvatarStore = defineStore({
               console.log('resized avatar blob inside handleAvatarUpload')
               console.log('store/avatar.ts this.avatarBlob', this.avatarBlob)
               this.avatarError = '';
-              this.avatarBase64String = btoa(reader.result as string);
+              this.avatarBase64String = reader.result?.toString() || '';
             }
           }, 'image/jpeg', 0.8);
         };
