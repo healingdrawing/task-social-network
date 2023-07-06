@@ -104,6 +104,13 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 		return
 	}
 
+	// privacy check
+	if _, ok := map[string]int{"public": 0, "private": 0, "almost private": 0}[data.Privacy]; !ok {
+		log.Println("Invalid privacy ", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " Invalid privacy"})
+		return
+	}
+
 	data.Created_at = time.Now().Format("2006-01-02 15:04:05")
 	result, err := statements["addPost"].Exec(user_id, data.Title, data.Categories, data.Content, data.Privacy, postPicture, data.Created_at)
 	if err != nil {

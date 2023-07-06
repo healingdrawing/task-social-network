@@ -23,11 +23,11 @@
       <input type="radio" id="private" name="postPrivacy" value="private" v-model="postPrivacy">
       <label for="private">Private - for all followers</label>
       <br>
-      <input type="radio" id="almostPrivate" name="postPrivacy" value="almostPrivate" v-model="postPrivacy">
-      <label for="almostPrivate">Almost Private - for selected followers</label>
+      <input type="radio" id="almost_private" name="postPrivacy" value="almost private" v-model="postPrivacy">
+      <label for="almost_private">Almost Private - for selected followers</label>
       <br>
-      <select v-if="postPrivacy === 'almostPrivate'" multiple v-model="selectedFollowers">
-        <option v-for="follower in followers" :key="follower.email" :value="follower.email">{{ follower.full_name }} ({{ follower.email }})</option>
+      <select v-if="postPrivacy === 'almost private'" multiple v-model="selectedFollowers">
+        <option v-for="follower in followersList" :key="follower.email" :value="follower.email">{{ follower.first_name }} {{ follower.last_name }} ({{ follower.email }})</option>
       </select>
       
       <div>
@@ -85,21 +85,16 @@ import { useWebSocketStore } from '@/store/websocket';
 import { WSMessage, WSMessageType, PostSubmit, Post, PostsListRequest, TargetProfileRequest } from '@/api/types';
 import { onBeforeRouteLeave, useRoute } from 'vue-router';
 
-interface Follower {
-  full_name: string;
-  email: string;
-}
-
 const wss = useWebSocketStore();
 const postsList = computed(() => wss.postsList); // ref and reactive failed to work here, so computed used. Straight way put webSocketStore.postsList to template works too,
+
 
 const postTitle = ref('');
 const postTags = ref('');
 const postContent = ref('');
 const postPrivacy = ref('public');
 const selectedFollowers = ref<string[]>([]);
-const followers = ref<Follower[]>([]);
-const picture: Ref<Blob | null> = ref(null); //todo: chat gpt solution, to fix null value case, because field is optional
+const picture: Ref<Blob | null> = ref(null);
 
 const pictureStore = usePictureStore();
 function handlePictureChange(event: Event) {
@@ -137,17 +132,9 @@ async function addPost() {
   postContent.value = '';
   postPrivacy.value = 'public';
   selectedFollowers.value = [];
-  // picture = "null";
-
-}
-
-//todo: remove/refactor later, dummy data, must be collected from backend
-function updateFollowersList() {
-  followers.value = [
-    { full_name: 'John Doe 11', email: 'John_Doe@mail.com' },
-    { full_name: 'Jane Doe 22', email: 'Jane_Doe@mail.com' },
-    { full_name: 'Sir Flex 33', email: 'Sir_Flex@mail.com' },
-  ];
+  picture.value = null;
+  (document.getElementById("picture") as HTMLInputElement).value = "";
+  pictureStore.resetPicture()
 }
 
 const postStore = usePostStore();
@@ -158,6 +145,18 @@ function piniaManageDataPost(post: Post) {
 const profileStore = useProfileStore();
 function piniaManageDataProfile(email: string) {
   profileStore.setTargetUserEmail(email);
+}
+
+const followersList = computed(() => wss.userFollowersList);
+//todo: remove/refactor later, dummy data, must be collected from backend
+function updateFollowersList() {
+  wss.sendMessage({
+    type: WSMessageType.USER_FOLLOWERS_LIST,
+    data: {
+      user_uuid: storeUUID.getUUID,
+      target_email: profileStore.getUserEmail,
+    } as TargetProfileRequest,
+  })
 }
 
 // send request to get old posts list, used inside onMounted

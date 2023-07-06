@@ -90,5 +90,10 @@ export const usePictureStore = defineStore({
         };
       };
     },
+    resetPicture() {
+      this.pictureError = '';
+      this.pictureBlob = null;
+      this.pictureBase64String = '';
+    }
   }
 });
