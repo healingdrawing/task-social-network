@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"regexp"
@@ -144,7 +143,7 @@ func userProfileHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(incomingEmail)
 
 	// get the ID of the user that we want to see
-	ID, err := getIDbyEmail(incomingEmail)
+	ID, err := get_user_id_by_email(incomingEmail)
 	if err != nil {
 		log.Println(err.Error())
 		jsonResponse(w, http.StatusUnauthorized, "User not found, getIDbyEmail failed")
@@ -540,7 +539,7 @@ func userLogoutHandler(w http.ResponseWriter, r *http.Request) {
 func createSession(email string) (UUID string, err error) {
 	random, _ := uuid.NewV4()
 	UUID = random.String()
-	ID, err := getIDbyEmail(email)
+	ID, err := get_user_id_by_email(email)
 	if err != nil {
 		return "", err
 	}
@@ -549,66 +548,4 @@ func createSession(email string) (UUID string, err error) {
 		return "", err
 	}
 	return UUID, nil
-}
-
-func getIDbyEmail(email string) (ID int, err error) {
-	rows, err := statements["getUserIDByEmail"].Query(email)
-	if err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-	rows.Next()
-	err = rows.Scan(&ID)
-	if err != nil {
-		return 0, err
-	}
-	rows.Close()
-	return ID, nil
-}
-
-func getUserEmailbyID(ID int) (email string, err error) {
-	rows, err := statements["getEmailByID"].Query(ID)
-	if err != nil {
-		return "", err
-	}
-	defer rows.Close()
-	rows.Next()
-	err = rows.Scan(&email)
-	if err != nil {
-		return "", err
-	}
-	rows.Close()
-	return email, nil
-}
-
-func isImage(data []byte) bool {
-	if len(data) < 4 {
-		log.Println("len(data) < 4")
-		return false
-	}
-
-	log.Println("inside isImage first x4 bytes\n", data[0], data[1], data[2], data[3])
-
-	if data[0] == 0xFF && data[1] == 0xD8 && data[2] == 0xFF {
-		return true // JPEG
-	}
-
-	if data[0] == 0x89 && data[1] == 0x50 && data[2] == 0x4E && data[3] == 0x47 {
-		return true // PNG
-	}
-
-	if data[0] == 0x47 && data[1] == 0x49 && data[2] == 0x46 && data[3] == 0x38 {
-		return true // GIF
-	}
-
-	return false
-}
-
-// todo: CHECK IT! , it is refactored to prevent warning
-func randomNum(min, max int) int {
-	rng := rand.New(rand.NewSource(time.Now().Unix()))
-	rng.Seed(time.Now().Unix())
-	return rng.Intn(max-min) + min
-	// rand.Seed(time.Now().Unix())
-	// return rand.Intn(max-min) + min
 }

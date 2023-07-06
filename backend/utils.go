@@ -1,13 +1,16 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"runtime/debug"
 	"strings"
+	"time"
 )
 
 // # jsonResponse marshals and forwards json response writing to http.ResponseWriter
@@ -91,6 +94,36 @@ func recovery(w http.ResponseWriter) {
 	}
 }
 
+func get_user_id_by_email(email string) (user_id int, err error) {
+	rows, err := statements["getUserIDByEmail"].Query(email)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+	rows.Next()
+	err = rows.Scan(&user_id)
+	if err != nil {
+		return 0, err
+	}
+	rows.Close()
+	return user_id, nil
+}
+
+func get_email_by_user_id(user_id int) (email string, err error) {
+	rows, err := statements["getEmailByID"].Query(user_id)
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+	rows.Next()
+	err = rows.Scan(&email)
+	if err != nil {
+		return "", err
+	}
+	rows.Close()
+	return email, nil
+}
+
 // # getRequestSenderID gets the ID of the request sender from the cookie
 //
 // @params {r *http.Request}
@@ -100,7 +133,7 @@ func getRequestSenderID(r *http.Request) (int, error) {
 		return 0, errors.New("malformed cookie/cookie not found")
 	}
 
-	requestSenderID, err := getIDbyUUID(cookie.Value)
+	requestSenderID, err := get_user_id_by_uuid(cookie.Value)
 	if err != nil {
 		return 0, errors.New("failed to get ID of the request sender")
 	}
@@ -108,23 +141,23 @@ func getRequestSenderID(r *http.Request) (int, error) {
 	return requestSenderID, nil
 }
 
-// # getIDbyUUID retrieves ID of the user from uuid
+// # get_user_id_by_uuid retrieves id of the user from uuid
 //
-// @params {UUID string}
-// execute DB prepared statement getIDbyUUID.query
-func getIDbyUUID(UUID string) (ID int, err error) {
-	rows, err := statements["getIDbyUUID"].Query(UUID)
+// @params {uuid string}
+// execute DB prepared statement get_user_id_by_uuid.query
+func get_user_id_by_uuid(uuid string) (user_id int, err error) {
+	rows, err := statements["getIDbyUUID"].Query(uuid)
 	if err != nil {
 		return 0, err
 	}
 	defer rows.Close()
 	rows.Next()
-	err = rows.Scan(&ID)
+	err = rows.Scan(&user_id)
 	if err != nil {
 		return 0, err
 	}
 	rows.Close()
-	return ID, nil
+	return user_id, nil
 }
 
 // extractImageData extracts image data from dataURI
@@ -138,4 +171,42 @@ func extractImageData(dataURI string) (string, error) {
 		return "", errors.New("invalid dataURI")
 	}
 	return parts[1], nil
+}
+
+func isImage(data []byte) bool {
+	if len(data) < 4 {
+		log.Println("len(data) < 4")
+		return false
+	}
+
+	switch {
+	case bytes.HasPrefix(data, []byte{0xFF, 0xD8, 0xFF}): // JPEG
+		return true
+	case bytes.HasPrefix(data, []byte{0x89, 0x50, 0x4E, 0x47}): // PNG
+		return true
+	case bytes.HasPrefix(data, []byte{0x47, 0x49, 0x46, 0x38}): // GIF
+		return true
+	}
+	return false
+
+	// if data[0] == 0xFF && data[1] == 0xD8 && data[2] == 0xFF {
+	// 	return true // JPEG
+	// }
+
+	// if data[0] == 0x89 && data[1] == 0x50 && data[2] == 0x4E && data[3] == 0x47 {
+	// 	return true // PNG
+	// }
+
+	// if data[0] == 0x47 && data[1] == 0x49 && data[2] == 0x46 && data[3] == 0x38 {
+	// 	return true // GIF
+	// }
+
+	// return
+}
+
+// randomNum returns a random number between min and max, both inclusive.
+func randomNum(min, max int) int {
+	rng := rand.New(rand.NewSource(time.Now().Unix()))
+	rng.Seed(time.Now().Unix())
+	return rng.Intn(max+1-min) + min
 }

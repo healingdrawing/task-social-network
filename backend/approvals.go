@@ -38,7 +38,7 @@ func groupRequestAcceptHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	memberID, err := getIDbyEmail(data.Email)
+	memberID, err := get_user_id_by_email(data.Email)
 	if err != nil {
 		jsonResponse(w, http.StatusBadRequest, "") // todo: fresh handling, in old version was just skipped
 		return
@@ -110,7 +110,7 @@ func groupRequestRejectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	memberID, err := getIDbyEmail(data.Email)
+	memberID, err := get_user_id_by_email(data.Email)
 	if err != nil {
 		jsonResponse(w, http.StatusBadRequest, "") // todo: fresh handling, in old version was just skipped
 		return
@@ -175,7 +175,7 @@ func approveFollowerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fanID, err := getIDbyEmail(data.Email)
+	fanID, err := get_user_id_by_email(data.Email)
 	if err != nil {
 		jsonResponse(w, http.StatusBadRequest, "") // todo: fresh handling, in old version was just skipped
 		return
@@ -257,7 +257,7 @@ func rejectFollowerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fanID, err := getIDbyEmail(data.Email)
+	fanID, err := get_user_id_by_email(data.Email)
 	if err != nil {
 		jsonResponse(w, http.StatusBadRequest, "") // todo: fresh handling, in old version was just skipped
 		return

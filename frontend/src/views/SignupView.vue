@@ -119,6 +119,7 @@ const signup = async () => {
       console.log("UUID: " + UUIDStore.getUUID);
       UUIDStore.setUUID(signupStore.getData.UUID)
       profileStore.setUserEmail(signupStore.getData.email);
+      profileStore.setTargetUserEmail(signupStore.getData.email);
       wss.connect(UUIDStore.getUUID);
 
       // slowdown this... masterpeice ... to wait for websocket to establish connection

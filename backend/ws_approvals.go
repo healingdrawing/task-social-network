@@ -30,7 +30,7 @@ func wsGroupRequestAcceptHandler(conn *websocket.Conn, messageData map[string]in
 		return
 	}
 
-	group_creator_id, err := getIDbyUUID(uuid)
+	group_creator_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the accept request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the accept request sender"})
@@ -51,7 +51,7 @@ func wsGroupRequestAcceptHandler(conn *websocket.Conn, messageData map[string]in
 		return
 	}
 
-	requester_id, err := getIDbyEmail(requester_email)
+	requester_id, err := get_user_id_by_email(requester_email)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
@@ -114,7 +114,7 @@ func wsGroupRequestRejectHandler(conn *websocket.Conn, messageData map[string]in
 		return
 	}
 
-	group_creator_id, err := getIDbyUUID(uuid)
+	group_creator_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the accept request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the accept request sender"})
@@ -135,7 +135,7 @@ func wsGroupRequestRejectHandler(conn *websocket.Conn, messageData map[string]in
 		return
 	}
 
-	requester_id, err := getIDbyEmail(requester_email)
+	requester_id, err := get_user_id_by_email(requester_email)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
@@ -191,7 +191,7 @@ func wsApproveFollowerHandler(conn *websocket.Conn, messageData map[string]inter
 		return
 	}
 
-	idol_user_id, err := getIDbyUUID(uuid)
+	idol_user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
@@ -205,7 +205,7 @@ func wsApproveFollowerHandler(conn *websocket.Conn, messageData map[string]inter
 		return
 	}
 
-	fan_user_id, err := getIDbyEmail(target_email)
+	fan_user_id, err := get_user_id_by_email(target_email)
 	if err != nil {
 		log.Println("failed to get ID of the follow request creator", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the follow request creator"})
@@ -273,7 +273,7 @@ func wsRejectFollowerHandler(conn *websocket.Conn, messageData map[string]interf
 		return
 	}
 
-	idol_user_id, err := getIDbyUUID(uuid)
+	idol_user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
@@ -287,7 +287,7 @@ func wsRejectFollowerHandler(conn *websocket.Conn, messageData map[string]interf
 		return
 	}
 
-	fan_user_id, err := getIDbyEmail(target_email)
+	fan_user_id, err := get_user_id_by_email(target_email)
 	if err != nil {
 		log.Println("failed to get ID of the follow request creator", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the follow request creator"})
@@ -348,7 +348,7 @@ func wsGroupInviteAcceptHandler(conn *websocket.Conn, messageData map[string]int
 		return
 	}
 
-	user_id, err := getIDbyUUID(uuid)
+	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the accept request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the accept request sender"})
@@ -421,7 +421,7 @@ func wsGroupInviteRejectHandler(conn *websocket.Conn, messageData map[string]int
 		return
 	}
 
-	user_id, err := getIDbyUUID(uuid)
+	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the accept request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the accept request sender"})

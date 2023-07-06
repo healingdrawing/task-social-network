@@ -47,7 +47,7 @@ func wsUserVisitorStatusHandler(conn *websocket.Conn, messageData map[string]int
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from message data"})
 		return
 	}
-	user_id, err := getIDbyUUID(uuid)
+	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
@@ -61,7 +61,7 @@ func wsUserVisitorStatusHandler(conn *websocket.Conn, messageData map[string]int
 		return
 	}
 
-	target_id, err := getIDbyEmail(target_email)
+	target_id, err := get_user_id_by_email(target_email)
 	if err != nil {
 		log.Println("failed to get ID of the target user", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the target user"})
@@ -136,7 +136,7 @@ func wsUserProfileHandler(conn *websocket.Conn, messageData map[string]interface
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from message data"})
 		return
 	}
-	user_id, err := getIDbyUUID(uuid)
+	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
@@ -150,7 +150,7 @@ func wsUserProfileHandler(conn *websocket.Conn, messageData map[string]interface
 		return
 	}
 
-	target_id, err := getIDbyEmail(target_email)
+	target_id, err := get_user_id_by_email(target_email)
 	if err != nil {
 		log.Println("failed to get ID of the target user", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the target user"})
@@ -219,7 +219,7 @@ func wsChangePrivacyHandler(conn *websocket.Conn, messageData map[string]interfa
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from message data"})
 		return
 	}
-	user_id, err := getIDbyUUID(uuid)
+	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})

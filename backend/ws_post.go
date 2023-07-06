@@ -89,7 +89,7 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 		postPicture = avatarData
 	}
 
-	user_id, err := getIDbyUUID(data.User_uuid)
+	user_id, err := get_user_id_by_uuid(data.User_uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
@@ -116,7 +116,7 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 			listOfEmails := strings.Split(data.Able_to_see, " ")
 			for _, email := range listOfEmails {
 				// get the id of the user from the email
-				userID, err := getIDbyEmail(email)
+				userID, err := get_user_id_by_email(email)
 				if err != nil {
 					log.Println("Invalid email ", err.Error())
 					wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " Invalid email"})
@@ -157,7 +157,7 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 	log.Println("==============new post================")
 	log.Println("user_uuid", data.User_uuid)
 	log.Println("user_id", user_id)
-	user_email, _ := getUserEmailbyID(user_id)
+	user_email, _ := get_email_by_user_id(user_id)
 	log.Println("user_email from user_id", user_email)
 	log.Println("post content", post.Content)
 	log.Println("post email", post.Email)
@@ -174,7 +174,7 @@ func wsPostsListHandler(conn *websocket.Conn, messageData map[string]interface{}
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
 		return
 	}
-	user_id, err := getIDbyUUID(uuid)
+	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
@@ -219,7 +219,7 @@ func wsUserPostsListHandler(conn *websocket.Conn, messageData map[string]interfa
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
 		return
 	}
-	user_id, err := getIDbyUUID(uuid)
+	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
@@ -228,7 +228,7 @@ func wsUserPostsListHandler(conn *websocket.Conn, messageData map[string]interfa
 
 	target_email := messageData["target_email"].(string)
 	log.Println("target_email ", target_email)
-	target_id, err := getIDbyEmail(target_email)
+	target_id, err := get_user_id_by_email(target_email)
 	if err != nil {
 		log.Println("failed to get ID of the target", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the target"})

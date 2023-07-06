@@ -99,7 +99,7 @@ func postNewHandler(w http.ResponseWriter, r *http.Request) {
 			listOfEmails := strings.Split(data.AbleToSee, " ")
 			for _, email := range listOfEmails {
 				// get the id of the user from the email
-				userID, err := getIDbyEmail(email)
+				userID, err := get_user_id_by_email(email)
 				if err != nil {
 					jsonResponse(w, http.StatusUnprocessableEntity, "Invalid email")
 					return

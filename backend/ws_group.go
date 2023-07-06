@@ -103,7 +103,7 @@ func wsGroupSubmitHandler(conn *websocket.Conn, messageData map[string]interface
 		*ptr = value
 	}
 
-	user_id, err := getIDbyUUID(data.User_uuid)
+	user_id, err := get_user_id_by_uuid(data.User_uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
@@ -176,7 +176,7 @@ func wsGroupJoinHandler(conn *websocket.Conn, messageData map[string]interface{}
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
 		return
 	}
-	user_id, err := getIDbyUUID(uuid)
+	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
@@ -233,7 +233,7 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
 		return
 	}
-	user_id, err := getIDbyUUID(uuid)
+	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
@@ -267,7 +267,7 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 
 	var invited_user_ids []int
 	for _, email := range emails {
-		invited_user_id, err := getIDbyEmail(email)
+		invited_user_id, err := get_user_id_by_email(email)
 		if err != nil {
 			log.Printf("failed to get ID of the invited user with email [%s] %s", email, err.Error())
 			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the invited user"})
@@ -393,7 +393,7 @@ func wsGroupInvitesListHandler(conn *websocket.Conn, messageData map[string]inte
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
 		return
 	}
-	user_id, err := getIDbyUUID(uuid)
+	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
@@ -443,7 +443,7 @@ func wsGroupRequestsListHandler(conn *websocket.Conn, messageData map[string]int
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
 		return
 	}
-	user_id, err := getIDbyUUID(uuid)
+	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the request sender", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})

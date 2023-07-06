@@ -80,7 +80,7 @@ const wss = useWebSocketStore();
 
 const isPublic = ref(false);
 
-watch(isPublic, (newValue, oldValue) => {
+watch(isPublic, (newValue) => {
   handleCheckboxChange(newValue);
 });
 
