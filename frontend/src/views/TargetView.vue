@@ -27,7 +27,9 @@
     <!-- separately add avatar, perhaps it should be on the right half of screen -->
     <div v-if="profile">
       <!-- <p>Avatar: <img :src="getImgUrl(profile.avatar)" alt="fail again"></p> -->
-      <p>Avatar: {{ profile.avatar }} </p>
+      <p>Avatar:
+        <img :src="`data:image/jpeg;base64,${profile.avatar}`" alt="avatar" />
+      </p>
     </div>
     <!-- add following list. The other users followed by the user -->
     <h2>Following:</h2>

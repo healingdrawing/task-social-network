@@ -266,7 +266,8 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if !isImage(avatarData) {
-			log.Println(err.Error())
+			log.Println("avatar is not a valid image")
+			log.Println("first x4 bytes of avatar:", avatarData[:4])
 			jsonResponse(w, http.StatusUnsupportedMediaType, "avatar is not a valid image")
 			return
 		}
@@ -575,6 +576,7 @@ func getUserEmailbyID(ID int) (email string, err error) {
 
 func isImage(data []byte) bool {
 	if len(data) < 4 {
+		log.Println("len(data) < 4")
 		return false
 	}
 

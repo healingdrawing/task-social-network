@@ -99,7 +99,7 @@ const signup = async () => {
       first_name: firstName.value,
       last_name: lastName.value,
       dob: dob.value,
-      avatar: avatar.value,
+      avatar: avatarStore.getAvatarString,
       nickname: nickname.value,
       about_me: aboutMe.value,
       public: false
