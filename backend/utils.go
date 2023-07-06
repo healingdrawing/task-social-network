@@ -126,3 +126,16 @@ func getIDbyUUID(UUID string) (ID int, err error) {
 	rows.Close()
 	return ID, nil
 }
+
+// extractImageData extracts image data from dataURI
+//
+// @params {dataURI string}
+//
+// it will split the dataURI into two parts, using "," as the delimiter, then return the second part
+func extractImageData(dataURI string) (string, error) {
+	parts := strings.SplitN(dataURI, ",", 2)
+	if len(parts) != 2 {
+		return "", errors.New("invalid dataURI")
+	}
+	return parts[1], nil
+}

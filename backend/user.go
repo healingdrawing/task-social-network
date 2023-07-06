@@ -259,7 +259,15 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	// check the avatar validity
 	if data.Avatar != "" {
-		avatarData, err := base64.StdEncoding.DecodeString(data.Avatar)
+		// cut prefix "data:image/jpeg;base64," or "data:image/png;base64,"
+		// use comma as delimiter
+		imageData, err := extractImageData(data.Avatar)
+		if err != nil {
+			log.Println("=FAIL extractImageData:", err.Error())
+			jsonResponse(w, http.StatusUnprocessableEntity, err.Error()) //error is handmade
+			return
+		}
+		avatarData, err := base64.StdEncoding.DecodeString(imageData)
 		if err != nil {
 			log.Println(err.Error())
 			jsonResponse(w, http.StatusUnprocessableEntity, "Invalid avatar")
@@ -267,7 +275,6 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		if !isImage(avatarData) {
 			log.Println("avatar is not a valid image")
-			log.Println("first x4 bytes of avatar:", avatarData[:4])
 			jsonResponse(w, http.StatusUnsupportedMediaType, "avatar is not a valid image")
 			return
 		}
@@ -579,6 +586,8 @@ func isImage(data []byte) bool {
 		log.Println("len(data) < 4")
 		return false
 	}
+
+	log.Println("inside isImage first x4 bytes\n", data[0], data[1], data[2], data[3])
 
 	if data[0] == 0xFF && data[1] == 0xD8 && data[2] == 0xFF {
 		return true // JPEG
