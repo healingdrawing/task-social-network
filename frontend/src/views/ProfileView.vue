@@ -5,7 +5,7 @@
   <!-- add checkbox to make profile public -->
   <div>
     <label v-if="profile">
-      <input type="checkbox" v-model="profile.public" />
+      <input type="checkbox" v-model="isPublic" />
       is public
     </label>
   </div>
@@ -93,12 +93,6 @@ function handleCheckboxChange(value: boolean) {
       make_public: value,
     } as ChangePrivacyRequest,
   })
-  // Call your method here
-  alert(value + ' . Checkbox changed. ProfileView.vue');
-}
-
-function getImgUrl(imageNameWithExtension: string) {
-  return require(`../assets/${imageNameWithExtension}`)
 }
 
 const profileStore = useProfileStore();
@@ -107,6 +101,11 @@ function piniaManageDataProfile(email: string) {
 }
 
 const profile = computed(() => wss.userProfile);
+
+watch(() => profile.value?.public, (newPublic) => {
+  isPublic.value = newPublic;
+});
+
 /** updateProfile updates the profile data from server*/
 function updateProfile() {
   wss.sendMessage({
@@ -153,7 +152,6 @@ function updatePostsList() {
       target_email: profileStore.getTargetUserEmail,
     } as TargetProfileRequest,
   })
-  console.log('Posts list updated');
 }
 
 

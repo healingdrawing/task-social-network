@@ -76,7 +76,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, onMounted, onBeforeMount, computed, reactive } from 'vue';
+import { onMounted, computed } from 'vue';
 import { useWebSocketStore } from '@/store/websocket';
 import { useUUIDStore } from '@/store/uuid';
 import { usePostStore } from '@/store/post';
@@ -135,13 +135,6 @@ function handleFollowing() {
   updateVisitorStatus();
 }
 
-// if true then show all profile information on screen
-const isProfilePublicOrVisitorFollower = ref(true);
-
-function getImgUrl(imageNameWithExtension: string) {
-  return require(`../assets/${imageNameWithExtension}`)
-}
-
 const storeUUID = useUUIDStore();
 const profileStore = useProfileStore();
 function piniaManageDataProfile(email: string) {
@@ -196,7 +189,6 @@ function updatePostsList() {
       target_email: profileStore.getTargetUserEmail,
     } as TargetProfileRequest,
   })
-  console.log('Posts list updated');
 }
 
 
