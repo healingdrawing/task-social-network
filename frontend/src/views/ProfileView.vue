@@ -25,23 +25,43 @@
   </div>
   <!-- add following list. The other users followed by the user -->
   <h2>Following:</h2>
-  <div class="user-list" style="height: 100px; overflow-y: scroll;">
-    <div v-for="user in followingList" :key="user.id">{{ user.name }}</div>
-  </div>
-  <!-- add followers list. The other users following the user -->
-  <h2>Followers:</h2>
-  <div class="user-list" style="height: 100px; overflow-y: scroll;">
-    <div v-for="user in followersList" :key="user.id">{{ user.name }}</div>
-  </div>
-  <!-- add user posts list. The posts created by the user -->
-  <h2>Posts:</h2>
-  <div v-for="post in postsList"
-    :key="post.id">
-    <router-link
-    :to="{ name: 'post' }"
-    @click="piniaManageData(post)">
-      {{ post.title }}
-    </router-link>
+    <div v-if="followingList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;">{{ followingList.length }} <br> {{ followingList }}
+      <div v-for="user in followingList" :key="user.email">{{ `${user.first_name} ${user.last_name} (${user.email})` }}</div>
+    </div>
+    <div v-else>No following</div>
+
+    <!-- add followers list. The other users following the user -->
+    <h2>Followers:</h2>
+    <div v-if="followersList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;"> {{ followersList.length }} <br> {{ followersList }}
+      <div v-for="user in followersList" :key="user.email">{{ `${user.first_name} ${user.last_name} (${user.email})` }}</div>
+    </div>
+    <div v-else>No followers</div>
+
+    <!-- add user posts list. The posts created by the user -->
+    <h2>Posts:</h2>
+    <div v-for="post in postsList"
+      :key="post.id">
+      <hr>
+      <router-link
+        :to="{ name: 'post' }"
+        @click="piniaManageDataPost(post)">
+        <p>Post id: {{ post.id }}</p>
+        <p>Post title: {{ post.title }}</p>
+        <p>Post tags: {{ post.categories }}</p>
+        <p>Post content: {{ post.content }}</p>
+        <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
+        <p>Post picture: {{ post.picture }}</p>
+        <p>Post created: {{ post.created_at }}</p>
+      </router-link>
+      <router-link
+      :to="{ name: 'target' }"
+      @click="piniaManageDataProfile(post.email)">
+        <h3>
+          Author: {{ post.first_name }}
+          {{ post.last_name }} 
+          ({{ post.email }})
+        </h3>
+      </router-link>
   </div>
   <!-- ( :to="{ name: 'post' }" ) also can be ( :to="'/post'" ) -->
 </template>
@@ -52,11 +72,9 @@ import { useWebSocketStore } from '@/store/websocket';
 import { useUUIDStore } from '@/store/uuid';
 import { usePostStore } from '@/store/post';
 import { useProfileStore } from '@/store/profile';
-import { WSMessageType, ChangePrivacyRequest, TargetProfileRequest } from '@/api/types';
+import { WSMessageType, ChangePrivacyRequest, TargetProfileRequest, Post } from '@/api/types';
 
 const wss = useWebSocketStore();
-
-const profile = computed(() => wss.userProfile);
 
 const isPublic = ref(false);
 
@@ -81,39 +99,13 @@ function getImgUrl(imageNameWithExtension: string) {
   return require(`../assets/${imageNameWithExtension}`)
 }
 
-const email = ref('john.doe@example.com');
-const firstName = ref('John');
-const lastName = ref('Doe');
-const dob = ref('01/01/1990');
-const avatar = ref('logo.png'); //todo: have to be at least logo.png in intial moment or fail with updateProfile() inside onMounted(). Outside onMounted() it works fine, with any initial string value
-const nickname = ref('johndoe');
-const aboutMe = ref('Lorem ipsum dolor sit amet, consectetur adipiscing elit.');
-
-//todo: remove/refactor later, to get data from backend
-interface Profile {
-  email: string;
-  firstName: string;
-  lastName: string;
-  dob: string;
-  avatar: string;
-  nickname: string;
-  aboutMe: string;
-}
-
-function fillDummyProfileData(userId: number): Profile {
-  return {
-    email: 'dummy@mail.com',
-    firstName: 'Dummy',
-    lastName: 'Doe',
-    dob: '01/01/1990',
-    avatar: 'logo.png',
-    nickname: 'dummydoe',
-    aboutMe: 'Very interesting text.',
-  };
-}
-
 const profileStore = useProfileStore();
-/** Function to update the profile data using dummy data at the moment*/
+function piniaManageDataProfile(email: string) {
+  profileStore.setTargetUserEmail(email);
+}
+
+const profile = computed(() => wss.userProfile);
+/** updateProfile updates the profile data from server*/
 function updateProfile() {
   wss.sendMessage({
     type: WSMessageType.USER_PROFILE,
@@ -124,84 +116,47 @@ function updateProfile() {
   })
 }
 
-// following and followers section
-interface User {
-  id: number;
-  name: string;
-}
-
-const followingList = ref<User[]>([]);
-
-// todo: dummy data, remove/refactor later
+const followingList = computed(() => wss.userFollowingList);
+/** updateFollowingList updates the following list from server*/
 function updateFollowingList() {
-  // Code to get the user list goes here
-  const users: User[] = [
-    { id: 1, name: 'John' },
-    { id: 2, name: 'Jane' },
-    { id: 3, name: 'Bob' },
-    { id: 4, name: 'Alice' },
-    { id: 5, name: 'Mike' },
-    { id: 6, name: 'Sara' },
-    { id: 7, name: 'Tom' },
-    { id: 8, name: 'Kate' },
-    { id: 9, name: 'David' },
-    { id: 10, name: 'Emily' },
-  ];
-  followingList.value = users;
-  console.log('Following list updated');
+  wss.sendMessage({
+    type: WSMessageType.USER_FOLLOWING_LIST,
+    data: {
+      user_uuid: storeUUID.getUUID,
+      target_email: profileStore.getUserEmail,
+    } as TargetProfileRequest,
+  })
 }
 
-const followersList = ref<User[]>([]);
-
-// todo: dummy data, remove/refactor later
+const followersList = computed(() => wss.userFollowersList);
+/** updateFollowersList updates the followers list from server*/
 function updateFollowersList() {
-  // Code to get the user list goes here
-  const users: User[] = [
-    { id: 1, name: 'John follower' },
-    { id: 2, name: 'Jane follower' },
-    { id: 3, name: 'Bob follower' },
-    { id: 4, name: 'Alice follower' },
-    { id: 5, name: 'Mike follower' },
-    { id: 6, name: 'Sara follower' },
-    { id: 7, name: 'Tom follower' },
-    { id: 8, name: 'Kate follower' },
-    { id: 9, name: 'David follower' },
-    { id: 10, name: 'Emily follower' },
-  ];
-  followersList.value = users;
-  console.log('Followers list updated');
+  wss.sendMessage({
+    type: WSMessageType.USER_FOLLOWERS_LIST,
+    data: {
+      user_uuid: storeUUID.getUUID,
+      target_email: profileStore.getUserEmail,
+    } as TargetProfileRequest,
+  })
 }
 
-// user posts section
-interface Post {
-  id: number;
-  title: string;
-}
+const postsList = computed(() => wss.postsList);
 
-const postsList = ref<Post[]>([]);
-
-// todo: dummy data, remove/refactor later
+/** updatePostsList updates the posts list from the server, able to see for the visitor */
 function updatePostsList() {
-  // Code to get the user posts goes here
-  const posts: Post[] = [
-    { id: 1, title: 'Dummy Post 1 Title' },
-    { id: 2, title: 'Dummy Post 2 Title' },
-    { id: 3, title: 'Dummy Post 3 Title' },
-    { id: 4, title: 'Dummy Post 4 Title' },
-    { id: 5, title: 'Dummy Post 5 Title' },
-    { id: 6, title: 'Dummy Post 6 Title' },
-    { id: 7, title: 'Dummy Post 7 Title' },
-    { id: 8, title: 'Dummy Post 8 Title' },
-    { id: 9, title: 'Dummy Post 9 Title' },
-    { id: 10, title: 'Dummy Post 10 Title' },
-  ];
-  postsList.value = posts;
+  wss.sendMessage({
+    type: WSMessageType.USER_POSTS_LIST, // todo: do not forget filter by able to see
+    data: {
+      user_uuid: storeUUID.getUUID,
+      target_email: profileStore.getTargetUserEmail,
+    } as TargetProfileRequest,
+  })
   console.log('Posts list updated');
 }
 
 
 const postStore = usePostStore()
-const piniaManageData = (post: Post) => {
+const piniaManageDataPost = (post: Post) => {
   postStore.setPostId(post.id)
 }
 

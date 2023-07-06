@@ -79,7 +79,7 @@ import { useWebSocketStore } from '@/store/websocket';
 import { useUUIDStore } from '@/store/uuid';
 import { usePostStore } from '@/store/post';
 import { useProfileStore } from '@/store/profile';
-import { WSMessageType, TargetProfileRequest, UserProfile, VisitorStatus } from '@/api/types';
+import { WSMessageType, TargetProfileRequest, UserProfile, VisitorStatus, Post } from '@/api/types';
 
 
 
@@ -158,6 +158,7 @@ function updateProfile() {
     } as TargetProfileRequest,
   })
 }
+
 const followingList = computed(() => wss.userFollowingList);
 /** updateFollowingList updates the following list from server*/
 function updateFollowingList() {
@@ -171,7 +172,7 @@ function updateFollowingList() {
 }
 
 const followersList = computed(() => wss.userFollowersList);
-// todo: dummy data, remove/refactor later
+/** updateFollowersList updates the followers list from server*/
 function updateFollowersList() {
   wss.sendMessage({
     type: WSMessageType.USER_FOLLOWERS_LIST,
@@ -182,15 +183,9 @@ function updateFollowersList() {
   })
 }
 
-// user posts section
-interface Post {
-  id: number;
-  title: string;
-}
-
 const postsList = computed(() => wss.postsList);
 
-// todo: dummy data, remove/refactor later
+/** updatePostsList updates the posts list from the server, able to see for the visitor */
 function updatePostsList() {
   wss.sendMessage({
     type: WSMessageType.USER_POSTS_LIST, // todo: do not forget filter by able to see
@@ -209,14 +204,11 @@ function piniaManageDataPost(post: Post) {
 }
 
 onMounted(() => {
-  console.log('profile.value', profile)
   updateVisitorStatus();
   updateProfile();
   updateFollowingList();
   updateFollowersList();
   updatePostsList();
 });
-
-
 
 </script>
