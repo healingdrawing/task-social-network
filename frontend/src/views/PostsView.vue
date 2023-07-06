@@ -55,8 +55,12 @@
         <p>Post tags: {{ post.categories }}</p>
         <p>Post content: {{ post.content }}</p>
         <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
-        <p>Post picture: {{ post.picture }}</p>
         <p>Post created: {{ post.created_at }}</p>
+        <div v-if="post.picture !== ''">
+          <p>Post picture: 
+            <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
+          </p>
+        </div>
       </router-link>
       <router-link
       :to="{ name: 'target' }"
@@ -72,7 +76,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { Ref, computed, onMounted, ref, watch } from 'vue';
 import { useUUIDStore } from '@/store/pinia';
 import { usePostStore } from '@/store/pinia';
 import { useProfileStore } from '@/store/pinia';
@@ -95,17 +99,16 @@ const postContent = ref('');
 const postPrivacy = ref('public');
 const selectedFollowers = ref<string[]>([]);
 const followers = ref<Follower[]>([]);
-// const picture: Ref<Blob | null> = ref(null); //todo: chat gpt solution, to fix null value case, because field is optional
+const picture: Ref<Blob | null> = ref(null); //todo: chat gpt solution, to fix null value case, because field is optional
 
 const pictureStore = usePictureStore();
 function handlePictureChange(event: Event) {
   pictureStore.handlePictureUpload(event);
-  // picture.value = (event.target as HTMLInputElement).files?.[0] ?? null;
+  picture.value = (event.target as HTMLInputElement).files?.[0] ?? null;
 }
 
 const storeUUID = useUUIDStore();
 async function addPost() {
-  const picture = await pictureStore.getBase64forJson
   const postSubmit: PostSubmit = {
     user_uuid: storeUUID.getUUID,
 
@@ -114,7 +117,7 @@ async function addPost() {
     content: postContent.value,
     privacy: postPrivacy.value,
     able_to_see: selectedFollowers.value.join(' '), //list of emails, separated by space
-    picture: picture,
+    picture: pictureStore.getPictureBase64String,
   };
 
   // if (postPrivacy.value === 'almostPrivate') {

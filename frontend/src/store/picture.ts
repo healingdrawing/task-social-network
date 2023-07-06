@@ -4,6 +4,7 @@ import { blobToBase64 } from "@/api/tools";
 interface PictureState {
   pictureError: string;
   pictureBlob: Blob | null;
+  pictureBase64String: string;
 }
 
 export const usePictureStore = defineStore({
@@ -11,6 +12,7 @@ export const usePictureStore = defineStore({
   state: (): PictureState => ({
     pictureError: "",
     pictureBlob: null,
+    pictureBase64String: "",
   }),
   getters: {
     getPictureError(): string {
@@ -19,12 +21,15 @@ export const usePictureStore = defineStore({
     getPictureBlob(): Blob | null {
       return this.pictureBlob;
     },
-    async getBase64forJson(state) {
-      if (!state.pictureBlob) {
-        return "null";
-      }
-      const base64String = await blobToBase64(state.pictureBlob);
-      return base64String;
+    // async getBase64forJson(state) {
+    //   if (!state.pictureBlob) {
+    //     return "null";
+    //   }
+    //   const base64String = await blobToBase64(state.pictureBlob);
+    //   return base64String;
+    // },
+    getPictureBase64String(): string {
+      return this.pictureBase64String;
     },
   },
   actions: {
@@ -79,6 +84,7 @@ export const usePictureStore = defineStore({
             } else {
               this.pictureBlob = blob;
               this.pictureError = '';
+              this.pictureBase64String = reader.result?.toString() || '';
             }
           }, 'image/jpeg', 0.8);
         };

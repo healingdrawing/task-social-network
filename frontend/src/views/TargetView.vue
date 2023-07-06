@@ -25,8 +25,7 @@
       <p>About Me: {{ profile.about_me }}</p>
     </div>
     <!-- separately add avatar, perhaps it should be on the right half of screen -->
-    <div v-if="profile">
-      <!-- <p>Avatar: <img :src="getImgUrl(profile.avatar)" alt="fail again"></p> -->
+    <div v-if="profile && profile.avatar !== ''">
       <p>Avatar:
         <img :src="`data:image/jpeg;base64,${profile.avatar}`" alt="avatar" />
       </p>
@@ -58,8 +57,12 @@
         <p>Post tags: {{ post.categories }}</p>
         <p>Post content: {{ post.content }}</p>
         <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
-        <p>Post picture: {{ post.picture }}</p>
         <p>Post created: {{ post.created_at }}</p>
+        <div v-if="post.picture !== ''">
+          <p>Post picture: 
+            <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
+          </p>
+        </div>
       </router-link>
       <router-link
       :to="{ name: 'target' }"

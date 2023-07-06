@@ -74,20 +74,28 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 	data.Categories = sanitizeCategories(data.Categories)
 	// process the picture
 	postPicture := []byte{}
-	if data.Picture != "null" { //todo: it was empty string ""
-		avatarData, err := base64.StdEncoding.DecodeString(data.Picture)
+	if data.Picture != "" {
+		imageData, err := extractImageData(data.Picture)
+		if err != nil {
+			log.Println("=FAIL extractPictureData: ", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " =FAIL extractPictureData:" + err.Error()})
+			return
+		}
+		pictureData, err := base64.StdEncoding.DecodeString(imageData)
 		if err != nil {
 			log.Println("Invalid avatar ", err.Error())
 			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " Invalid avatar"})
 			return
 		}
-		if !isImage(avatarData) {
-			log.Println("avatar is not a valid image", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnsupportedMediaType) + " avatar is not a valid image"})
+		if !isImage(pictureData) {
+			log.Println("picture is not a valid image", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnsupportedMediaType) + " picture is not a valid image"})
 			return
 		}
-		postPicture = avatarData
+		postPicture = pictureData
 	}
+
+	// todo: here is no default image addition as it is on signup avatar section
 
 	user_id, err := get_user_id_by_uuid(data.User_uuid)
 	if err != nil {
