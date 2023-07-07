@@ -1,10 +1,28 @@
 <template>
   <div>
     <h1>Post:</h1>
-    <h2>id: {{ postId }}</h2>
-    <h2>author: {{ postAuthor }}</h2>
-    <h2>title: {{ postTitle }}</h2>
-    <h2>content: {{ postContent }}</h2>
+    <div>
+      <p>Post id: {{ post.id }}</p>
+      <p>Post title: {{ post.title }}</p>
+      <p>Post tags: {{ post.categories }}</p>
+      <p>Post content: {{ post.content }}</p>
+      <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
+      <p>Post created: {{ post.created_at }}</p>
+      <div v-if="post.picture !== ''">
+        <p>Post picture: 
+          <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
+        </p>
+      </div>
+      <router-link
+      :to="{ name: 'target' }"
+      @click="piniaManageDataProfile(post.email)">
+        <h3>
+          Author: {{ post.first_name }}
+          {{ post.last_name }} 
+          ({{ post.email }})
+        </h3>
+      </router-link>
+    </div>
   </div>
   <div>
     <h2>Comments:</h2>
@@ -41,14 +59,18 @@
       <p>Comment picture: {{ comment.picture }}</p>
     </div>
   </div>
-  
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, Ref } from 'vue';
+import { ref, onMounted, Ref, computed } from 'vue';
 import { usePostStore } from '@/store/pinia';
 import { useProfileStore } from '@/store/pinia';
 import { usePictureStore } from '@/store/pinia';
+
+const profileStore = useProfileStore();
+function piniaManageDataProfile(email: string) {
+  profileStore.setTargetUserEmail(email);
+}
 
 const picture: Ref<Blob | null> = ref(null); //todo: chat gpt solution, to fix null value case, because field is optional
 const pictureStore = usePictureStore();
@@ -58,25 +80,13 @@ function handlePictureChange(event: Event) {
 }
 
 const postStore = usePostStore();
+const post = computed(() => postStore.getPost);
 
-// todo: plan to use this view(PostView.vue) like target view from both "ProfileView.vue" and "PostView.vue", when user click on post title, it will be redirected to "PostView.vue" and this postId will be used to get post from backend, and show it on "PostView.vue". So "userId" must be provided some way(pinia storage or cookie/session not sure) too, to create comment for this post
+// todo: refactor to get comments from backend, using post_id
+function updatePostComments() {
 
-// todo: refactor to get post from backend , and update postTitle, and postContent(include some way images, which is part of task)
-function updateFullPost() {
-  postId.value = postStore.getPostId;
-  // todo: get post from backend, using postId, and update x3 data bottom
-  postAuthor.value = "must be collected from backend later inside updateFullPost()";
-  postTitle.value = "must be collected from backend later inside updateFullPost()";
-  postContent.value = "must be collected from backend later inside updateFullPost()";
-  console.log('postId inside updatePost PostView.vue ', postId);
+  // todo: send message through websocket to refresh comments list
 }
-
-// const postId = computed(() => profileStore.getPostId); // reactivity syntax
-/** managed by pinia storage, to keep links in browser as possible short, just "/post" */
-const postId = ref(-1); //no need reactivity in this case
-const postAuthor = ref(''); //todo: full name of author
-const postTitle = ref('');
-const postContent = ref(''); //todo: not sure it can be just string, because the images can be part of post content
 
 interface Comment {
   id: number; // comment id, unique, autoincrement, primary key, all comments must be stored one table in database
@@ -117,13 +127,13 @@ function addComment() {
 
 }
 
-const profileStore = useProfileStore();
+
 function piniaManageData(comment: Comment) {
   profileStore.setTargetUserEmail("comment.authorEmail");
 }
 
 onMounted(() => {
-  updateFullPost();
+  updatePostComments();
 });
 
 </script>

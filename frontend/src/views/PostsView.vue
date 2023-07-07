@@ -139,7 +139,7 @@ async function addPost() {
 
 const postStore = usePostStore();
 function piniaManageDataPost(post: Post) {
-  postStore.setPostId(post.id);
+  postStore.setPost(post);
 }
 
 const profileStore = useProfileStore();

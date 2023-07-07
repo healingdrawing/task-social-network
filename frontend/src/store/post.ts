@@ -1,21 +1,33 @@
+import { Post } from '@/api/types';
 import { defineStore } from 'pinia';
 
 interface PostState {
-  postId: number;
+  post: Post;
 }
 
 export const usePostStore = defineStore({
   id: 'post',
   state: (): PostState => ({
     // Define your state properties here
-    postId: -1,
+    post: {
+      id: -1,
+      title: '',
+      categories: '',
+      content: '',
+      privacy: '',
+      picture: '',
+      created_at: '',
+      email: '',
+      first_name: '',
+      last_name: '',
+    },
   }),
   getters: {
     // Define your getters here
-    getPostId(): number { return this.postId; },
+    getPost(): Post { return this.post; },
   },
   actions: {
     // Define your actions here
-    setPostId(postId: number) { this.postId = postId; },
+    setPost(post: Post) { this.post = post; },
   },
 });

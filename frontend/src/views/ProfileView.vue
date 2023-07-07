@@ -161,7 +161,7 @@ function updatePostsList() {
 
 const postStore = usePostStore()
 const piniaManageDataPost = (post: Post) => {
-  postStore.setPostId(post.id)
+  postStore.setPost(post)
 }
 
 onMounted(() => {
