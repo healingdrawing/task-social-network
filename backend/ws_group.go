@@ -11,11 +11,10 @@ import (
 )
 
 type WS_GROUP_SUBMIT_DTO struct {
-	User_uuid   string `json:"user_uuid"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Privacy     string `json:"privacy"`
-	Invited     string `json:"invited"` // space separated emails
+	User_uuid      string `json:"user_uuid"`
+	Name           string `json:"name"`
+	Description    string `json:"description"`
+	Invited_emails string `json:"invited_emails"` // space separated emails
 }
 
 type WS_GROUP_RESPONSE_DTO struct {
@@ -23,7 +22,6 @@ type WS_GROUP_RESPONSE_DTO struct {
 	Name          string    `json:"name"`
 	Description   string    `json:"description"`
 	Creation_date time.Time `json:"creation_date"`
-	Privacy       string    `json:"privacy"`
 	Email         string    `json:"email"`
 	First_name    string    `json:"first_name"`
 	Last_name     string    `json:"last_name"`
@@ -36,7 +34,6 @@ type WS_GROUP_CHECK_DTO struct {
 	Description string    `json:"description"`
 	Creator_id  int       `json:"creator_id"`
 	Created_at  time.Time `json:"created_at"`
-	Privacy     string    `json:"privacy"`
 }
 
 type WS_GROUP_REQUEST_RESPONSE_DTO struct {
@@ -86,11 +83,10 @@ func wsGroupSubmitHandler(conn *websocket.Conn, messageData map[string]interface
 	var data WS_GROUP_SUBMIT_DTO
 
 	fields := map[string]*string{
-		"user_uuid":   &data.User_uuid,
-		"name":        &data.Name,
-		"description": &data.Description,
-		"privacy":     &data.Privacy,
-		"invited":     &data.Invited,
+		"user_uuid":      &data.User_uuid,
+		"name":           &data.Name,
+		"description":    &data.Description,
+		"invited_emails": &data.Invited_emails,
 	}
 
 	for key, ptr := range fields {
@@ -113,13 +109,13 @@ func wsGroupSubmitHandler(conn *websocket.Conn, messageData map[string]interface
 	// sanitize data
 	data.Name = strings.TrimSpace(data.Name)
 	data.Description = strings.TrimSpace(data.Description)
-	data.Privacy = strings.TrimSpace(data.Privacy)
-	if data.Name == "" || data.Description == "" || data.Privacy == "" {
+	if data.Name == "" || data.Description == "" {
 		log.Println("empty fields")
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " empty fields"})
 		return
 	}
-	result, err := statements["addGroup"].Exec(data.Name, data.Description, user_id, time.Now().Format("2006-01-02 15:04:05"), data.Privacy)
+	created_at := time.Now().Format("2006-01-02 15:04:05")
+	result, err := statements["addGroup"].Exec(data.Name, data.Description, user_id, created_at)
 	if err != nil {
 		log.Println("addGroup query failed", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroup query failed"})
@@ -131,20 +127,20 @@ func wsGroupSubmitHandler(conn *websocket.Conn, messageData map[string]interface
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to get last insert id"})
 		return
 	}
-	invited_users_emails_string := strings.TrimSpace(data.Invited)
-	if invited_users_emails_string != "" {
-		invited_users_emails := strings.Split(invited_users_emails_string, " ")
-		for _, email := range invited_users_emails {
+	invited_emails_string := strings.TrimSpace(data.Invited_emails)
+	if invited_emails_string != "" {
+		invited_emails := strings.Split(invited_emails_string, " ")
+		for _, email := range invited_emails {
 			// get the user id from the email
-			var invited_user_id int
-			err = statements["getUserIDByEmail"].QueryRow(email).Scan(&invited_user_id)
+			invited_user_id, err := get_user_id_by_email(email)
 			if err != nil {
-				log.Println("getUserIDByEmail query failed", err.Error())
-				wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getUserIDByEmail query failed"})
+				log.Println("failed to get user id by email", err.Error())
+				wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to get user id by email"})
 				return
 			}
 			// add the invited user to the groupPendingMembers table
-			_, err = statements["addGroupInvitedUser"].Exec(invited_user_id, group_id, user_id, time.Now().Format("2006-01-02 15:04:05"))
+			created_at := time.Now().Format("2006-01-02 15:04:05")
+			_, err = statements["addGroupInvitedUser"].Exec(invited_user_id, group_id, user_id, created_at)
 			if err != nil {
 				log.Println("addGroupInvitedUser query failed", err.Error())
 				wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupInvitedUser query failed"})

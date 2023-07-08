@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { WSMessage, WSMessageType, Post, Comment, UserProfile, UserForList, UserVisitorStatus as Visitor, Bell, BellType } from '@/api/types';
+import { WSMessage, WSMessageType, Post, Comment, UserProfile, UserForList, UserVisitorStatus as Visitor, Bell, BellType, Group } from '@/api/types';
 import router from '@/router/index';
 
 const websockets: (WebSocket | null)[] = [];
@@ -105,6 +105,11 @@ export const useWebSocketStore = defineStore({
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.COMMENTS_LIST);
           break;
 
+        case WSMessageType.GROUP_SUBMIT:
+        case WSMessageType.GROUPS_LIST:
+        case WSMessageType.GROUPS_ALL_LIST:
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.GROUPS_LIST);
+          break;
 
         case WSMessageType.USER_PROFILE:
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.USER_PROFILE);
@@ -188,6 +193,25 @@ export const useWebSocketStore = defineStore({
       ).flat();
       return [...comments];
     },
+
+    /**all the groups able to see by user*/
+    groupsList(): Group[] {
+      const groups_messages_list = this.messages.filter((message) => message.type === WSMessageType.GROUPS_LIST && message.data !== null);
+      const groups = groups_messages_list.map((message) =>
+        (message.data as Group[]).map((group) => group)
+      ).flat();
+      return [...groups]; //not necessary to use spread here, and all can be oneline
+    },
+
+    /**all the groups to discover*/
+    groupsAllList(): Group[] {
+      const groups_messages_list = this.messages.filter((message) => message.type === WSMessageType.GROUPS_ALL_LIST && message.data !== null);
+      const groups = groups_messages_list.map((message) =>
+        (message.data as Group[]).map((group) => group)
+      ).flat();
+      return [...groups];
+    },
+
     followRequestsList(): Bell[] {
       const fresh_follow_requests_messages = this.messages.filter((message) => message.type === WSMessageType.FOLLOW_REQUEST_RESPONSE)
       const fresh_follow_requests = fresh_follow_requests_messages.map((message) => message.data as Bell)
@@ -218,7 +242,6 @@ export const useWebSocketStore = defineStore({
     },
 
     chatUsersList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.CHAT_USERS_LIST) },
-    groupsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUPS_LIST) },
     groupPostsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_POSTS_LIST) },
     groupPostCommentsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_POST_COMMENTS_LIST) },
     groupRequestsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_REQUESTS_LIST) },

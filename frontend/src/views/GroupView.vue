@@ -1,7 +1,7 @@
 <template>
-  user id transfered using pinia: {{ profileStore.userId }}
+  user id transfered using pinia: {{ profileStore.getUserId }}
   <br>
-  group id transfered using pinia: {{ groupStore.groupId }}
+  group id transfered using pinia: {{ groupStore.getGroupId }}
   <!-- todo: implement view "GroupView.vue" -->
   <pre style="text-align: left;">
     one group view gap.

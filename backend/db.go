@@ -49,10 +49,9 @@ func dbInit() {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT,
 			description TEXT,
-			creator INTEGER,
+			creator_id INTEGER,
 			created_at TIMESTAMP,
-			privacy TEXT,
-			FOREIGN KEY (creator) REFERENCES users (id)
+			FOREIGN KEY (creator_id) REFERENCES users (id)
 			);
 		CREATE TABLE group_members (
 			group_id INTEGER,
@@ -141,11 +140,11 @@ func statementsCreation() {
 		"addMessage":  `INSERT INTO message (from_id, to_id, content, created_at) VALUES (?, ?, ?, ?);`,
 		"getMessages": `SELECT from_id, to_id, content, created_at FROM message WHERE (from_id = ? AND to_id = ?) OR (from_id = ? AND to_id = ?) ORDER BY created_at DESC;`,
 
-		"addGroup":  `INSERT INTO groups (name, description, creator, created_at, privacy) VALUES (?, ?, ?, ?, ?);`,
-		"getGroups": `SELECT id, name, description, creator, created_at, privacy FROM groups ORDER BY created_at DESC;`,
-		"getGroup":  `SELECT id, name, description, creator, created_at, privacy FROM groups WHERE id = ?;`,
+		"addGroup":  `INSERT INTO groups (name, description, creator_id, created_at) VALUES (?, ?, ?, ?);`,
+		"getGroups": `SELECT id, name, description, creator_id, created_at FROM groups ORDER BY created_at DESC;`,
+		"getGroup":  `SELECT id, name, description, creator_id, created_at FROM groups WHERE id = ?;`,
 
-		"getCreatorAllGroupsPendings": `SELECT group_pending_members.group_id, group_pending_members.member_id, groups.name, groups.description, users.email, users.first_name, users.last_name FROM groups JOIN group_pending_members ON group_pending_members.group_id = groups.id JOIN users ON group_pending_members.member_id = users.id WHERE groups.creator = ?`,
+		"getCreatorAllGroupsPendings": `SELECT group_pending_members.group_id, group_pending_members.member_id, groups.name, groups.description, users.email, users.first_name, users.last_name FROM groups JOIN group_pending_members ON group_pending_members.group_id = groups.id JOIN users ON group_pending_members.member_id = users.id WHERE groups.creator_id = ?`,
 
 		"addGroupMember":           `INSERT INTO group_members (group_id, member_id) VALUES (?, ?);`,
 		"getGroupMembers":          `SELECT member_id FROM group_members WHERE group_id = ?;`,

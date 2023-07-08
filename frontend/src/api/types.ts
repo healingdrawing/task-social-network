@@ -20,7 +20,8 @@ export enum WSMessageType {
   POSTS_LIST = "posts_list", //  postsGetHandler
   // ANY_PROFILE_VIEW_POSTS_LIST = "any_profile_view_posts_list", // NEW
 
-  GROUPS_LIST = "groups_list", //  !!!groupsGetHandler //todo: NOT IMPLEMENTED ON OLD BACKEND
+  GROUPS_LIST = "groups_list", //  NEW to get all groups where user is member
+  GROUPS_ALL_LIST = "groups_all_list", //  NEW to discover all groups
   GROUP_SUBMIT = "group_submit", //  groupNewHandler
   GROUP_POST_SUBMIT = "group_post_submit", //  groupPostNewHandler
   GROUP_POSTS_LIST = "group_posts_list", //  groupPostsGetHandler
@@ -128,6 +129,27 @@ export interface PostSubmit {
 }
 
 export interface PostsListRequest {
+  user_uuid: string;
+}
+
+export interface Group {
+  id: number;
+  name: string;
+  description: string;
+  created_at: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+}
+
+export interface GroupSubmit {
+  user_uuid: string;
+  name: string;
+  description: string;
+  invited_emails: string;// space separated, to send invites in group creation process
+}
+
+export interface GroupsListRequest {
   user_uuid: string;
 }
 

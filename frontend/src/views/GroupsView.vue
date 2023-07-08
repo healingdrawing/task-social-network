@@ -5,7 +5,7 @@
     <form @submit.prevent="createGroup">
       <label>
         Group title:
-        <input type="text" v-model="title" required>
+        <input type="text" v-model="name" required>
       </label>
       <br>
       <label>
@@ -15,9 +15,9 @@
       <br>
       <label>
         Invite users:
-        <select v-model="invitedUsers" multiple>
-          <option v-for="user in allUsers" :key="user.id" :value="user.id">{{ user.fullName }}</option>
-        </select>
+        <select v-model="selectedFollowers" multiplev-model="selectedFollowers">
+        <option v-for="follower in followersList" :key="follower.email" :value="follower.email">{{ follower.first_name }} {{ follower.last_name }} ({{ follower.email }})</option>
+      </select>
       </label>
       <br>
       <button type="submit">Create Group</button>
@@ -29,14 +29,14 @@
     <ul>
       <li v-for="group in groupsList" :key="group.id">
         <hr>
-        <router-link :to="{ name: 'group' }" @click="piniaManageData(group)">
-          group title:{{ group.title }}
-          <br>
-          ({{ group.members.length }} members)
-          <br> (at the moment it is just dummy invitations number, not real membership)
-          <br>id:{{ group.id }}
-          <br>
-          group description:{{ group.description }}
+        <router-link :to="{ name: 'group' }" @click="piniaManageDataGroup(group)">
+          group id: {{ group.id }}
+          <br> group name: {{ group.name }}
+          <br> group description: {{ group.description }}
+          <br> group created: {{ group.created_at }}
+        </router-link>
+        <router-link :to="{ name: 'target' }" @click="piniaManageDataProfile(group.email)">
+          <br> group creator: {{ group.first_name }} {{ group.last_name }} ({{ group.email }})
         </router-link>
       </li>
     </ul>
@@ -44,59 +44,75 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { useWebSocketStore } from '@/store/pinia';
+import { useUUIDStore } from '@/store/pinia';
+import { useProfileStore } from '@/store/pinia';
 import { useGroupStore } from '@/store/group';
+import { TargetProfileRequest, WSMessage, WSMessageType, GroupSubmit, Group } from '@/api/types';
 
-interface User {
-  id: number;
-  fullName: string;
+const wss = useWebSocketStore();
+const storeUUID = useUUIDStore();
+const profileStore = useProfileStore();
+const followersList = computed(() => wss.userFollowersList);
+function updateFollowersList() {
+  wss.sendMessage({
+    type: WSMessageType.USER_FOLLOWERS_LIST,
+    data: {
+      user_uuid: storeUUID.getUUID,
+      target_email: profileStore.getUserEmail,
+    } as TargetProfileRequest,
+  })
 }
 
-interface Group {
-  id: number;
-  title: string;
-  description: string;
-  members: User[];
+const groupsList = computed(() => wss.groupsList);
+function updateGroupsList() {
+  wss.sendMessage({
+    type: WSMessageType.GROUPS_LIST,
+    data: {
+      user_uuid: storeUUID.getUUID,
+      target_email: profileStore.getUserEmail,
+    } as TargetProfileRequest,
+  })
 }
 
-const title = ref('');
+
+const name = ref('');
 const description = ref('');
-const invitedUsers = ref<number[]>([]);
-const allUsers: User[] = [
-  { id: 1, fullName: 'Alice Dummy' },
-  { id: 2, fullName: 'Bob Dummy' },
-  { id: 3, fullName: 'Charlie Dummy' },
-  { id: 4, fullName: 'David Dummy' },
-];
-const groupsList = ref<Group[]>([]);
+const selectedFollowers = ref<string[]>([]);
 
 const createGroup = () => {
-  const group: Group = {
-    id: Date.now(),
-    title: title.value,
-    description: description.value,
-    members: invitedUsers.value.map(id => allUsers.find(user => user.id === id)!) //todo: refactor/check this on real data , it looks ugly
+  const message: WSMessage = {
+    type: WSMessageType.GROUP_SUBMIT,
+    data: {
+      user_uuid: storeUUID.getUUID,
+      name: name.value,
+      description: description.value,
+      invited_emails: selectedFollowers.value.join(' '),
+    } as GroupSubmit,
   };
-  groupsList.value.unshift(group);
-  title.value = '';
+  wss.sendMessage(message);
+
+  // reset form
+  name.value = '';
   description.value = '';
-  invitedUsers.value = [];
+  selectedFollowers.value = [];
 };
 
-function updateGroupsList() {
-  groupsList.value = [
-    { id: 1, title: 'Group 1', description: 'Description 1', members: [allUsers[0], allUsers[1]] },
-    { id: 2, title: 'Group 2', description: 'Description 2', members: [allUsers[2], allUsers[3]] },
-  ]
-}
+
 
 const groupStore = useGroupStore();
-const piniaManageData = (group: Group) => {
+const piniaManageDataGroup = (group: Group) => {
   groupStore.setGroupId(group.id);
 };
 
+const piniaManageDataProfile = (email: string) => {
+  profileStore.setTargetUserEmail(email);
+};
+
 onMounted(() => {
-  updateGroupsList();
+  updateFollowersList();
+  updateGroupsList(); // with membership
 });
 
 </script>

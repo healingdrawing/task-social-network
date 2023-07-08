@@ -30,7 +30,9 @@ const (
 	WS_POSTS_LIST  WSMT = "posts_list"
 	// WS_ANY_PROFILE_VIEW_POSTS_LIST WSMT = "any_profile_view_posts_list"
 
-	WS_GROUPS_LIST               WSMT = "groups_list"
+	WS_GROUPS_LIST     WSMT = "groups_list"     // FOR USER MEMBERSHIP
+	WS_GROUPS_ALL_LIST WSMT = "groups_all_list" // TO DISCOVER ALL GROUPS
+
 	WS_GROUP_SUBMIT              WSMT = "group_submit"
 	WS_GROUP_POST_SUBMIT         WSMT = "group_post_submit"
 	WS_GROUP_POSTS_LIST          WSMT = "group_posts_list"
