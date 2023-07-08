@@ -140,16 +140,21 @@ func statementsCreation() {
 		"addMessage":  `INSERT INTO message (from_id, to_id, content, created_at) VALUES (?, ?, ?, ?);`,
 		"getMessages": `SELECT from_id, to_id, content, created_at FROM message WHERE (from_id = ? AND to_id = ?) OR (from_id = ? AND to_id = ?) ORDER BY created_at DESC;`,
 
-		"addGroup":  `INSERT INTO groups (name, description, creator_id, created_at) VALUES (?, ?, ?, ?);`,
-		"getGroups": `SELECT id, name, description, creator_id, created_at FROM groups ORDER BY created_at DESC;`,
-		"getGroup":  `SELECT id, name, description, creator_id, created_at FROM groups WHERE id = ?;`,
+		"addGroup":     `INSERT INTO groups (name, description, creator_id, created_at) VALUES (?, ?, ?, ?);`,
+		"getGroup":     `SELECT id, name, description, creator_id, created_at FROM groups WHERE id = ?;`,
+		"getAllGroups": `SELECT id, name, description, creator_id, created_at FROM groups ORDER BY created_at DESC;`,
+		"getGroups":    `SELECT groups.id, name, description, created_at, email, first_name, last_name FROM groups INNER JOIN group_members ON group_id = groups.id INNER JOIN users ON users.id = member_id WHERE member_id = ? ORDER BY created_at DESC;`,
 
 		"getCreatorAllGroupsPendings": `SELECT group_pending_members.group_id, group_pending_members.member_id, groups.name, groups.description, users.email, users.first_name, users.last_name FROM groups JOIN group_pending_members ON group_pending_members.group_id = groups.id JOIN users ON group_pending_members.member_id = users.id WHERE groups.creator_id = ?`,
 
-		"addGroupMember":           `INSERT INTO group_members (group_id, member_id) VALUES (?, ?);`,
-		"getGroupMembers":          `SELECT member_id FROM group_members WHERE group_id = ?;`,
-		"getGroupMembersInfo":      `SELECT nickname, first_name, last_name FROM users WHERE id = ?;`,
-		"getGroupPendingMembers":   `SELECT member_id FROM group_pending_members WHERE group_id = ?;`,
+		"addGroupMember":  `INSERT INTO group_members (group_id, member_id) VALUES (?, ?);`,
+		"getGroupMembers": `SELECT member_id FROM group_members WHERE group_id = ?;`,
+		"getGroupMember":  `SELECT member_id FROM group_members WHERE group_id = ? AND member_id = ?;`,
+
+		"getGroupMembersInfo":    `SELECT nickname, first_name, last_name FROM users WHERE id = ?;`,
+		"getGroupPendingMembers": `SELECT member_id FROM group_pending_members WHERE group_id = ?;`,
+		"getGroupPendingMember":  `SELECT member_id FROM group_pending_members WHERE group_id = ? AND member_id = ?;`,
+
 		"addGroupPendingMember":    `INSERT INTO group_pending_members (group_id, member_id) VALUES (?, ?);`,
 		"removeGroupPendingMember": `DELETE FROM group_pending_members WHERE group_id = ? AND member_id = ?;`,
 		"removeGroupMember":        `DELETE FROM group_members WHERE group_id = ? AND member_id = ?;`,

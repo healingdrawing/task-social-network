@@ -65,7 +65,8 @@ const (
 	WS_USER_REGISTER       WSMT = "user_register"
 	WS_USER_UNFOLLOW       WSMT = "user_unfollow"
 
-	WS_USER_VISITOR_STATUS WSMT = "user_visitor_status"
+	WS_USER_VISITOR_STATUS       WSMT = "user_visitor_status"
+	WS_USER_GROUP_VISITOR_STATUS WSMT = "user_group_visitor_status"
 )
 
 /*

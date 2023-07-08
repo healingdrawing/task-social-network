@@ -38,63 +38,78 @@
   <div>
     <h1>{{ group.title }}</h1>
     <p>{{ group.description }}</p>
-    <div v-if="isMember">
-      <button @click="groupChat">Open Group Chat</button>
-      <button @click="groupInvite">Invite User</button>
-      <button @click="groupPosts">Group Posts</button>
-      <div>
-        <h2>Create New Event</h2>
-        <form @submit.prevent="createEvent">
-          <label for="title">Title:</label>
-          <input type="text" id="title" v-model="event.title" required>
-          <br>
-          <label for="datetime">Date and Time:</label>
-          <input type="datetime-local" id="datetime" v-model="event.datetime" required>
-          <br>
-          <label for="description">Description:</label>
-          <textarea id="description" v-model="event.description"></textarea>
-          <br>
-          <label>Going to Event:</label>
-          <input type="radio" id="going" value="1" v-model="event.going">
-          <label for="going">Yes</label>
-          <input type="radio" id="not-going" value="0" v-model="event.going">
-          <label for="not-going">No</label>
-          <br>
-          <button type="submit">Create Event</button>
-        </form>
+    <div v-if="group_visitor">
+      <div v-if="group_visitor.status === VisitorStatus.MEMBER">
+        <button @click="groupChat">Open Group Chat</button>
+        <button @click="groupInvite">Invite User</button>
+        <button @click="groupPosts">Group Posts</button>
+        <div>
+          <h2>Create New Event</h2>
+          <form @submit.prevent="createEvent">
+            <label for="title">Title:</label>
+            <input type="text" id="title" v-model="event.title" required>
+            <br>
+            <label for="datetime">Date and Time:</label>
+            <input type="datetime-local" id="datetime" v-model="event.datetime" required>
+            <br>
+            <label for="description">Description:</label>
+            <textarea id="description" v-model="event.description"></textarea>
+            <br>
+            <label>Going to Event:</label>
+            <input type="radio" id="going" value="1" v-model="event.going">
+            <label for="going">Yes</label>
+            <input type="radio" id="not-going" value="0" v-model="event.going">
+            <label for="not-going">No</label>
+            <br>
+            <button type="submit">Create Event</button>
+          </form>
+        </div>
+        <div>
+          <h2>List of Group Events</h2>
+          <ul>
+            <li v-for="event in events" :key="event.id">
+              <h3>{{ event.title }}</h3>
+              <p>{{ event.datetime }}</p>
+              <p>{{ event.description }}</p>
+              <div>
+                <input type="radio" id="going-yes" name="going-{{ event.id }}" value="1" v-bind:checked="event.going === '1'" v-on:change="going_yes(event, '1')">
+                <label for="going-yes">Yes</label>
+                <input type="radio" id="going-no" name="going-{{ event.id }}" value="0" v-bind:checked="event.going === '0'" v-on:change="going_no(event, '0')">
+                <label for="going-no">No</label>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
-      <div>
-        <h2>List of Group Events</h2>
-        <ul>
-          <li v-for="event in events" :key="event.id">
-            <h3>{{ event.title }}</h3>
-            <p>{{ event.datetime }}</p>
-            <p>{{ event.description }}</p>
-            <div>
-              <input type="radio" id="going-yes" name="going-{{ event.id }}" value="1" v-bind:checked="event.going === '1'" v-on:change="goingYes(event, '1')">
-              <label for="going-yes">Yes</label>
-              <input type="radio" id="going-no" name="going-{{ event.id }}" value="0" v-bind:checked="event.going === '0'" v-on:change="goingNo(event, '0')">
-              <label for="going-no">No</label>
-            </div>
-          </li>
-        </ul>
+      <div v-else-if="group_visitor.status === VisitorStatus.REQUESTER">
+        <p>Request to join group is pending.</p>
       </div>
-    </div>
-    <div v-else>
-      <button @click="joinGroup">Join Group</button>
+      <div v-else>
+        <button @click="joinGroup">Join Group</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import router from '@/router/index';
+import { useWebSocketStore } from '@/store/pinia';
+import { useUUIDStore } from '@/store/pinia';
 import { useProfileStore } from '@/store/profile';
 import { useGroupStore } from '@/store/group';
 import { useChatStore } from '@/store/chat';
+import { VisitorStatus } from '@/api/types';
+const wss = useWebSocketStore();
+const UUIDStore = useUUIDStore();
 const profileStore = useProfileStore();
 const groupStore = useGroupStore();
 const chatStore = useChatStore();
+
+
+const group_visitor = computed(() => wss.groupVisitor)
+
+//dummy code
 
 interface Group {
   title: string;
@@ -121,11 +136,11 @@ const createEvent = async () => {
   event.value = { id: -1, title: '', datetime: '', description: '', going: '1' }
 }
 
-const goingYes = (event: Event, value: string) => {
+const going_yes = (event: Event, value: string) => {
   event.going = value;
 };
 
-const goingNo = (event: Event, value: string) => {
+const going_no = (event: Event, value: string) => {
   event.going = value;
 };
 

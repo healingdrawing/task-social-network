@@ -89,13 +89,13 @@ import { WSMessageType, TargetProfileRequest, UserProfile, VisitorStatus, Post }
 
 
 const wss = useWebSocketStore();
-const visitor = computed(() => wss.visitor); // Replace with actual logic to determine visitor status
+const visitor = computed(() => wss.visitor);
 
 function updateVisitorStatus() {
   wss.sendMessage({
     type: WSMessageType.USER_VISITOR_STATUS,
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       target_email: profileStore.getTargetUserEmail,
     } as TargetProfileRequest,
   })
@@ -118,7 +118,7 @@ function handleFollowing() {
     wss.sendMessage({
       type: WSMessageType.USER_FOLLOW,
       data: {
-        user_uuid: storeUUID.getUUID,
+        user_uuid: UUIDStore.getUUID,
         target_email: profileStore.getTargetUserEmail,
       } as TargetProfileRequest,
     })
@@ -126,7 +126,7 @@ function handleFollowing() {
     wss.sendMessage({
       type: WSMessageType.USER_UNFOLLOW,
       data: {
-        user_uuid: storeUUID.getUUID,
+        user_uuid: UUIDStore.getUUID,
         target_email: profileStore.getTargetUserEmail,
       } as TargetProfileRequest,
     })
@@ -138,7 +138,7 @@ function handleFollowing() {
   updateVisitorStatus();
 }
 
-const storeUUID = useUUIDStore();
+const UUIDStore = useUUIDStore();
 const profileStore = useProfileStore();
 function piniaManageDataProfile(email: string) {
   profileStore.setTargetUserEmail(email);
@@ -151,7 +151,7 @@ function updateProfile() {
   wss.sendMessage({
     type: WSMessageType.USER_PROFILE,
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       target_email: profileStore.getTargetUserEmail,
     } as TargetProfileRequest,
   })
@@ -163,7 +163,7 @@ function updateFollowingList() {
   wss.sendMessage({
     type: WSMessageType.USER_FOLLOWING_LIST,
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       target_email: profileStore.getTargetUserEmail,
     } as TargetProfileRequest,
   })
@@ -175,7 +175,7 @@ function updateFollowersList() {
   wss.sendMessage({
     type: WSMessageType.USER_FOLLOWERS_LIST,
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       target_email: profileStore.getTargetUserEmail,
     } as TargetProfileRequest,
   })
@@ -188,7 +188,7 @@ function updatePostsList() {
   wss.sendMessage({
     type: WSMessageType.USER_POSTS_LIST, // todo: do not forget filter by able to see
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       target_email: profileStore.getTargetUserEmail,
     } as TargetProfileRequest,
   })

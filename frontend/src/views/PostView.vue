@@ -78,6 +78,7 @@ import { usePictureStore } from '@/store/pinia';
 import { CommentsListRequest, CommentSubmit, WSMessage, WSMessageType } from '@/api/types';
 
 const wss = useWebSocketStore();
+const UUIDStore = useUUIDStore();
 
 const profileStore = useProfileStore();
 function piniaManageDataProfile(email: string) {
@@ -99,7 +100,7 @@ function updatePostComments() {
   wss.sendMessage({
     type: WSMessageType.COMMENTS_LIST,
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       post_id: post.value.id,
     } as CommentsListRequest,
   });
@@ -110,12 +111,9 @@ const commentsList = computed(() => wss.commentsList);
 
 const commentContent = ref('');
 
-const storeUUID = useUUIDStore();
-
-// todo: refactor to add comment to backend
 function addComment() {
   const commentSubmit: CommentSubmit = {
-    user_uuid: storeUUID.getUUID,
+    user_uuid: UUIDStore.getUUID,
     post_id: post.value.id, // idiotic gap, because golang can cast properly only strings. facepalm
     content: commentContent.value,
     picture: pictureStore.getPictureBase64String,

@@ -10,30 +10,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type WS_USER_PROFILE_DTO struct {
-	Email        string `json:"email"`
-	First_name   string `json:"first_name"`
-	Last_name    string `json:"last_name"`
-	Dob          string `json:"dob"`
-	Avatar       string `json:"avatar"`
-	avatar_bytes []byte `sqlite3:"avatar"`
-	Nickname     string `json:"nickname"`
-	About_me     string `json:"about_me"`
-	Public       bool   `json:"public"`
-	Privacy      string `sqlite3:"privacy"`
-}
-
-type WS_USER_PROFILE_RESPONSE_DTO struct {
-	Email      string `json:"email"`
-	First_name string `json:"first_name"`
-	Last_name  string `json:"last_name"`
-	Dob        string `json:"dob"`
-	Avatar     string `json:"avatar"`
-	Nickname   string `json:"nickname"`
-	About_me   string `json:"about_me"`
-	Public     bool   `json:"public"`
-}
-
+// used in two cases: wsUserVisitorStatusHandler and wsUserGroupVisitorStatusHandler
 type WS_USER_VISITOR_STATUS_DTO struct {
 	Status string `json:"status"`
 }
@@ -116,6 +93,118 @@ func wsUserVisitorStatusHandler(conn *websocket.Conn, messageData map[string]int
 
 	log.Println("sending user visitor status", visitor)
 	wsSendUserVisitorStatus(visitor)
+}
+
+// wsUserGroupVisitorStatusHandler used to manage button on top of group page of frontend. Button will be: request to join group/waiting for decision/member of group.
+// - group_id is the group that the user is visiting
+//
+// status will be one of the following:
+//
+// "requester", "member", "visitor"
+func wsUserGroupVisitorStatusHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+	defer wsRecover()
+
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("failed to get user_uuid from message data")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from message data"})
+		return
+	}
+	user_id, err := get_user_id_by_uuid(uuid)
+	if err != nil {
+		log.Println("failed to get ID of the message sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		return
+	}
+
+	_group_id, ok := messageData["group_id"].(float64)
+	if !ok {
+		log.Println("failed to get group_id from message data")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from message data"})
+		return
+	}
+	group_id := int(_group_id)
+
+	// check if user already made a request to join the group
+	is_requester, err := isGroupJoinRequester(user_id, group_id)
+	if err != nil {
+		log.Println("failed to check if user is a requester of the target group", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a requester of the target group"})
+		return
+	}
+
+	if is_requester {
+		wsSendUserGroupVisitorStatus(WS_USER_VISITOR_STATUS_DTO{Status: "requester"})
+		return
+	}
+
+	// check if user is already a member of the group
+	is_member, err := isGroupMember(user_id, group_id)
+	if err != nil {
+		log.Println("failed to check if user is a member of the target group", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a member of the target group"})
+		return
+	}
+
+	if is_member {
+		wsSendUserGroupVisitorStatus(WS_USER_VISITOR_STATUS_DTO{Status: "member"})
+		return
+	}
+	wsSendUserGroupVisitorStatus(WS_USER_VISITOR_STATUS_DTO{Status: "visitor"})
+}
+
+func isGroupJoinRequester(user_id int, group_id int) (bool, error) {
+	rows, err := statements["getGroupPendingMember"].Query(group_id, user_id)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	// check length of rows
+	// if length is 0, return false
+	// else return true
+	if rows.Next() {
+		return true, nil
+	}
+	return false, nil
+}
+
+func isGroupMember(user_id int, group_id int) (bool, error) {
+	rows, err := statements["getGroupMember"].Query(group_id, user_id)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	// check length of rows
+	// if length is 0, return false
+	// else return true
+	if rows.Next() {
+		return true, nil
+	}
+	return false, nil
+}
+
+type WS_USER_PROFILE_DTO struct {
+	Email        string `json:"email"`
+	First_name   string `json:"first_name"`
+	Last_name    string `json:"last_name"`
+	Dob          string `json:"dob"`
+	Avatar       string `json:"avatar"`
+	avatar_bytes []byte `sqlite3:"avatar"`
+	Nickname     string `json:"nickname"`
+	About_me     string `json:"about_me"`
+	Public       bool   `json:"public"`
+	Privacy      string `sqlite3:"privacy"`
+}
+
+type WS_USER_PROFILE_RESPONSE_DTO struct {
+	Email      string `json:"email"`
+	First_name string `json:"first_name"`
+	Last_name  string `json:"last_name"`
+	Dob        string `json:"dob"`
+	Avatar     string `json:"avatar"`
+	Nickname   string `json:"nickname"`
+	About_me   string `json:"about_me"`
+	Public     bool   `json:"public"`
 }
 
 /*

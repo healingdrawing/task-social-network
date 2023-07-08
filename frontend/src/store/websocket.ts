@@ -130,12 +130,16 @@ export const useWebSocketStore = defineStore({
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.USER_VISITOR_STATUS);
           break;
 
+        case WSMessageType.USER_GROUP_VISITOR_STATUS:
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.USER_GROUP_VISITOR_STATUS);
+          break;
+
         default:
           console.log('SKIP clearMessages default============', message.type);
       }
     },
 
-    /** try to prevent artefacts between routing. Looks like it works, but facepalm generally */
+    /** todo: later check/remove. Try to prevent artefacts between routing. Looks like it works, but facepalm generally */
     clearOnBeforeRouteLeave(path: string) {
       if (path == "/posts") {
         this.messages = this.messages.filter((message) => message.type !== WSMessageType.POSTS_LIST);
@@ -155,6 +159,15 @@ export const useWebSocketStore = defineStore({
       const visitor = visitor_messages.map((message) => message.data as Visitor)[0];
 
       console.log('visitor.status========getter========', visitor);
+      return visitor;
+
+    },
+    groupVisitor(): Visitor {
+      // filter in exact visitor status response messages
+      const visitor_messages = this.messages.filter((message) => message.type === WSMessageType.USER_GROUP_VISITOR_STATUS);
+      const visitor = visitor_messages.map((message) => message.data as Visitor)[0];
+
+      console.log('groupVisitor.status========getter========', visitor);
       return visitor;
 
     },
@@ -194,18 +207,18 @@ export const useWebSocketStore = defineStore({
       return [...comments];
     },
 
-    /**all the groups able to see by user*/
+    /**all the groups where user is member*/
     groupsList(): Group[] {
       const groups_messages_list = this.messages.filter((message) => message.type === WSMessageType.GROUPS_LIST && message.data !== null);
       const groups = groups_messages_list.map((message) =>
         (message.data as Group[]).map((group) => group)
       ).flat();
-      return [...groups]; //not necessary to use spread here, and all can be oneline
+      return [...groups]
     },
 
     /**all the groups to discover*/
     groupsAllList(): Group[] {
-      const groups_messages_list = this.messages.filter((message) => message.type === WSMessageType.GROUPS_ALL_LIST && message.data !== null);
+      const groups_messages_list = this.messages.filter((message) => message.type === WSMessageType.GROUPS_LIST && message.data !== null);
       const groups = groups_messages_list.map((message) =>
         (message.data as Group[]).map((group) => group)
       ).flat();

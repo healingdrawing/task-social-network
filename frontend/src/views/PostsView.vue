@@ -102,10 +102,10 @@ function handlePictureChange(event: Event) {
   picture.value = (event.target as HTMLInputElement).files?.[0] ?? null;
 }
 
-const storeUUID = useUUIDStore();
+const UUIDStore = useUUIDStore();
 async function addPost() {
   const postSubmit: PostSubmit = {
-    user_uuid: storeUUID.getUUID,
+    user_uuid: UUIDStore.getUUID,
 
     title: postTitle.value,
     categories: postTags.value,
@@ -146,7 +146,7 @@ function updateFollowersList() {
   wss.sendMessage({
     type: WSMessageType.USER_FOLLOWERS_LIST,
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       target_email: profileStore.getUserEmail,
     } as TargetProfileRequest,
   })
@@ -159,7 +159,7 @@ function updatePostsList() {
   wss.sendMessage({
     type: WSMessageType.POSTS_LIST,
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
     } as PostsListRequest,
   });
 }

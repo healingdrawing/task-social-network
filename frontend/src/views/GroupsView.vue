@@ -15,7 +15,7 @@
       <br>
       <label>
         Invite users:
-        <select v-model="selectedFollowers" multiplev-model="selectedFollowers">
+        <select multiple v-model="selectedFollowers">
         <option v-for="follower in followersList" :key="follower.email" :value="follower.email">{{ follower.first_name }} {{ follower.last_name }} ({{ follower.email }})</option>
       </select>
       </label>
@@ -52,14 +52,14 @@ import { useGroupStore } from '@/store/group';
 import { TargetProfileRequest, WSMessage, WSMessageType, GroupSubmit, Group } from '@/api/types';
 
 const wss = useWebSocketStore();
-const storeUUID = useUUIDStore();
+const UUIDStore = useUUIDStore();
 const profileStore = useProfileStore();
 const followersList = computed(() => wss.userFollowersList);
 function updateFollowersList() {
   wss.sendMessage({
     type: WSMessageType.USER_FOLLOWERS_LIST,
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       target_email: profileStore.getUserEmail,
     } as TargetProfileRequest,
   })
@@ -70,7 +70,7 @@ function updateGroupsList() {
   wss.sendMessage({
     type: WSMessageType.GROUPS_LIST,
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       target_email: profileStore.getUserEmail,
     } as TargetProfileRequest,
   })
@@ -85,7 +85,7 @@ const createGroup = () => {
   const message: WSMessage = {
     type: WSMessageType.GROUP_SUBMIT,
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       name: name.value,
       description: description.value,
       invited_emails: selectedFollowers.value.join(' '),

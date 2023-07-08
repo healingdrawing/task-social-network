@@ -37,12 +37,13 @@ func wsGroupRequestAcceptHandler(conn *websocket.Conn, messageData map[string]in
 		return
 	}
 
-	group_id, ok := messageData["group_id"].(int)
+	_group_id, ok := messageData["group_id"].(float64)
 	if !ok {
 		log.Println("failed to get group_id from message data")
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from message data"})
 		return
 	}
+	group_id := int64(_group_id)
 
 	requester_email, ok := messageData["requester_email"].(string)
 	if !ok {
@@ -69,7 +70,7 @@ func wsGroupRequestAcceptHandler(conn *websocket.Conn, messageData map[string]in
 	var group WS_GROUP_CHECK_DTO
 
 	for rows.Next() {
-		err = rows.Scan(&group.Id, &group.Name, &group.Description, &group.Creator_id, &group.Created_at, &group.Privacy)
+		err = rows.Scan(&group.Id, &group.Name, &group.Description, &group.Creator_id, &group.Created_at)
 		if err != nil {
 			log.Println("failed to scan group", err.Error())
 			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to scan group"})
@@ -121,12 +122,13 @@ func wsGroupRequestRejectHandler(conn *websocket.Conn, messageData map[string]in
 		return
 	}
 
-	group_id, ok := messageData["group_id"].(int)
+	_group_id, ok := messageData["group_id"].(float64)
 	if !ok {
 		log.Println("failed to get group_id from message data")
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from message data"})
 		return
 	}
+	group_id := int64(_group_id)
 
 	requester_email, ok := messageData["requester_email"].(string)
 	if !ok {
@@ -153,7 +155,7 @@ func wsGroupRequestRejectHandler(conn *websocket.Conn, messageData map[string]in
 	var group WS_GROUP_CHECK_DTO
 
 	for rows.Next() {
-		err = rows.Scan(&group.Id, &group.Name, &group.Description, &group.Creator_id, &group.Created_at, &group.Privacy)
+		err = rows.Scan(&group.Id, &group.Name, &group.Description, &group.Creator_id, &group.Created_at)
 		if err != nil {
 			log.Println("failed to scan group", err.Error())
 			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to scan group"})
@@ -355,12 +357,13 @@ func wsGroupInviteAcceptHandler(conn *websocket.Conn, messageData map[string]int
 		return
 	}
 
-	group_id, ok := messageData["group_id"].(int)
+	_group_id, ok := messageData["group_id"].(float64)
 	if !ok {
 		log.Println("failed to get group_id from message data")
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from message data"})
 		return
 	}
+	group_id := int64(_group_id)
 
 	// check if the user was invited to the group, using getGroupInvitedUsers statement
 	rows, err := statements["getGroupInvitedUsers"].Query(group_id)
@@ -428,12 +431,13 @@ func wsGroupInviteRejectHandler(conn *websocket.Conn, messageData map[string]int
 		return
 	}
 
-	group_id, ok := messageData["group_id"].(int)
+	_group_id, ok := messageData["group_id"].(float64)
 	if !ok {
 		log.Println("failed to get group_id from message data")
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from message data"})
 		return
 	}
+	group_id := int64(_group_id)
 
 	// check if the user was invited to the group, using getGroupInvitedUsers statement
 	rows, err := statements["getGroupInvitedUsers"].Query(group_id)

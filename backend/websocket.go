@@ -126,6 +126,11 @@ func reader(conn *websocket.Conn, uuid string) {
 			log.Println("data after unmarshalling: ", data) //todo: delete debug
 
 			switch data.Type {
+			case string(WS_GROUP_SUBMIT):
+				wsGroupSubmitHandler(conn, data.Data)
+			case string(WS_GROUPS_LIST):
+				wsGroupsListHandler(conn, data.Data)
+
 			case string(WS_POST_SUBMIT):
 				wsPostSubmitHandler(conn, data.Data)
 			case string(WS_POSTS_LIST):
@@ -162,6 +167,8 @@ func reader(conn *websocket.Conn, uuid string) {
 
 			case string(WS_USER_VISITOR_STATUS):
 				wsUserVisitorStatusHandler(conn, data.Data)
+			case string(WS_USER_GROUP_VISITOR_STATUS):
+				wsUserGroupVisitorStatusHandler(conn, data.Data)
 
 			case "login":
 				clients.Store(conn, data.Data["username"])
@@ -235,9 +242,27 @@ func wsSendSuccess(msg WS_SUCCESS_RESPONSE_DTO) {
 // 	})
 // }
 
-func wsSendPostsList(postsList WS_POSTS_LIST_DTO) {
+func wsSendPostsList(posts_list WS_POSTS_LIST_DTO) {
 
-	outputMessage, err := wsCreateResponseMessage(WS_POSTS_LIST, postsList)
+	outputMessage, err := wsCreateResponseMessage(WS_POSTS_LIST, posts_list)
+
+	if err != nil {
+		log.Println(err)
+	}
+	clients.Range(func(key, value interface{}) bool {
+		if c, ok := key.(*websocket.Conn); ok {
+			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return true
+	})
+}
+
+func wsSendGroupsList(groups_list WS_GROUPS_LIST_DTO) {
+
+	outputMessage, err := wsCreateResponseMessage(WS_GROUPS_LIST, groups_list)
 
 	if err != nil {
 		log.Println(err)
@@ -271,9 +296,9 @@ func wsSendPostsList(postsList WS_POSTS_LIST_DTO) {
 // 	})
 // }
 
-func wsSendCommentsList(commentsList WS_COMMENTS_LIST_DTO) {
+func wsSendCommentsList(comments_list WS_COMMENTS_LIST_DTO) {
 
-	outputMessage, err := wsCreateResponseMessage(WS_COMMENTS_LIST, commentsList)
+	outputMessage, err := wsCreateResponseMessage(WS_COMMENTS_LIST, comments_list)
 
 	if err != nil {
 		log.Println(err)
@@ -364,6 +389,24 @@ func wsSendFollowRequestsList(follow_requests_list WS_FOLLOW_REQUESTS_LIST_DTO) 
 func wsSendUserVisitorStatus(user_visitor_status WS_USER_VISITOR_STATUS_DTO) {
 
 	outputMessage, err := wsCreateResponseMessage(WS_USER_VISITOR_STATUS, user_visitor_status)
+
+	if err != nil {
+		log.Println(err)
+	}
+	clients.Range(func(key, value interface{}) bool {
+		if c, ok := key.(*websocket.Conn); ok {
+			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return true
+	})
+}
+
+func wsSendUserGroupVisitorStatus(user_group_visitor_status WS_USER_VISITOR_STATUS_DTO) {
+
+	outputMessage, err := wsCreateResponseMessage(WS_USER_GROUP_VISITOR_STATUS, user_group_visitor_status)
 
 	if err != nil {
 		log.Println(err)

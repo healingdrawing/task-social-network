@@ -104,7 +104,7 @@ function acceptFollowRequest(bell: Bell) {
   wss.sendMessage({
     type: WSMessageType.FOLLOW_REQUEST_ACCEPT,
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       target_email: bell.email,
     } as TargetProfileRequest,
   })
@@ -115,7 +115,7 @@ function rejectFollowRequest(bell: Bell) {
   wss.sendMessage({
     type: WSMessageType.FOLLOW_REQUEST_REJECT,
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       target_email: bell.email,
     } as TargetProfileRequest,
   })
@@ -138,21 +138,21 @@ function rejectJoinRequest(bell: Bell) {
   //gap
 }
 
-const storeUUID = useUUIDStore();
+const UUIDStore = useUUIDStore();
 const profileStore = useProfileStore();
 function updateBells() {
   // todo: add x4 cases for each type of bell
   wss.sendMessage({
     type: WSMessageType.FOLLOW_REQUESTS_LIST,
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       target_email: profileStore.getTargetUserEmail,
     } as TargetProfileRequest,
   })
   // wss.sendMessage({
   //   type: WSMessageType.GROUP_REQUESTS_LIST,
   //   data: {
-  //     user_uuid: storeUUID.getUUID,
+  //     user_uuid:UUIDStore.getUUID,
   //     target_email: profileStore.getTargetUserEmail,
   //   } as TargetProfileRequest,
   // })

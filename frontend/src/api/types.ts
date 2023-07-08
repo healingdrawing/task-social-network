@@ -54,7 +54,8 @@ export enum WSMessageType {
   USER_REGISTER = "user_register", //  userRegisterHandler
   USER_UNFOLLOW = "user_unfollow", //  unfollowHandler
 
-  USER_VISITOR_STATUS = "user_visitor_status", //  not implemented in old code
+  USER_VISITOR_STATUS = "user_visitor_status", //  NEW
+  USER_GROUP_VISITOR_STATUS = "user_group_visitor_status", //  NEW
 }
 
 export enum SuccessContent {
@@ -66,6 +67,7 @@ export enum VisitorStatus {
   OWNER = "owner",
   FOLLOWER = "follower",
   REQUESTER = "requester",
+  MEMBER = "member", // injection for groupVisitor() case
   VISITOR = "visitor",
 }
 
@@ -95,7 +97,7 @@ export interface Comment {
 
 export interface CommentSubmit {
   user_uuid: string;
-  post_id: number; // -ugly golang cant casting number in json using interface.(int). It returns 0 and ok=false, In same time print of map shows number > 0. So data must be string. facepalm
+  post_id: number; // -ugly golang cant casting number in json using interface.(int). It returns 0 and ok=false, In same time print of map shows number > 0. So data must be reconverted using float64 intermediate value. facepalm
   content: string;
   picture?: string; // jpeg,png,gif
 }
@@ -180,6 +182,7 @@ export interface UserForList {
   last_name: string;
 }
 
+/**used for two cases visitor() and groupVisitor() */
 export interface UserVisitorStatus {
   status: VisitorStatus;
 }

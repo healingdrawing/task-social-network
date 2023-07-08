@@ -88,12 +88,12 @@ watch(isPublic, (newValue) => {
   handleCheckboxChange(newValue);
 });
 
-const storeUUID = useUUIDStore();
+const UUIDStore = useUUIDStore();
 function handleCheckboxChange(value: boolean) {
   wss.sendMessage({
     type: WSMessageType.USER_PRIVACY,
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       make_public: value,
     } as ChangePrivacyRequest,
   })
@@ -115,7 +115,7 @@ function updateProfile() {
   wss.sendMessage({
     type: WSMessageType.USER_PROFILE,
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       target_email: profileStore.getUserEmail,
     } as TargetProfileRequest,
   })
@@ -127,7 +127,7 @@ function updateFollowingList() {
   wss.sendMessage({
     type: WSMessageType.USER_FOLLOWING_LIST,
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       target_email: profileStore.getUserEmail,
     } as TargetProfileRequest,
   })
@@ -139,7 +139,7 @@ function updateFollowersList() {
   wss.sendMessage({
     type: WSMessageType.USER_FOLLOWERS_LIST,
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       target_email: profileStore.getUserEmail,
     } as TargetProfileRequest,
   })
@@ -152,7 +152,7 @@ function updatePostsList() {
   wss.sendMessage({
     type: WSMessageType.USER_POSTS_LIST, // todo: do not forget filter by able to see
     data: {
-      user_uuid: storeUUID.getUUID,
+      user_uuid: UUIDStore.getUUID,
       target_email: profileStore.getUserEmail,
     } as TargetProfileRequest,
   })
