@@ -37,18 +37,11 @@ type WS_POST_RESPONSE_DTO struct {
 
 type WS_POSTS_LIST_DTO []WS_POST_RESPONSE_DTO
 
+//todo:  later may be add the group posts able to see for user, but maybe implement separated section on frontend *View.vue(because the group posts always public, for group members, and must have extra field in response, the group title) or not :|
+
+// wsPostSubmitHandler creates a new post, then return all posts, which user can see.
 func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
-
-	//todo: CHECK THE NEW ERROR HANDLING! AND REMOVE COMMENTED CODE
-	// var data WS_POST_SUBMIT_DTO
-	// data.User_uuid = messageData["user_uuid"].(string)
-	// data.Title = messageData["title"].(string)
-	// data.Categories = messageData["categories"].(string)
-	// data.Content = messageData["content"].(string)
-	// data.Privacy = messageData["privacy"].(string)
-	// data.Picture = messageData["picture"].(string)
-	// data.Able_to_see = (messageData["able_to_see"]).(string)
 
 	var data WS_POST_SUBMIT_DTO
 	fields := map[string]*string{
@@ -83,8 +76,8 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 		}
 		pictureData, err := base64.StdEncoding.DecodeString(imageData)
 		if err != nil {
-			log.Println("Invalid avatar ", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " Invalid avatar"})
+			log.Println("Invalid picture ", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " Invalid picture"})
 			return
 		}
 		if !isImage(pictureData) {
@@ -99,8 +92,8 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 
 	user_id, err := get_user_id_by_uuid(data.User_uuid)
 	if err != nil {
-		log.Println("failed to get ID of the request sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
+		log.Println("failed to get ID of the message sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
 		return
 	}
 
@@ -148,36 +141,29 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 		}
 	}
 
-	rows, err := statements["getPosts"].Query(user_id)
+	rows, err := statements["getPostsAbleToSee"].Query(user_id, user_id, user_id)
 	if err != nil {
-		log.Println("getPosts query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getPosts query failed"})
+		log.Println("getPostsAbleToSee query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getPostsAbleToSee query failed"})
 		return
 	}
 	defer rows.Close()
 
-	var post WS_POST_RESPONSE_DTO
-	pictureBytes := []byte{}
-	rows.Next()
-	err = rows.Scan(&post.Id, &post.Title, &post.Content, &post.Categories, &pictureBytes, &post.Privacy, &post.Created_at, &post.Email, &post.First_name, &post.Last_name)
-	if err != nil {
-		log.Println("post scan failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " post scan failed"})
-		return
+	var postsList WS_POSTS_LIST_DTO
+	for rows.Next() {
+		var post WS_POST_RESPONSE_DTO
+		pictureBytes := []byte{}
+		err = rows.Scan(&post.Id, &post.Title, &post.Content, &post.Categories, &pictureBytes, &post.Privacy, &post.Created_at, &post.Email, &post.First_name, &post.Last_name)
+		if err != nil {
+			log.Println("post scan failed", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " post scan failed"})
+			return
+		}
+		post.Picture = base64.StdEncoding.EncodeToString(pictureBytes)
+		postsList = append(postsList, post)
 	}
-	post.Picture = base64.StdEncoding.EncodeToString(pictureBytes)
 
-	//todo: debug, some weird lag happen, when all data is correct except email, and only in this case. when posts list collected from db, email is correct
-
-	log.Println("==============new post================")
-	log.Println("user_uuid", data.User_uuid)
-	log.Println("user_id", user_id)
-	user_email, _ := get_email_by_user_id(user_id)
-	log.Println("user_email from user_id", user_email)
-	log.Println("post content", post.Content)
-	log.Println("post email", post.Email)
-
-	wsSendPost(post)
+	wsSendPostsList(postsList)
 }
 
 func wsPostsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
@@ -191,8 +177,8 @@ func wsPostsListHandler(conn *websocket.Conn, messageData map[string]interface{}
 	}
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
-		log.Println("failed to get ID of the request sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
+		log.Println("failed to get ID of the message sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
 		return
 	}
 
@@ -219,7 +205,6 @@ func wsPostsListHandler(conn *websocket.Conn, messageData map[string]interface{}
 	}
 
 	wsSendPostsList(postsList)
-
 }
 
 /** includes the posts created by user, BUT NOT GROUP POSTS, created by user */
@@ -236,8 +221,8 @@ func wsUserPostsListHandler(conn *websocket.Conn, messageData map[string]interfa
 	}
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
-		log.Println("failed to get ID of the request sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
+		log.Println("failed to get ID of the message sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
 		return
 	}
 

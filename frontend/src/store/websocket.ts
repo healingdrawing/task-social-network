@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { WSMessage, WSMessageType, Post, UserProfile, UserForList, UserVisitorStatus as Visitor, SuccessResponse, SuccessContent, VisitorStatus, Bell, BellType } from '@/api/types';
+import { WSMessage, WSMessageType, Post, Comment, UserProfile, UserForList, UserVisitorStatus as Visitor, Bell, BellType } from '@/api/types';
 import router from '@/router/index';
 
 const websockets: (WebSocket | null)[] = [];
@@ -60,7 +60,7 @@ export const useWebSocketStore = defineStore({
     sendMessage(message: WSMessage) {
       this.clearMessages(message);
       const messageString = JSON.stringify(message);
-      console.log(`Sending message json string: ${messageString}`);
+      console.log(`\n=Sending message.\ntype: ${message.type}\ndata(json string): ${messageString}`);
       this.socket?.send(messageString);
     },
     disconnect() {
@@ -76,6 +76,7 @@ export const useWebSocketStore = defineStore({
       this.messages = this.messages.filter((message) => message.type !== WSMessageType.SUCCESS_RESPONSE);
 
       switch (message.type) {
+        //todo: NOPE. FORGET ABOUT IT! perhaps refactor to replace response to list for all possible cases, and then, in case of success, function can be oneline without switch
         //todo: add x4 cases for each type of bell
         case WSMessageType.FOLLOW_REQUEST_ACCEPT:
           console.log('case clearMessages==============================', message.type);
@@ -93,18 +94,17 @@ export const useWebSocketStore = defineStore({
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUESTS_LIST);
           break;
 
+        case WSMessageType.POST_SUBMIT:
+        case WSMessageType.POSTS_LIST:
         case WSMessageType.USER_POSTS_LIST:
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.POSTS_LIST);
           break;
-        case WSMessageType.POSTS_LIST:
-          this.messages = this.messages.filter((message) => message.type !== WSMessageType.POSTS_LIST);
+
+        case WSMessageType.COMMENT_SUBMIT:
+        case WSMessageType.COMMENTS_LIST:
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.COMMENTS_LIST);
           break;
-        case WSMessageType.POST_RESPONSE:
-          this.messages = this.messages.filter((message) => message.type !== WSMessageType.POST_RESPONSE);
-          break;
-        case WSMessageType.POST_SUBMIT:
-          this.messages = this.messages.filter((message) => message.type !== WSMessageType.POST_SUBMIT);
-          break;
+
 
         case WSMessageType.USER_PROFILE:
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.USER_PROFILE);
@@ -181,6 +181,13 @@ export const useWebSocketStore = defineStore({
       const posts = [...fresh_posts, ...history_posts];
       return posts;
     },
+    commentsList(): Comment[] {
+      const comments_messages_list = this.messages.filter((message) => message.type === WSMessageType.COMMENTS_LIST && message.data !== null);
+      const comments = comments_messages_list.map((message) =>
+        (message.data as Comment[]).map((comment) => comment)
+      ).flat();
+      return [...comments];
+    },
     followRequestsList(): Bell[] {
       const fresh_follow_requests_messages = this.messages.filter((message) => message.type === WSMessageType.FOLLOW_REQUEST_RESPONSE)
       const fresh_follow_requests = fresh_follow_requests_messages.map((message) => message.data as Bell)
@@ -210,7 +217,6 @@ export const useWebSocketStore = defineStore({
       return [...this.followRequestsList]
     },
 
-    commentsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.COMMENTS_LIST) },
     chatUsersList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.CHAT_USERS_LIST) },
     groupsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUPS_LIST) },
     groupPostsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_POSTS_LIST) },

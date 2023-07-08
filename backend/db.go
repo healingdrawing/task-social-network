@@ -137,7 +137,7 @@ func statementsCreation() {
 		"getPostsAbleToSeeToVisitor": `SELECT post.id, title, content, categories, picture, post.privacy, created_at, email, first_name, last_name FROM post INNER JOIN users ON users.id = post.user_id WHERE (post.user_id = ? AND ? = ? OR post.privacy = "public" AND post.user_id = ? OR (post.privacy = "private" AND post.user_id = ? AND EXISTS (SELECT 1 FROM followers WHERE followers.user_id = ? AND followers.follower_id = ?)) OR post.user_id = ? AND EXISTS (SELECT 1 FROM almost_private WHERE almost_private.post_id = post.id AND almost_private.user_id = ?)) ORDER BY created_at DESC;`,
 
 		"addComment":  `INSERT INTO comment (user_id, post_id, content, picture, created_at) VALUES (?, ?, ?, ?, ?);`,
-		"getComments": `SELECT first_name, last_name, content, picture FROM comment INNER JOIN users ON user_id = users.id WHERE post_id = ? ORDER BY comment.id DESC;`,
+		"getComments": `SELECT email, first_name, last_name, content, picture, created_at FROM comment INNER JOIN users ON user_id = users.id WHERE post_id = ? ORDER BY comment.id DESC;`,
 		"addMessage":  `INSERT INTO message (from_id, to_id, content, created_at) VALUES (?, ?, ?, ?);`,
 		"getMessages": `SELECT from_id, to_id, content, created_at FROM message WHERE (from_id = ? AND to_id = ?) OR (from_id = ? AND to_id = ?) ORDER BY created_at DESC;`,
 

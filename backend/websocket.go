@@ -133,6 +133,11 @@ func reader(conn *websocket.Conn, uuid string) {
 			case string(WS_USER_POSTS_LIST):
 				wsUserPostsListHandler(conn, data.Data)
 
+			case string(WS_COMMENT_SUBMIT):
+				wsCommentSubmitHandler(conn, data.Data)
+			case string(WS_COMMENTS_LIST):
+				wsCommentsListHandler(conn, data.Data)
+
 			case string(WS_USER_PROFILE):
 				wsUserProfileHandler(conn, data.Data)
 			case string(WS_USER_PRIVACY):
@@ -212,9 +217,27 @@ func wsSendSuccess(msg WS_SUCCESS_RESPONSE_DTO) {
 	})
 }
 
-func wsSendPost(post WS_POST_RESPONSE_DTO) {
+// func wsSendPost(post WS_POST_RESPONSE_DTO) {
 
-	outputMessage, err := wsCreateResponseMessage(WS_POST_RESPONSE, post)
+// 	outputMessage, err := wsCreateResponseMessage(WS_POST_RESPONSE, post)
+
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+// 	clients.Range(func(key, value interface{}) bool {
+// 		if c, ok := key.(*websocket.Conn); ok {
+// 			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+// 			if err != nil {
+// 				log.Println(err)
+// 			}
+// 		}
+// 		return true
+// 	})
+// }
+
+func wsSendPostsList(postsList WS_POSTS_LIST_DTO) {
+
+	outputMessage, err := wsCreateResponseMessage(WS_POSTS_LIST, postsList)
 
 	if err != nil {
 		log.Println(err)
@@ -230,9 +253,27 @@ func wsSendPost(post WS_POST_RESPONSE_DTO) {
 	})
 }
 
-func wsSendPostsList(postsList WS_POSTS_LIST_DTO) {
+// func wsSendComment(comment WS_COMMENT_RESPONSE_DTO) {
 
-	outputMessage, err := wsCreateResponseMessage(WS_POSTS_LIST, postsList)
+// 	outputMessage, err := wsCreateResponseMessage(WS_COMMENT_RESPONSE, comment)
+
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+// 	clients.Range(func(key, value interface{}) bool {
+// 		if c, ok := key.(*websocket.Conn); ok {
+// 			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+// 			if err != nil {
+// 				log.Println(err)
+// 			}
+// 		}
+// 		return true
+// 	})
+// }
+
+func wsSendCommentsList(commentsList WS_COMMENTS_LIST_DTO) {
+
+	outputMessage, err := wsCreateResponseMessage(WS_COMMENTS_LIST, commentsList)
 
 	if err != nil {
 		log.Println(err)

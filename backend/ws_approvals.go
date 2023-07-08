@@ -53,8 +53,8 @@ func wsGroupRequestAcceptHandler(conn *websocket.Conn, messageData map[string]in
 
 	requester_id, err := get_user_id_by_email(requester_email)
 	if err != nil {
-		log.Println("failed to get ID of the request sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
+		log.Println("failed to get ID of the message sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
 		return
 	}
 
@@ -137,8 +137,8 @@ func wsGroupRequestRejectHandler(conn *websocket.Conn, messageData map[string]in
 
 	requester_id, err := get_user_id_by_email(requester_email)
 	if err != nil {
-		log.Println("failed to get ID of the request sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
+		log.Println("failed to get ID of the message sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
 		return
 	}
 
@@ -193,8 +193,8 @@ func wsApproveFollowerHandler(conn *websocket.Conn, messageData map[string]inter
 
 	idol_user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
-		log.Println("failed to get ID of the request sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
+		log.Println("failed to get ID of the message sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
 		return
 	}
 
@@ -275,8 +275,8 @@ func wsRejectFollowerHandler(conn *websocket.Conn, messageData map[string]interf
 
 	idol_user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
-		log.Println("failed to get ID of the request sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
+		log.Println("failed to get ID of the message sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
 		return
 	}
 

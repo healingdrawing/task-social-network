@@ -115,17 +115,11 @@ async function addPost() {
     picture: pictureStore.getPictureBase64String,
   };
 
-  // if (postPrivacy.value === 'almostPrivate') {
-  //   postSubmit.able_to_see = selectedFollowers.value.join(' ');
-  // }
-
   const message: WSMessage = {
     type: WSMessageType.POST_SUBMIT,
     data: postSubmit,
   };
   wss.sendMessage(message);
-
-  // postsList.value.unshift(post);
 
   postTitle.value = '';
   postTags.value = '';

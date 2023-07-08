@@ -49,8 +49,8 @@ func wsUserVisitorStatusHandler(conn *websocket.Conn, messageData map[string]int
 	}
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
-		log.Println("failed to get ID of the request sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
+		log.Println("failed to get ID of the message sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
 		return
 	}
 
@@ -138,8 +138,8 @@ func wsUserProfileHandler(conn *websocket.Conn, messageData map[string]interface
 	}
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
-		log.Println("failed to get ID of the request sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
+		log.Println("failed to get ID of the message sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
 		return
 	}
 
@@ -221,8 +221,8 @@ func wsChangePrivacyHandler(conn *websocket.Conn, messageData map[string]interfa
 	}
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
-		log.Println("failed to get ID of the request sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the request sender"})
+		log.Println("failed to get ID of the message sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
 		return
 	}
 

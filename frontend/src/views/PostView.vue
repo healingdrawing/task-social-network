@@ -46,26 +46,38 @@
     </div>
     <!-- add comments list , already created -->
     <div v-for="comment in commentsList"
-      :key="comment.id">
+      :key="comment.created_at">
       <hr>
-      <p>Comment Author id: {{ comment.authorId }}</p>
+      <p>Comment content: {{ comment.content }}</p>
+      <div v-if="comment.picture !== ''">
+        <p>Comment picture: 
+          <img :src="`data:image/jpeg;base64,${comment.picture}`" alt="picture" />
+        </p>
+      </div>
       <router-link
       :to="{ name: 'target' }"
-      @click="piniaManageData(comment)">
-      <h3>Comment Author: {{ comment.authorFullName }}</h3>
+      @click="piniaManageDataProfile(comment.email)">
+      <h6>Comment Author:
+        {{ comment.first_name }} 
+        {{ comment.last_name }} 
+        ({{ comment.email }})
+      </h6>
       </router-link>
-      <p>Comment id: {{ comment.id }}</p>
-      <p>Comment content: {{ comment.content }}</p>
-      <p>Comment picture: {{ comment.picture }}</p>
+      
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted, Ref, computed } from 'vue';
+import { useWebSocketStore } from '@/store/pinia';
+import { useUUIDStore } from '@/store/pinia';
 import { usePostStore } from '@/store/pinia';
 import { useProfileStore } from '@/store/pinia';
 import { usePictureStore } from '@/store/pinia';
+import { CommentsListRequest, CommentSubmit, WSMessage, WSMessageType } from '@/api/types';
+
+const wss = useWebSocketStore();
 
 const profileStore = useProfileStore();
 function piniaManageDataProfile(email: string) {
@@ -84,52 +96,42 @@ const post = computed(() => postStore.getPost);
 
 // todo: refactor to get comments from backend, using post_id
 function updatePostComments() {
-
+  wss.sendMessage({
+    type: WSMessageType.COMMENTS_LIST,
+    data: {
+      user_uuid: storeUUID.getUUID,
+      post_id: post.value.id,
+    } as CommentsListRequest,
+  });
   // todo: send message through websocket to refresh comments list
 }
 
-interface Comment {
-  id: number; // comment id, unique, autoincrement, primary key, all comments must be stored one table in database
-  authorId: number; //todo: need to implement clickable link to user profile
-  authorFullName: string; //todo: need to implement clickable link to user profile
-  content: string;
-  picture?: Blob | null;
-}
-
-//todo: remove/refactor later, dummy data, must be collected from backend
-function getComments() {
-  const comments: Comment[] = [
-    { id: 1, authorId: 11, authorFullName: 'John Doe 11', content: 'Dummy comment.', },
-    { id: 2, authorId: 22, authorFullName: 'Jane Doe 22', content: 'Dummy comment.', },
-  ];
-  return comments;
-}
-const commentsList = ref(getComments());
+const commentsList = computed(() => wss.commentsList);
 
 const commentContent = ref('');
-const commentAuthorFullName = ref('');
+
+const storeUUID = useUUIDStore();
 
 // todo: refactor to add comment to backend
 function addComment() {
-  // todo: perpahs here call the backend to add comment, using user id, post id, and comment content, and get back the comment id, and author full name(to not provide it using pinia storage, which not looks too good).
-  commentAuthorFullName.value = 'dummy author full name'
-  const comment: Comment = {
-    id: 3,
-    authorId: 33,
-    authorFullName: commentAuthorFullName.value,
+  const commentSubmit: CommentSubmit = {
+    user_uuid: storeUUID.getUUID,
+    post_id: post.value.id, // idiotic gap, because golang can cast properly only strings. facepalm
     content: commentContent.value,
-    picture: picture.value,
+    picture: pictureStore.getPictureBase64String,
   };
-  commentsList.value.unshift(comment);
+
+  const message: WSMessage = {
+    type: WSMessageType.COMMENT_SUBMIT,
+    data: commentSubmit,
+  };
+  wss.sendMessage(message);
 
   commentContent.value = '';
   picture.value = null;
+  (document.getElementById("picture") as HTMLInputElement).value = "";
+  pictureStore.resetPicture()
 
-}
-
-
-function piniaManageData(comment: Comment) {
-  profileStore.setTargetUserEmail("comment.authorEmail");
 }
 
 onMounted(() => {

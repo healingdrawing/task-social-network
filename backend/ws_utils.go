@@ -26,9 +26,8 @@ const (
 	WS_FOLLOW_REQUEST_ACCEPT   WSMT = "follow_request_accept"
 	WS_FOLLOW_REQUESTS_LIST    WSMT = "follow_requests_list"
 
-	WS_POST_SUBMIT   WSMT = "post_submit"
-	WS_POST_RESPONSE WSMT = "post_response"
-	WS_POSTS_LIST    WSMT = "posts_list"
+	WS_POST_SUBMIT WSMT = "post_submit"
+	WS_POSTS_LIST  WSMT = "posts_list"
 	// WS_ANY_PROFILE_VIEW_POSTS_LIST WSMT = "any_profile_view_posts_list"
 
 	WS_GROUPS_LIST               WSMT = "groups_list"

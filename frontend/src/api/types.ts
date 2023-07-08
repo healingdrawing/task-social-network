@@ -4,6 +4,7 @@ export enum WSMessageType {
   SUCCESS_RESPONSE = "success_response", //  successHandler // not sure this needed
 
   COMMENT_SUBMIT = "comment_submit", //  commentNewHandler
+  COMMENT_RESPONSE = "comment_response", //  NEW 
   COMMENTS_LIST = "comments_list", //  commentsGetHandler
 
   CHAT_USERS_LIST = "chat_users_list", //  chatUsersHandler
@@ -80,6 +81,27 @@ export interface ErrorResponse {
 
 export interface SuccessResponse {
   message: string;
+}
+
+export interface Comment {
+  content: string;
+  picture: string;
+  created_at: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+}
+
+export interface CommentSubmit {
+  user_uuid: string;
+  post_id: number; // -ugly golang cant casting number in json using interface.(int). It returns 0 and ok=false, In same time print of map shows number > 0. So data must be string. facepalm
+  content: string;
+  picture?: string; // jpeg,png,gif
+}
+
+export interface CommentsListRequest {
+  user_uuid: string;
+  post_id: number;
 }
 
 export interface Post {
