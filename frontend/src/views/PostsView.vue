@@ -142,7 +142,6 @@ function piniaManageDataProfile(email: string) {
 }
 
 const followersList = computed(() => wss.userFollowersList);
-//todo: remove/refactor later, dummy data, must be collected from backend
 function updateFollowersList() {
   wss.sendMessage({
     type: WSMessageType.USER_FOLLOWERS_LIST,
