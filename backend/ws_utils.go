@@ -39,13 +39,16 @@ const (
 	WS_GROUP_POST_COMMENT_SUBMIT WSMT = "group_post_comment_submit"
 	WS_GROUP_POST_COMMENTS_LIST  WSMT = "group_post_comments_list"
 	WS_GROUP_JOIN                WSMT = "group_join"
-	WS_GROUP_INVITES_SUBMIT      WSMT = "group_invites_submit"
-	WS_GROUP_INVITES_LIST        WSMT = "group_invites_list" // FOR USER
-	WS_GROUP_INVITE_ACCEPT       WSMT = "group_invite_accept"
-	WS_GROUP_INVITE_REJECT       WSMT = "group_invite_reject"
-	WS_GROUP_REQUESTS_LIST       WSMT = "group_requests_list"
-	WS_GROUP_REQUEST_ACCEPT      WSMT = "group_request_accept"
-	WS_GROUP_REQUEST_REJECT      WSMT = "group_request_reject"
+
+	WS_GROUP_INVITES_SUBMIT WSMT = "group_invites_submit"
+	WS_GROUP_INVITE_ACCEPT  WSMT = "group_invite_accept"
+	WS_GROUP_INVITE_REJECT  WSMT = "group_invite_reject"
+	WS_GROUP_INVITES_LIST   WSMT = "group_invites_list" // FOR USER, many groups
+
+	WS_GROUP_REQUEST_SUBMIT WSMT = "group_request_submit"
+	WS_GROUP_REQUEST_ACCEPT WSMT = "group_request_accept"
+	WS_GROUP_REQUEST_REJECT WSMT = "group_request_reject"
+	WS_GROUP_REQUESTS_LIST  WSMT = "group_requests_list"
 
 	WS_GROUP_EVENT_SUBMIT            WSMT = "group_event_submit"
 	WS_GROUP_EVENTS_LIST             WSMT = "group_events_list"

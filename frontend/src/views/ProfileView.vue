@@ -90,13 +90,17 @@ watch(isPublic, (newValue) => {
 
 const UUIDStore = useUUIDStore();
 function handleCheckboxChange(value: boolean) {
-  wss.sendMessage({
-    type: WSMessageType.USER_PRIVACY,
-    data: {
-      user_uuid: UUIDStore.getUUID,
-      make_public: value,
-    } as ChangePrivacyRequest,
-  })
+  console.log('=== HANDLE CHECKBOX CHANGE', value);
+  // todo: undefined happens in time of move to BellView.vue, perhaps because of wss.facepalm() cleaning + reactivity
+  if (value !== undefined) {
+    wss.sendMessage({
+      type: WSMessageType.USER_PRIVACY,
+      data: {
+        user_uuid: UUIDStore.getUUID,
+        make_public: value.toString(),
+      } as ChangePrivacyRequest,
+    })
+  }
 }
 
 const profileStore = useProfileStore();

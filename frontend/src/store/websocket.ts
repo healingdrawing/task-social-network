@@ -13,6 +13,7 @@ export const useWebSocketStore = defineStore({
   actions: {
     /**remove all the messages from the store */
     facepalm() {
+      console.log('===BEFORE facepalm===');
       this.$state.messages = [];
       console.log('===facepalm===');
     },
@@ -79,19 +80,18 @@ export const useWebSocketStore = defineStore({
         //todo: NOPE. FORGET ABOUT IT! perhaps refactor to replace response to list for all possible cases, and then, in case of success, function can be oneline without switch
         //todo: add x4 cases for each type of bell
         case WSMessageType.FOLLOW_REQUEST_ACCEPT:
-          console.log('case clearMessages==============================', message.type);
-          this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUEST_RESPONSE);
-          this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUESTS_LIST);
-          break;
         case WSMessageType.FOLLOW_REQUEST_REJECT:
-          console.log('case clearMessages==============================', message.type);
-          this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUEST_RESPONSE);
-          this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUESTS_LIST);
-          break;
         case WSMessageType.FOLLOW_REQUESTS_LIST:
           console.log('case clearMessages==============================', message.type);
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUEST_RESPONSE);
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUESTS_LIST);
+          break;
+
+        case WSMessageType.GROUP_INVITE_ACCEPT:
+        case WSMessageType.GROUP_INVITE_REJECT:
+        case WSMessageType.GROUP_INVITES_LIST:
+          console.log('case clearMessages==============================', message.type);
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.GROUP_INVITES_LIST);
           break;
 
         case WSMessageType.POST_SUBMIT:
@@ -249,9 +249,27 @@ export const useWebSocketStore = defineStore({
         '\n history_follow_requests========== ', history_follow_requests.length);
       return follow_requests
     },
+
+    groupInvitesList(): Bell[] {
+      // todo: not clear place, tried not null check, and for another lists too
+      const group_invites_messages_list = this.messages.filter((message) => message.type === WSMessageType.GROUP_INVITES_LIST && message.data !== null)
+      const group_invites = group_invites_messages_list.map((message) =>
+        (message.data as Bell[]).map((bell) => bell)
+      ).flat()
+
+      // prepare for display, fill the empty fields
+      group_invites.forEach((bell) => {
+        bell.type = BellType.INVITATION
+      })
+
+      console.log('pinia \n group_invites========== ', group_invites.length,
+        '\n group_invites_messages_list========== ', group_invites_messages_list.length);
+      return group_invites
+    },
+
     bellsList(): Bell[] {
       //TODO: add other bells x4 summary
-      return [...this.followRequestsList]
+      return [...this.followRequestsList, ...this.groupInvitesList]
     },
 
     chatUsersList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.CHAT_USERS_LIST) },

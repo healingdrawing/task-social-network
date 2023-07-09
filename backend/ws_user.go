@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/websocket"
 	_ "github.com/mattn/go-sqlite3"
@@ -315,10 +316,16 @@ func wsChangePrivacyHandler(conn *websocket.Conn, messageData map[string]interfa
 		return
 	}
 
-	make_public, ok := messageData["make_public"].(bool)
+	_make_public, ok := messageData["make_public"].(string)
 	if !ok {
 		log.Println("failed to get make_public", err.Error())
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get make_public"})
+		return
+	}
+	make_public, err := strconv.ParseBool(_make_public)
+	if err != nil {
+		log.Println("failed to parse make_public", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to parse make_public"})
 		return
 	}
 

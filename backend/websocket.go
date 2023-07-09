@@ -156,14 +156,31 @@ func reader(conn *websocket.Conn, uuid string) {
 				wsFollowHandler(conn, data.Data)
 			case string(WS_USER_UNFOLLOW):
 				wsUnfollowHandler(conn, data.Data)
+
 			case string(WS_FOLLOW_REQUESTS_LIST):
 				wsFollowRequestsListHandler(conn, data.Data)
-			case string(WS_GROUP_REQUESTS_LIST):
-				wsGroupRequestsListHandler(conn, data.Data)
 			case string(WS_FOLLOW_REQUEST_ACCEPT):
 				wsApproveFollowerHandler(conn, data.Data)
 			case string(WS_FOLLOW_REQUEST_REJECT):
 				wsRejectFollowerHandler(conn, data.Data)
+
+			case string(WS_GROUP_REQUEST_SUBMIT): // for frontend button GroupView.vue
+				wsGroupRequestSubmitHandler(conn, data.Data)
+			case string(WS_GROUP_REQUEST_ACCEPT):
+				wsGroupRequestAcceptHandler(conn, data.Data)
+			case string(WS_GROUP_REQUEST_REJECT):
+				wsGroupRequestRejectHandler(conn, data.Data)
+			case string(WS_GROUP_REQUESTS_LIST):
+				wsGroupRequestsListHandler(conn, data.Data)
+
+			case string(WS_GROUP_INVITES_SUBMIT): // string of emails space separated
+				wsGroupInvitesSubmitHandler(conn, data.Data)
+			case string(WS_GROUP_INVITE_ACCEPT):
+				wsGroupInviteAcceptHandler(conn, data.Data)
+			case string(WS_GROUP_INVITE_REJECT):
+				wsGroupInviteRejectHandler(conn, data.Data)
+			case string(WS_GROUP_INVITES_LIST):
+				wsGroupInvitesListHandler(conn, data.Data)
 
 			case string(WS_USER_VISITOR_STATUS):
 				wsUserVisitorStatusHandler(conn, data.Data)

@@ -149,13 +149,20 @@ function updateBells() {
       target_email: profileStore.getTargetUserEmail,
     } as TargetProfileRequest,
   })
-  // wss.sendMessage({
-  //   type: WSMessageType.GROUP_REQUESTS_LIST,
-  //   data: {
-  //     user_uuid:UUIDStore.getUUID,
-  //     target_email: profileStore.getTargetUserEmail,
-  //   } as TargetProfileRequest,
-  // })
+  wss.sendMessage({
+    type: WSMessageType.GROUP_REQUESTS_LIST,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      target_email: profileStore.getTargetUserEmail,
+    } as TargetProfileRequest,
+  })
+  wss.sendMessage({
+    type: WSMessageType.GROUP_INVITES_LIST,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      target_email: profileStore.getTargetUserEmail,
+    } as TargetProfileRequest,
+  })
 
 }
 
