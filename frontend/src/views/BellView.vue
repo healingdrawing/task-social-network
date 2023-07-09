@@ -31,10 +31,22 @@
       <li v-for="(bell, index) in bells" :key="index">
         <hr>
         <div v-if="bell.type === BellType.EVENT">
-          type: {{ bell.type }} | {{ bell.event_name }}
-          <br> group: {{ bell.group_name }}
-          <br> <button @click="openGroup(bell)">Open Group</button>
-          <button @click="removeBell(bell)">Close</button>
+          Your Majesty! Some noise is heard from the castle walls.
+          It is about:
+          <br> " {{ bell.event_name }} "
+          <br> from the:
+          <br> " {{ bell.group_name }} "
+          <br> <button title="Discover" @click="openGroup(bell)">
+            This could be a matter of extreme importance 😤 !
+            <br> Prepare my royal horse ! Open the gate !
+          </button>
+          <button title="Close Event Reminder" @click="removeBell(bell)">
+            Again ?! 😒 Boring! Prepare my dolphins 🥹 !
+            <br> I am full of spirit today. Move me to the pool.
+          </button>
+          <h6>
+            type: {{ bell.type }} | {{ bell.event_name }}
+          </h6>
         </div>
         <div v-else-if="bell.type === BellType.FOLLOWING">
           Your Majesty! A peasant named 
@@ -43,16 +55,16 @@
           <br> Says that a member of the royal family
           <br> from a neighboring kingdom.
           <br> Also says there is not enough snow in their market.
-          <br> <button title="Accept" @click="acceptFollowRequest(bell)">
-            Outrageous! Open the gate!
+          <br> <button title="Accept Following Request" @click="acceptFollowRequest(bell)">
+            😳 Outrageous! Open the gate!
             <br> A matter of extreme importance!
             <br> So my majesty should
-            <br> powder his nose first...
+            <br> powder the nose first...
           </button>
-          <button title="Reject" @click="rejectFollowRequest(bell)">
+          <button title="Reject Following Request" @click="rejectFollowRequest(bell)">
             Terrible! Can't you see I'm eating!
             <br> In shock, I spilled the spirit on my pants.
-            <br> Bring me the head of this poor peasant.
+            <br> Bring me the head 😌 of this poor peasant.
             <br> I want to look into those dishonest eyes.
           </button>
           <h6>
@@ -60,15 +72,67 @@
           </h6>
         </div>
         <div v-else-if="bell.type === BellType.INVITATION">
-          type: {{ bell.type }} | {{ bell.group_name }}
-          <br> <button @click="openGroup(bell)">Open Group</button>
-          <br> <button @click="acceptInvitation(bell)">Accept</button>
-          <button @click="rejectInvitation(bell)">Reject</button>
+          Ambassador of an international organization called
+          <br> " {{ bell.group_name }} "
+          <br> respectfully invites Your Majesty to join the Board of Governors.
+          <br> Says their market trades more snow than Your Majesty's market.
+          <br> Says can prove 😏.
+          <br> <button title="Visit" @click="openGroup(bell)">
+            🤯 Outrageous!!! More snow than in my market!
+            <br> Alert my personal leprechaun squad, mobile amusement park
+            <br> with blackjack and ... and a swimming pool with trained dolphins 🧐 !
+            <br> We are moving out now ! Open the gate !
+          </button>
+          <br> <button title="Accept Invitation" @click="acceptInvitation(bell)">
+            🤔 can prove ... 😳!
+            <br> Execute a royal decree 😤 !
+            <br> Prepare a banquet hall and
+            <br> a trained dolphin 🧐 with soy sauce.
+            <br> Bring me this gorgeous person 🥹 !
+            <br> This could be a matter of extreme importance 😤 !
+            <br> Also make today the annual official holiday of snow 🥹 !
+            <br> It's not every day you meet a person
+            <br> who can prove 🥹 for free.
+          </button>
+          <button title="Reject Invitation" @click="rejectInvitation(bell)">
+            😠 Don't you see how I'm suffering 🥺 ?
+            <br> They said I should stop my spirit diet to boost my spirit.
+            <br> But it sounds stupid and works stupidly.
+            <br> I know how the universe works.
+            <br> More spirit equals more spirit. It is obvious! I'll prove! 
+            <br> Why should I suffer alone 🥺 ? Execute a royal decree 😤 !
+            <br> Stop the spirit diet of my trained dolphins!
+            <br> Attach a laser blaster to the head of each dolphin and
+            <br> teleport them to the headquarters of this organization!
+          </button>
+          <h6>
+            type: {{ bell.type }} | {{ bell.group_name }}
+            <br>from: {{ bell.first_name }} {{ bell.last_name }} ({{ bell.email }})
+          </h6>
         </div>
         <div v-else-if="bell.type === BellType.REQUEST">
-          type: {{ bell.type }} | {{ bell.group_name }}
-          <button @click="allowJoinRequest(bell)">Accept</button>
-          <button @click="rejectJoinRequest(bell)">Reject</button>
+          Your Majesty! The spy 🕵️ is caught outside the castle walls!
+          <br> Says that he brought, in a bag, snow
+          <br> from a neighboring kingdom, for research by your scientists.
+          <br> Also says that wants to join 🤩 the organization
+          <br> " {{ bell.group_name }} "
+          <br> created by Your Majesty.
+          <button title="Accept Request" @click="allowJoinRequest(bell)">
+            Perfect! The Kingdom needs environmentalists!
+            <br> Appointing him as a florist 🧐 in my poppy fields.
+            <br> Fine and red 🥴 is not bad. And now it's lunch time!
+            <br> But first 😏 My Majesty will powder his nose!
+          </button>
+          <button title="Reject Request" @click="rejectJoinRequest(bell)">
+            My Majesty 🧐 grants him freedom!
+            <br> 😳 Bring me all his snow!
+            <br> Pour the scientists 🥴 10%!
+            <br> The rest I'll research 😤 personally!
+          </button>
+          <h6>
+            type: {{ bell.type }} | {{ bell.group_name }}
+            <br> from: {{ bell.first_name }} {{ bell.last_name }} ({{ bell.email }})
+          </h6>
         </div>
       </li>
     </ul>

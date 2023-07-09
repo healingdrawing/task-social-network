@@ -55,9 +55,9 @@ type WS_INVITE_RESPONSE_DTO struct {
 	Group_name         string    `json:"group_name"`
 	Group_description  string    `json:"group_description"`
 	Created_at         time.Time `json:"created_at"`
-	Inviter_email      string    `json:"inviter_email"`
-	Inviter_first_name string    `json:"inviter_first_name"`
-	Inviter_last_name  string    `json:"inviter_last_name"`
+	Inviter_email      string    `json:"email"`
+	Inviter_first_name string    `json:"first_name"`
+	Inviter_last_name  string    `json:"last_name"`
 }
 type WS_GROUP_INVITES_LIST_DTO []WS_INVITE_RESPONSE_DTO
 
