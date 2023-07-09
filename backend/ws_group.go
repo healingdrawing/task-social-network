@@ -157,8 +157,12 @@ func wsGroupSubmitHandler(conn *websocket.Conn, messageData map[string]interface
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupMember query failed"})
 		return
 	}
+
 	// send response
 	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " group created"})
+
+	// send the list of all groups where user is a member, for GroupsView.vue
+	wsGroupsListHandler(conn, messageData)
 
 }
 

@@ -10,15 +10,17 @@
       <br>
       <label>
         Group description:
-        <textarea v-model="description"></textarea>
+        <textarea v-model="description" required></textarea>
       </label>
-      <br>
-      <label>
-        Invite users:
-        <select multiple v-model="selectedFollowers">
-        <option v-for="follower in followersList" :key="follower.email" :value="follower.email">{{ follower.first_name }} {{ follower.last_name }} ({{ follower.email }})</option>
-      </select>
-      </label>
+      <div v-if="followersList && followersList.length > 0">
+        <br>
+        <label>
+          Invite followers:
+          <select multiple v-model="selectedFollowers">
+          <option v-for="follower in followersList" :key="follower.email" :value="follower.email">{{ follower.first_name }} {{ follower.last_name }} ({{ follower.email }})</option>
+        </select>
+        </label>
+      </div>
       <br>
       <button type="submit">Create Group</button>
     </form>

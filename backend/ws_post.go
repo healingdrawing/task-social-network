@@ -141,29 +141,10 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 		}
 	}
 
-	rows, err := statements["getPostsAbleToSee"].Query(user_id, user_id, user_id)
-	if err != nil {
-		log.Println("getPostsAbleToSee query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getPostsAbleToSee query failed"})
-		return
-	}
-	defer rows.Close()
+	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " post created"})
 
-	var postsList WS_POSTS_LIST_DTO
-	for rows.Next() {
-		var post WS_POST_RESPONSE_DTO
-		pictureBytes := []byte{}
-		err = rows.Scan(&post.Id, &post.Title, &post.Content, &post.Categories, &pictureBytes, &post.Privacy, &post.Created_at, &post.Email, &post.First_name, &post.Last_name)
-		if err != nil {
-			log.Println("post scan failed", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " post scan failed"})
-			return
-		}
-		post.Picture = base64.StdEncoding.EncodeToString(pictureBytes)
-		postsList = append(postsList, post)
-	}
-
-	wsSendPostsList(postsList)
+	// return all posts, which user can see
+	wsPostsListHandler(conn, messageData)
 }
 
 func wsPostsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
