@@ -28,20 +28,18 @@
     <!-- SECTION 2 - groups list -->
     <h2><router-link :to="{ name: 'groupsAll' }">Browse All Groups</router-link></h2>
     <h2>Groups list with membership:</h2>
-    <ul>
-      <li v-for="group in groupsList" :key="group.id">
-        <hr>
-        <router-link :to="{ name: 'group' }" @click="piniaManageDataGroup(group)">
-          group id: {{ group.id }}
-          <br> group name: {{ group.name }}
-          <br> group description: {{ group.description }}
-          <br> group created: {{ group.created_at }}
-        </router-link>
-        <router-link :to="{ name: 'target' }" @click="piniaManageDataProfile(group.email)">
-          <br> group creator: {{ group.first_name }} {{ group.last_name }} ({{ group.email }})
-        </router-link>
-      </li>
-    </ul>
+    <div v-for="group in groupsList" :key="group.id">
+      <hr>
+      <router-link :to="{ name: 'group' }" @click="piniaManageDataGroup(group)">
+        group id: {{ group.id }}
+        <br> group name: {{ group.name }}
+        <br> group description: {{ group.description }}
+        <br> group created: {{ group.created_at }}
+      </router-link>
+      <router-link :to="{ name: 'target' }" @click="piniaManageDataProfile(group.email)">
+        <br> group creator: {{ group.first_name }} {{ group.last_name }} ({{ group.email }})
+      </router-link>
+    </div>
   </div>
 </template>
 

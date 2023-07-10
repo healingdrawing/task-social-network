@@ -130,6 +130,8 @@ func reader(conn *websocket.Conn, uuid string) {
 				wsGroupSubmitHandler(conn, data.Data)
 			case string(WS_GROUPS_LIST):
 				wsGroupsListHandler(conn, data.Data)
+			case string(WS_GROUPS_ALL_LIST):
+				wsGroupsAllListHandler(conn, data.Data)
 
 			case string(WS_POST_SUBMIT):
 				wsPostSubmitHandler(conn, data.Data)

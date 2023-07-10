@@ -216,7 +216,7 @@ export const useWebSocketStore = defineStore({
       return [...groups]
     },
 
-    /**all the groups to discover*/
+    /**all the groups to discover. The type is same as above, but request type is GROUPS_ALL_LIST */
     groupsAllList(): Group[] {
       const groups_messages_list = this.messages.filter((message) => message.type === WSMessageType.GROUPS_LIST && message.data !== null);
       const groups = groups_messages_list.map((message) =>

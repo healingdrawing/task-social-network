@@ -225,7 +225,7 @@ func wsGroupsAllListHandler(conn *websocket.Conn, messageData map[string]interfa
 	var groups WS_GROUPS_LIST_DTO
 	for rows.Next() {
 		var group WS_GROUP_RESPONSE_DTO
-		err = rows.Scan(&group.Id, &group.Name, &group.Description, &group.Created_at)
+		err = rows.Scan(&group.Id, &group.Name, &group.Description, &group.Created_at, &group.Email, &group.First_name, &group.Last_name)
 		if err != nil {
 			log.Println("getAllGroups query failed to scan", err.Error())
 			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getAllGroups query failed to scan row"})
