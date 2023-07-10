@@ -332,7 +332,7 @@ func wsGroupRequestsListHandler(conn *websocket.Conn, messageData map[string]int
 	wsSendGroupRequestsList(requests_list)
 }
 
-// groupInvitesSubmitHandler makes the users join the group_invited_users table
+// wsGroupInvitesSubmitHandler send invites to the group for emails(users) space separated
 //
 // @params: group_id, invited_emails
 func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]interface{}) {
@@ -367,7 +367,7 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 	}
 	//remove all not single spaces and trailing spaces
 	invited_emails = strings.Join(strings.Fields(invited_emails), " ")
-	//check it is not empty
+	//check the string is enough long, at least "a@" or "a b"(should not happens, cause filtered by frontend html tag built-in checker for email)
 	if len(invited_emails) < 2 {
 		log.Println("no invited_emails in messageData")
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " no invited_emails in messageData"})

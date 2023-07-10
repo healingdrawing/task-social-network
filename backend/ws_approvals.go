@@ -372,9 +372,11 @@ func wsGroupInviteAcceptHandler(conn *websocket.Conn, messageData map[string]int
 		return
 	}
 	var invited_user_id int
+	var gapint int
+	var gapstring string
 	invited_user_ids := map[int]int{}
 	for rows.Next() {
-		err = rows.Scan(&invited_user_id)
+		err = rows.Scan(&invited_user_id, &gapint, &gapint, &gapstring)
 		if err != nil {
 			log.Println("failed to scan invited users", err.Error())
 			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to scan invited users"})

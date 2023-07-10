@@ -154,6 +154,13 @@ export interface GroupSubmit {
   invited_emails: string;// space separated, to send invites in group creation process
 }
 
+// To send group invitations by group member to followers
+export interface GroupInvitesSubmit {
+  user_uuid: string;
+  group_id: number;
+  invited_emails: string;// space separated, to send invites in group creation process
+}
+
 export interface GroupsListRequest {
   user_uuid: string;
 }
