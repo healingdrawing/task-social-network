@@ -99,15 +99,25 @@ import { useUUIDStore } from '@/store/pinia';
 import { useProfileStore } from '@/store/profile';
 import { useGroupStore } from '@/store/group';
 import { useChatStore } from '@/store/chat';
-import { VisitorStatus } from '@/api/types';
+import { GroupVisitorStatusRequest, VisitorStatus, WSMessageType } from '@/api/types';
 const wss = useWebSocketStore();
 const UUIDStore = useUUIDStore();
 const profileStore = useProfileStore();
 const groupStore = useGroupStore();
 const chatStore = useChatStore();
 
-
 const group_visitor = computed(() => wss.groupVisitor)
+function updateGroupVisitor() {
+  wss.sendMessage({
+    type: WSMessageType.USER_GROUP_VISITOR_STATUS,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      group_id: groupStore.getGroupId,
+    } as GroupVisitorStatusRequest,
+  })
+}
+
+
 
 //dummy code
 
@@ -145,7 +155,15 @@ const going_no = (event: Event, value: string) => {
 };
 
 //todo: implement joinGroup() function
-const joinGroup = () => { console.log('join group') }
+const joinGroup = () => {
+  wss.sendMessage({
+    type: WSMessageType.GROUP_REQUEST_SUBMIT,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      group_id: groupStore.getGroupId,
+    } as GroupVisitorStatusRequest, // the fields are same , so reuse it
+  })
+}
 
 // open ChatView.vue
 const groupChat = () => { router.push({ name: 'chat' }) }
@@ -157,6 +175,10 @@ const groupInvite = () => { router.push({ name: 'groupInvite' }) }
 const groupPosts = () => { router.push({ name: 'posts' }) }
 
 onMounted(() => {
+
+  updateGroupVisitor();
+
+  //dummy code
   group.value.title = 'Dummy Group Title'; //todo: replace with actual group title
   group.value.description = 'Dummy Group Description'; //todo: replace with actual group description
 

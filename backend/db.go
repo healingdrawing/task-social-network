@@ -145,7 +145,7 @@ func statementsCreation() {
 		"getAllGroups": `SELECT groups.id, name, description, created_at, email, first_name, last_name FROM groups INNER JOIN users ON users.id = creator_id ORDER BY created_at DESC;`,
 		"getGroups":    `SELECT groups.id, name, description, created_at, email, first_name, last_name FROM groups INNER JOIN users ON users.id = creator_id INNER JOIN group_members ON group_id = groups.id WHERE member_id = ? ORDER BY created_at DESC;`,
 
-		"getCreatorAllGroupsPendings": `SELECT group_pending_members.group_id, group_pending_members.member_id, groups.name, groups.description, users.email, users.first_name, users.last_name FROM groups JOIN group_pending_members ON group_pending_members.group_id = groups.id JOIN users ON group_pending_members.member_id = users.id WHERE groups.creator_id = ?`,
+		"getCreatorAllGroupsPendings": `SELECT group_pending_members.group_id, group_pending_members.member_id, groups.name, groups.description, users.email, users.first_name, users.last_name FROM groups INNER JOIN group_pending_members ON group_pending_members.group_id = groups.id INNER JOIN users ON group_pending_members.member_id = users.id WHERE groups.creator_id = ?`,
 
 		"addGroupMember":  `INSERT INTO group_members (group_id, member_id) VALUES (?, ?);`,
 		"getGroupMembers": `SELECT member_id FROM group_members WHERE group_id = ?;`,

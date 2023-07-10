@@ -83,7 +83,7 @@ export const useWebSocketStore = defineStore({
         case WSMessageType.FOLLOW_REQUEST_REJECT:
         case WSMessageType.FOLLOW_REQUESTS_LIST:
           console.log('case clearMessages==============================', message.type);
-          this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUEST_RESPONSE);
+          // this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUEST_RESPONSE);
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.FOLLOW_REQUESTS_LIST);
           break;
 
@@ -92,6 +92,13 @@ export const useWebSocketStore = defineStore({
         case WSMessageType.GROUP_INVITES_LIST:
           console.log('case clearMessages==============================', message.type);
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.GROUP_INVITES_LIST);
+          break;
+
+        case WSMessageType.GROUP_REQUEST_ACCEPT:
+        case WSMessageType.GROUP_REQUEST_REJECT:
+        case WSMessageType.GROUP_REQUESTS_LIST:
+          console.log('case clearMessages==============================', message.type);
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.GROUP_REQUESTS_LIST);
           break;
 
         case WSMessageType.POST_SUBMIT:
@@ -267,15 +274,30 @@ export const useWebSocketStore = defineStore({
       return group_invites
     },
 
+    groupRequestsList(): Bell[] {
+      const group_requests_messages_list = this.messages.filter((message) => message.type === WSMessageType.GROUP_REQUESTS_LIST && message.data !== null)
+      const group_requests = group_requests_messages_list.map((message) =>
+        (message.data as Bell[]).map((bell) => bell)
+      ).flat()
+
+      // prepare for display, fill the empty fields
+      group_requests.forEach((bell) => {
+        bell.type = BellType.REQUEST
+      })
+
+      console.log('pinia \n group_requests========== ', group_requests.length,
+        '\n group_requests_messages_list========== ', group_requests_messages_list.length);
+      return group_requests
+    },
+
     bellsList(): Bell[] {
       //TODO: add other bells x4 summary
-      return [...this.followRequestsList, ...this.groupInvitesList]
+      return [...this.followRequestsList, ...this.groupInvitesList, ...this.groupRequestsList]
     },
 
     chatUsersList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.CHAT_USERS_LIST) },
     groupPostsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_POSTS_LIST) },
     groupPostCommentsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_POST_COMMENTS_LIST) },
-    groupRequestsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_REQUESTS_LIST) },
     groupEventsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_EVENTS_LIST) },
     groupEventParticipantsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_EVENT_PARTICIPANTS_LIST) },
 

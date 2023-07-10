@@ -185,9 +185,21 @@ export interface UserForList {
   last_name: string;
 }
 
+export interface GroupVisitorStatusRequest {
+  user_uuid: string;
+  group_id: number;
+}
+
 /**used for two cases visitor() and groupVisitor() */
 export interface UserVisitorStatus {
   status: VisitorStatus;
+}
+
+// used for two cases Accept and Reject
+export interface GroupRequestActionSubmit {
+  user_uuid: string;
+  group_id: number;
+  requester_email: string;
 }
 
 export enum BellType {

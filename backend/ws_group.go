@@ -41,7 +41,7 @@ type WS_GROUP_CHECK_DTO struct {
 type WS_GROUP_REQUEST_RESPONSE_DTO struct {
 	Group_id    int    `json:"group_id"`  // accept or reject in frontend
 	Member_id   int    `json:"member_id"` // accept or reject in frontend
-	Name        string `json:"name"`
+	Group_name  string `json:"group_name"`
 	Description string `json:"description"`
 	Email       string `json:"email"`
 	First_name  string `json:"first_name"`
@@ -50,7 +50,7 @@ type WS_GROUP_REQUEST_RESPONSE_DTO struct {
 
 type WS_GROUP_REQUESTS_LIST_DTO []WS_GROUP_REQUEST_RESPONSE_DTO
 
-type WS_INVITE_RESPONSE_DTO struct {
+type WS_GROUP_INVITE_RESPONSE_DTO struct {
 	Group_id           int       `json:"group_id"`
 	Group_name         string    `json:"group_name"`
 	Group_description  string    `json:"group_description"`
@@ -59,7 +59,7 @@ type WS_INVITE_RESPONSE_DTO struct {
 	Inviter_first_name string    `json:"first_name"`
 	Inviter_last_name  string    `json:"last_name"`
 }
-type WS_GROUP_INVITES_LIST_DTO []WS_INVITE_RESPONSE_DTO
+type WS_GROUP_INVITES_LIST_DTO []WS_GROUP_INVITE_RESPONSE_DTO
 
 //old refactored types bottom
 
@@ -271,7 +271,11 @@ func wsGroupRequestSubmitHandler(conn *websocket.Conn, messageData map[string]in
 		return
 	}
 
+	//todo: perhaps remove later, at the moment not used
 	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " group joining request sent to group creator, waiting for approval"})
+
+	// send back the updated visitor status
+	wsUserGroupVisitorStatusHandler(conn, messageData)
 	return
 
 }
@@ -311,7 +315,7 @@ func wsGroupRequestsListHandler(conn *websocket.Conn, messageData map[string]int
 		err = rows.Scan(
 			&request.Group_id,
 			&request.Member_id,
-			&request.Name,
+			&request.Group_name,
 			&request.Description,
 			&request.Email,
 			&request.First_name,
@@ -516,8 +520,9 @@ func wsGroupInvitesListHandler(conn *websocket.Conn, messageData map[string]inte
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getUserInvites query failed"})
 		return
 	}
+	defer rows.Close()
 	for rows.Next() {
-		var invite WS_INVITE_RESPONSE_DTO
+		var invite WS_GROUP_INVITE_RESPONSE_DTO
 		err = rows.Scan(
 			&invite.Group_id,
 			&invite.Group_name,

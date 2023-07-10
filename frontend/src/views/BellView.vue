@@ -45,7 +45,9 @@
             <br> I am full of spirit today. Move me to the pool.
           </button>
           <h6>
-            type: {{ bell.type }} | {{ bell.event_name }}
+            type: {{ bell.type }} notification
+            <br> name: {{ bell.event_name }}
+            <br> group: {{ bell.group_name }}
           </h6>
         </div>
         <div v-else-if="bell.type === BellType.FOLLOWING">
@@ -68,7 +70,8 @@
             <br> I want to look into those dishonest eyes.
           </button>
           <h6>
-            type: {{ bell.type }} | {{ bell.first_name }} {{ bell.last_name }} ({{ bell.email }})
+            type: {{ bell.type }} request
+            <br> from: {{ bell.first_name }} {{ bell.last_name }} ({{ bell.email }})
           </h6>
         </div>
         <div v-else-if="bell.type === BellType.INVITATION">
@@ -106,8 +109,9 @@
             <br> teleport them to the headquarters of this organization!
           </button>
           <h6>
-            type: {{ bell.type }} | {{ bell.group_name }}
-            <br>from: {{ bell.first_name }} {{ bell.last_name }} ({{ bell.email }})
+            type: {{ bell.type }} to join
+            <br> group: " {{ bell.group_name }} "
+            <br> from: {{ bell.first_name }} {{ bell.last_name }} ({{ bell.email }})
           </h6>
         </div>
         <div v-else-if="bell.type === BellType.REQUEST">
@@ -117,11 +121,11 @@
           <br> Also says that wants to join 🤩 the organization
           <br> " {{ bell.group_name }} "
           <br> created by Your Majesty.
-          <button title="Accept Request" @click="allowJoinRequest(bell)">
+          <br> <button title="Accept Request" @click="acceptJoinRequest(bell)">
             Perfect! The Kingdom needs environmentalists!
             <br> Appointing him as a florist 🧐 in my poppy fields.
             <br> Fine and red 🥴 is not bad. And now it's lunch time!
-            <br> But first 😏 My Majesty will powder his nose!
+            <br> But first 😏 My Majesty will powder the nose!
           </button>
           <button title="Reject Request" @click="rejectJoinRequest(bell)">
             My Majesty 🧐 grants him freedom!
@@ -130,7 +134,8 @@
             <br> The rest I'll research 😤 personally!
           </button>
           <h6>
-            type: {{ bell.type }} | {{ bell.group_name }}
+            type: {{ bell.type }} to join
+            <br> group: " {{ bell.group_name }} "
             <br> from: {{ bell.first_name }} {{ bell.last_name }} ({{ bell.email }})
           </h6>
         </div>
@@ -141,14 +146,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeMount, onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useWebSocketStore } from '@/store/websocket';
 import router from '@/router';
 import { useGroupStore } from '@/store/group';
-import { BellType, Bell, TargetProfileRequest, WSMessageType, WSMessage } from '@/api/types';
+import { BellType, Bell, TargetProfileRequest, WSMessageType, GroupRequestActionSubmit, GroupVisitorStatusRequest } from '@/api/types';
 import { useUUIDStore } from '@/store/uuid';
 import { useProfileStore } from '@/store/profile';
-import { mapGetters } from 'pinia';
 
 const wss = useWebSocketStore()
 const bells = computed(() => wss.bellsList);
@@ -187,19 +191,51 @@ function rejectFollowRequest(bell: Bell) {
 }
 
 function acceptInvitation(bell: Bell) {
-  // code to accept invitation
+  wss.sendMessage({
+    type: WSMessageType.GROUP_INVITE_ACCEPT,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      group_id: bell.group_id,
+      requester_email: bell.email,
+    } as GroupVisitorStatusRequest,
+  })
+  updateBells();
 }
 
 function rejectInvitation(bell: Bell) {
-  //gap
+  wss.sendMessage({
+    type: WSMessageType.GROUP_INVITE_REJECT,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      group_id: bell.group_id,
+      requester_email: bell.email,
+    } as GroupVisitorStatusRequest,
+  })
+  updateBells();
 }
 
-function allowJoinRequest(bell: Bell) {
-  // code to allow join request
+function acceptJoinRequest(bell: Bell) {
+  wss.sendMessage({
+    type: WSMessageType.GROUP_REQUEST_ACCEPT,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      group_id: bell.group_id,
+      requester_email: bell.email,
+    } as GroupRequestActionSubmit,
+  })
+  updateBells();
 }
 
 function rejectJoinRequest(bell: Bell) {
-  //gap
+  wss.sendMessage({
+    type: WSMessageType.GROUP_REQUEST_REJECT,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      group_id: bell.group_id,
+      requester_email: bell.email,
+    } as GroupRequestActionSubmit,
+  })
+  updateBells();
 }
 
 const UUIDStore = useUUIDStore();

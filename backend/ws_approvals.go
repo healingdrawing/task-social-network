@@ -99,7 +99,6 @@ func wsGroupRequestAcceptHandler(conn *websocket.Conn, messageData map[string]in
 	}
 
 	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Success: you approved the group membership"})
-
 }
 
 // wsGroupRequestRejectHandler is the handler for rejecting a group request
@@ -177,13 +176,12 @@ func wsGroupRequestRejectHandler(conn *websocket.Conn, messageData map[string]in
 	}
 
 	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Success: you rejected the group membership"})
-
 }
 
-// wsApproveFollowerHandler is the handler for approving a follower request
+// wsAcceptFollowerHandler is the handler for approving a follower request
 //
 // @rparam {email string}
-func wsApproveFollowerHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+func wsAcceptFollowerHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
 
 	uuid, ok := messageData["user_uuid"].(string)
@@ -259,7 +257,6 @@ func wsApproveFollowerHandler(conn *websocket.Conn, messageData map[string]inter
 		return
 	}
 	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Success: you approved the follow request"})
-	return
 }
 
 // wsRejectFollowerHandler is the handler for rejecting a follower request
@@ -334,7 +331,6 @@ func wsRejectFollowerHandler(conn *websocket.Conn, messageData map[string]interf
 	}
 
 	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Success: you rejected the follow request"})
-	return
 }
 
 // wsGroupInviteAcceptHandler is the handler for accepting a group invite
@@ -342,6 +338,8 @@ func wsRejectFollowerHandler(conn *websocket.Conn, messageData map[string]interf
 // @r.param {group_id int}
 func wsGroupInviteAcceptHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
+
+	log.Println("=== wsGroupInviteAcceptHandler")
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
@@ -408,7 +406,6 @@ func wsGroupInviteAcceptHandler(conn *websocket.Conn, messageData map[string]int
 	}
 
 	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Success: you accepted the group invite"})
-
 }
 
 // wsGroupInviteRejectHandler is the handler for rejecting a group invite
@@ -416,6 +413,8 @@ func wsGroupInviteAcceptHandler(conn *websocket.Conn, messageData map[string]int
 // @param {group_id int}
 func wsGroupInviteRejectHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
+
+	log.Println("=== wsGroupInviteRejectHandler")
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
@@ -448,9 +447,11 @@ func wsGroupInviteRejectHandler(conn *websocket.Conn, messageData map[string]int
 		return
 	}
 	var invited_user_id int
+	var gapint int
+	var gapstring string
 	invited_user_ids := map[int]int{}
 	for rows.Next() {
-		err = rows.Scan(&invited_user_id)
+		err = rows.Scan(&invited_user_id, &gapint, &gapint, &gapstring)
 		if err != nil {
 			log.Println("failed to scan invited users", err.Error())
 			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to scan invited users"})
@@ -475,5 +476,4 @@ func wsGroupInviteRejectHandler(conn *websocket.Conn, messageData map[string]int
 	}
 
 	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Success: you rejected the group invite"})
-
 }
