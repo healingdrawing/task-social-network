@@ -54,10 +54,6 @@ function updateFollowersList() {
   })
 }
 
-
-
-// old code
-
 const groupStore = useGroupStore();
 const inviteUsers = () => {
   wss.sendMessage({
