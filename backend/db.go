@@ -182,7 +182,7 @@ func statementsCreation() {
 		"getEventParticipantStatus": `SELECT status FROM event_participants WHERE event_id = ? AND user_id = ? LIMIT 1;`,
 		"getUserIDwithEventCount":   `SELECT COUNT(*) FROM event_participants WHERE event_id = ? AND user_id = ?;`,
 
-		"getFollowers":                   `SELECT follower_id FROM followers WHERE user_id = ?;`,
+		"getFollowers":                   `SELECT follower_id FROM followers INNER JOIN users ON users.id = follower_id WHERE user_id = ? ORDER BY email ASC;`,
 		"getFollowersPending":            `SELECT follower_id FROM followers_pending WHERE user_id = ?;`,
 		"addFollower":                    `INSERT INTO followers (user_id, follower_id) VALUES (?, ?);`,
 		"addFollowerPending":             `INSERT INTO followers_pending (user_id, follower_id) VALUES (?, ?);`,
