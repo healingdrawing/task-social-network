@@ -36,50 +36,55 @@
   </pre>
 
   <div>
-    <h1>{{ group.title }}</h1>
-    <p>{{ group.description }}</p>
+    <h6 title="group id">{{ group.id }}</h6>
+    <h1 title="group name">{{ group.name }}</h1>
+    <p title="group description">{{ group.description }}</p>
+    <p title="group creator">
+      <router-link :to="{ name: 'target' }" @click="piniaManageDataProfile(group.email)">
+        {{ group.first_name }} {{ group.last_name }} ({{ group.email }})
+      </router-link>
+    </p>
     <div v-if="group_visitor">
       <div v-if="group_visitor.status === VisitorStatus.MEMBER">
-        <button @click="groupChat">Open Group Chat</button>
-        <button @click="groupInvite">Invite User</button>
-        <button @click="groupPosts">Group Posts</button>
+        <button @click= "groupChat"> Open Group Chat </button>
+        <button @click="groupInvite"> Invite User </button>
+        <button @click="groupPosts"> Group Posts </button>
         <div>
-          <h2>Create New Event</h2>
+          <h2>Create New Event </h2>
           <form @submit.prevent="createEvent">
-            <label for="title">Title:</label>
+            <label for="title"> Title: </label>
             <input type="text" id="title" v-model="event.title" required>
             <br>
-            <label for="datetime">Date and Time:</label>
+            <label for="datetime"> Date and Time: </label>
             <input type="datetime-local" id="datetime" v-model="event.datetime" required>
             <br>
-            <label for="description">Description:</label>
-            <textarea id="description" v-model="event.description"></textarea>
+            <label for="description"> Description: </label>
+            <textarea id="description" v-model="event.description" required> </textarea>
             <br>
-            <label>Going to Event:</label>
+            <label>Going to Event: </label>
             <input type="radio" id="going" value="1" v-model="event.going">
-            <label for="going">Yes</label>
+            <label for="going"> Yes </label>
             <input type="radio" id="not-going" value="0" v-model="event.going">
-            <label for="not-going">No</label>
+            <label for="not-going"> No </label>
             <br>
-            <button type="submit">Create Event</button>
+            <button type= "submit"> Create Event </button>
           </form>
         </div>
-        <div>
-          <h2>List of Group Events</h2>
-          <ul>
-            <li v-for="event in events" :key="event.id">
-              <h3>{{ event.title }}</h3>
-              <p>{{ event.datetime }}</p>
-              <p>{{ event.description }}</p>
-              <div>
-                <input type="radio" id="going-yes" name="going-{{ event.id }}" value="1" v-bind:checked="event.going === '1'" v-on:change="going_yes(event, '1')">
-                <label for="going-yes">Yes</label>
-                <input type="radio" id="going-no" name="going-{{ event.id }}" value="0" v-bind:checked="event.going === '0'" v-on:change="going_no(event, '0')">
-                <label for="going-no">No</label>
-              </div>
-            </li>
-          </ul>
-        </div>
+        <h2>List of Group Events </h2>
+        <ul>
+          <li v-for="event in events" :key="event.id">
+            <h3>{{
+              event.title }}</h3>
+            <p>{{ event.datetime }}</p>
+            <p>{{ event.description }}</p>
+            <div>
+              <input type="radio" id="going-yes" name="going-{{ event.id }}" value="1" v-bind:checked="event.going === '1'" v-on:change="going_yes(event, '1')">
+              <label for="going-yes">Yes</label>
+              <input type="radio" id="going-no" name="going-{{ event.id }}" value="0" v-bind:checked="event.going === '0'" v-on:change="going_no(event, '0')">
+              <label for="going-no">No</label>
+            </div>
+          </li>
+        </ul>
       </div>
       <div v-else-if="group_visitor.status === VisitorStatus.REQUESTER">
         <p>Request to join group is pending.</p>
@@ -112,19 +117,17 @@ function updateGroupVisitor() {
     type: WSMessageType.USER_GROUP_VISITOR_STATUS,
     data: {
       user_uuid: UUIDStore.getUUID,
-      group_id: groupStore.getGroupId,
+      group_id: groupStore.getGroup.id,
     } as GroupVisitorStatusRequest,
   })
 }
 
-
+const piniaManageDataProfile = (email: string) => {
+  profileStore.setTargetUserEmail(email);
+};
 
 //dummy code
 
-interface Group {
-  title: string;
-  description: string;
-}
 
 interface Event {
   id: number;
@@ -134,8 +137,7 @@ interface Event {
   going: string;
 }
 
-const group = ref<Group>({ title: '', description: '' });
-const isMember = ref(false);
+const group = computed(() => groupStore.getGroup)
 const event = ref<Event>({ id: 1, title: '', datetime: '', description: '', going: '1' });
 const events = ref<Event[]>([]);
 
@@ -169,24 +171,18 @@ const joinGroup = () => {
 const groupChat = () => { router.push({ name: 'chat' }) }
 
 // open GroupInviteView.vue
-const groupInvite = () => { router.push({ name: 'groupInvite' }) }
+const groupInvite = () => { router.push({ name: 'group_invite' }) }
 
-// open PostsView.vue . // todo: Group posts only. Filtered by group id on backend inside onMount() of PostsView.vue. The groupId is already set in groupStore in GroupsView.vue piniaManageData(), before visit that view
-const groupPosts = () => { router.push({ name: 'posts' }) }
+// open GroupPostsView.vue . // todo: saparated table for group posts used
+const groupPosts = () => { router.push({ name: 'group_posts' }) }
 
 onMounted(() => {
 
   updateGroupVisitor();
 
-  //dummy code
-  group.value.title = 'Dummy Group Title'; //todo: replace with actual group title
-  group.value.description = 'Dummy Group Description'; //todo: replace with actual group description
-
   //todo: get chat id for the group from backend using groupStore.getGroupId
   const chatId = 77; // replace with actual chat ID
   //then set it using pinia, to use it in ChatView.vue, to collect needed data from backend
   chatStore.setChatId(chatId);
-
-  isMember.value = true; //todo: replace with actual membership check
 });
 </script>

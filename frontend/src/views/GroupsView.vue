@@ -26,7 +26,7 @@
     </form>
 
     <!-- SECTION 2 - groups list -->
-    <h2><router-link :to="{ name: 'groupsAll' }">Browse All Groups</router-link></h2>
+    <h2><router-link :to="{ name: 'groups_all' }">Browse All Groups</router-link></h2>
     <h2>Groups list with membership:</h2>
     <div v-for="group in groupsList" :key="group.id">
       <hr>
@@ -103,7 +103,7 @@ const createGroup = () => {
 
 const groupStore = useGroupStore();
 const piniaManageDataGroup = (group: Group) => {
-  groupStore.setGroupId(group.id);
+  groupStore.setGroup(group);
 };
 
 const piniaManageDataProfile = (email: string) => {

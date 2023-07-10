@@ -38,14 +38,24 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import(/* webpackChunkName: "posts" */ '../views/PostsView.vue')
   },
   {
+    path: '/group_post',
+    name: 'group_post',
+    component: () => import(/* webpackChunkName: "group_post" */ '../views/GroupPostView.vue')
+  },
+  {
+    path: '/group_posts',
+    name: 'group_posts',
+    component: () => import(/* webpackChunkName: "group_posts" */ '../views/GroupPostsView.vue')
+  },
+  {
     path: '/group',
     name: 'group',
     component: () => import(/* webpackChunkName: "group" */ '../views/GroupView.vue')
   },
   {
-    path: '/groupInvite',
-    name: 'groupInvite',
-    component: () => import(/* webpackChunkName: "groupInvite" */ '../views/GroupInviteView.vue')
+    path: '/group_invite',
+    name: 'group_invite',
+    component: () => import(/* webpackChunkName: "group_invite" */ '../views/GroupInviteView.vue')
   },
   {
     path: '/groups',
@@ -53,9 +63,9 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import(/* webpackChunkName: "groups" */ '../views/GroupsView.vue')
   },
   {
-    path: '/groupsAll',
-    name: 'groupsAll',
-    component: () => import(/* webpackChunkName: "groupsAll" */ '../views/GroupsAllView.vue')
+    path: '/groups_all',
+    name: 'groups_all',
+    component: () => import(/* webpackChunkName: "groups_all" */ '../views/GroupsAllView.vue')
   },
   {
     path: '/chat',
