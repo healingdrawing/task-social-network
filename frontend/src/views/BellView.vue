@@ -150,7 +150,7 @@ import { computed, onMounted } from 'vue';
 import { useWebSocketStore } from '@/store/websocket';
 import router from '@/router';
 import { useGroupStore } from '@/store/group';
-import { BellType, Bell, TargetProfileRequest, WSMessageType, GroupRequestActionSubmit, GroupVisitorStatusRequest } from '@/api/types';
+import { BellType, Bell, TargetProfileRequest, WSMessageType, GroupRequestActionSubmit, GroupVisitorStatusRequest, Group } from '@/api/types';
 import { useUUIDStore } from '@/store/uuid';
 import { useProfileStore } from '@/store/profile';
 
@@ -160,7 +160,12 @@ const bells = computed(() => wss.bellsList);
 const groupStore = useGroupStore();
 function openGroup(bell: Bell) {
   // code to open group
-  groupStore.setGroupId(bell.group_id);
+  const group = {
+    id: bell.group_id,
+    name: bell.group_name,
+    description: bell.group_description,
+  } as Group
+  groupStore.setGroup(group);
   router.push({ name: 'group' });
 }
 
@@ -263,7 +268,7 @@ function updateBells() {
       target_email: profileStore.getTargetUserEmail,
     } as TargetProfileRequest,
   })
-
+  //todo: implement events too
 }
 
 onMounted(() => {

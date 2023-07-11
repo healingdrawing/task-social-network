@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useWebSocketStore } from '@/store/pinia';
 import { useUUIDStore } from '@/store/pinia';
 import { useProfileStore } from '@/store/pinia';
@@ -52,7 +52,7 @@ function updateGroupsList() {
 
 const groupStore = useGroupStore();
 function piniaManageDataGroup(group: Group) {
-  groupStore.setGroupId(group.id)
+  groupStore.setGroup(group)
 }
 
 const piniaManageDataProfile = (email: string) => {

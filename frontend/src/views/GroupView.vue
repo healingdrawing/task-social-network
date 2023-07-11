@@ -1,7 +1,5 @@
 <template>
   user id transfered using pinia: {{ profileStore.getUserId }}
-  <br>
-  group id transfered using pinia: {{ groupStore.getGroupId }}
   <!-- todo: implement view "GroupView.vue" -->
   <pre style="text-align: left;">
     one group view gap.
@@ -37,13 +35,22 @@
 
   <div>
     <h6 title="group id">{{ group.id }}</h6>
-    <h1 title="group name">{{ group.name }}</h1>
+    <h1 title="group name/title">{{ group.name }}</h1>
     <p title="group description">{{ group.description }}</p>
-    <p title="group creator">
+    <!--
+      link to group creator link is not required and not implemented,
+      because it is headache when jump into group from invite,
+      because you need provide giant pile of rare needed info into <Bell>.
+      Also sql must be refactored, only for this not required case. So, no.
+      Commened to keep the same style for all cases of visiting group.
+      With other cases, visiting group not from invite,
+      the uncommented code section bottom works correct, because filled naturally.
+    -->
+    <!-- <p v-if="group." title="group creator">
       <router-link :to="{ name: 'target' }" @click="piniaManageDataProfile(group.email)">
         {{ group.first_name }} {{ group.last_name }} ({{ group.email }})
       </router-link>
-    </p>
+    </p> -->
     <div v-if="group_visitor">
       <div v-if="group_visitor.status === VisitorStatus.MEMBER">
         <button @click= "groupChat"> Open Group Chat </button>
@@ -122,6 +129,7 @@ function updateGroupVisitor() {
   })
 }
 
+//todo: artefact to provide commented functionality in template
 const piniaManageDataProfile = (email: string) => {
   profileStore.setTargetUserEmail(email);
 };
@@ -156,13 +164,12 @@ const going_no = (event: Event, value: string) => {
   event.going = value;
 };
 
-//todo: implement joinGroup() function
 const joinGroup = () => {
   wss.sendMessage({
     type: WSMessageType.GROUP_REQUEST_SUBMIT,
     data: {
       user_uuid: UUIDStore.getUUID,
-      group_id: groupStore.getGroupId,
+      group_id: groupStore.getGroup.id,
     } as GroupVisitorStatusRequest, // the fields are same , so reuse it
   })
 }

@@ -226,6 +226,9 @@ export interface Bell {
 
   group_id: number; // invitation to group , and request to join group, and event
   group_name: string; // invitation to group , and request to join group , and event
+  //todo: to fill the groupStore before routing to group page
+  group_description: string;
+  // todo: to fill the groupStore before routing to group page
 
   event_id: number; // event
   event_name: string; // event

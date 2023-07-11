@@ -60,7 +60,7 @@ const inviteUsers = () => {
     type: WSMessageType.GROUP_INVITES_SUBMIT,
     data: {
       user_uuid: UUIDStore.getUUID,
-      group_id: groupStore.getGroupId,
+      group_id: groupStore.getGroup.id,
       invited_emails: selectedFollowers.value.join(' '),
     } as GroupInvitesSubmit,
   });
