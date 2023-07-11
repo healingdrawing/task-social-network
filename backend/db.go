@@ -168,7 +168,10 @@ func statementsCreation() {
 
 		"addGroupPost":           `INSERT INTO group_post (user_id, title, categories, content, picture, created_at) VALUES (?, ?, ?, ?, ?, ?);`,
 		"addGroupPostMembership": `INSERT INTO group_post_membership (group_id, group_post_id) VALUES (?, ?);`,
-		"getGroupPosts":          `SELECT group_post.id, title, content, categories, first_name, last_name, email, created_at, picture FROM group_post JOIN group_post_membership ON group_post.id = group_post_membership.group_post_id JOIN users ON group_post.user_id = users.id ORDER BY created_at DESC;`,
+
+		"getGroupPosts": `SELECT groups.id, groups.name, groups.description, group_post.id, title, content, categories, picture, group_post.created_at, email, first_name, last_name FROM group_post INNER JOIN group_post_membership ON group_post.id = group_post_membership.group_post_id INNER JOIN groups ON groups.id = group_post_membership.group_id INNER JOIN users ON group_post.user_id = users.id WHERE group_post_membership.group_id = ? ORDER BY group_post.created_at DESC;`,
+
+		"getUserAllGroupPosts": `SELECT groups.id, groups.name, groups.description, group_post.id, title, content, categories, picture, group_post.created_at, email, first_name, last_name FROM group_post INNER JOIN group_post_membership ON group_post.id = group_post_membership.group_post_id INNER JOIN groups ON groups.id = group_post_membership.group_id INNER JOIN users ON group_post.user_id = users.id WHERE group_post.user_id = ? ORDER BY group_post.created_at DESC;`,
 
 		"addGroupComment":  `INSERT INTO group_comment (user_id, group_post_id, content, picture, created_at) VALUES (?, ?, ?, ?, ?);`,
 		"getGroupComments": `SELECT email, first_name, last_name, content, picture, created_at FROM group_comment INNER JOIN users ON users.id = user_id WHERE group_post_id = ? ORDER BY group_comment.id DESC;`,

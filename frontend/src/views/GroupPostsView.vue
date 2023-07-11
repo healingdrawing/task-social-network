@@ -1,10 +1,11 @@
 <template>
   <div>
-    <h1>Create Post:</h1>
+    <router-link to="/group">Back to Group</router-link>
+    <h1>Create Group Post:</h1>
 
     <div><hr><button type="button" @click="crap" title="remove in production">Fill Debug / remove later</button><hr></div> <!-- todo: remove later -->
 
-    <form @submit.prevent="addPost">
+    <form @submit.prevent="addGroupPost">
       <label for="postTitle">Post Title:</label>
       <input type="text" id="postTitle" v-model="postTitle" required>
       <br>
@@ -13,22 +14,6 @@
       <br>
       <label for="postContent">Post Content:</label>
       <textarea id="postContent" v-model="postContent" required></textarea>
-      
-      <br>
-      <label for="postPrivacy">Post Privacy:</label>
-      <br>
-      <input type="radio" id="public" name="postPrivacy" value="public" v-model="postPrivacy">
-      <label for="public">Public - for all users</label>
-      <br>
-      <input type="radio" id="private" name="postPrivacy" value="private" v-model="postPrivacy">
-      <label for="private">Private - for all followers</label>
-      <br>
-      <input type="radio" id="almost_private" name="postPrivacy" value="almost private" v-model="postPrivacy">
-      <label for="almost_private">Almost Private - for selected followers</label>
-      <br>
-      <select v-if="postPrivacy === 'almost private'" multiple v-model="selectedFollowers">
-        <option v-for="follower in followersList" :key="follower.email" :value="follower.email">{{ follower.first_name }} {{ follower.last_name }} ({{ follower.email }})</option>
-      </select>
       
       <div>
         <label for="picture">Picture:</label>
@@ -42,9 +27,9 @@
     <div v-if="pictureStore.pictureError">{{ pictureStore.pictureError }}</div>
   </div>
   <div>
-    <h2>Posts:</h2>
+    <h2>Group Posts:</h2>
     <!-- add posts list , already created -->
-    <div v-for="post in postsList"
+    <div v-for="post in group_posts_list"
       :key="post.id">
       <hr>
       <router-link
@@ -78,22 +63,21 @@
 <script lang="ts" setup>
 import { Ref, computed, onMounted, ref, watch } from 'vue';
 import { useUUIDStore } from '@/store/pinia';
+import { useWebSocketStore } from '@/store/websocket';
+import { useGroupStore } from '@/store/pinia';
 import { usePostStore } from '@/store/pinia';
 import { useProfileStore } from '@/store/pinia';
 import { usePictureStore } from '@/store/pinia';
-import { useWebSocketStore } from '@/store/websocket';
-import { WSMessage, WSMessageType, PostSubmit, Post, PostsListRequest, TargetProfileRequest } from '@/api/types';
+import { WSMessage, WSMessageType, Post, GroupPostSubmit, GroupPostsListRequest } from '@/api/types';
 import { onBeforeRouteLeave } from 'vue-router';
 
 const wss = useWebSocketStore();
-const postsList = computed(() => wss.postsList); // ref and reactive failed to work here, so computed used. Straight way put webSocketStore.postsList to template works too,
+const group_posts_list = computed(() => wss.groupPostsList); // ref and reactive failed to work here, so computed used. Straight way put webSocketStore.groupPostsList to template works too,
 
 
 const postTitle = ref('');
 const postTags = ref('');
 const postContent = ref('');
-const postPrivacy = ref('public');
-const selectedFollowers = ref<string[]>([]);
 const picture: Ref<Blob | null> = ref(null);
 
 const pictureStore = usePictureStore();
@@ -103,29 +87,26 @@ function handlePictureChange(event: Event) {
 }
 
 const UUIDStore = useUUIDStore();
-async function addPost() {
-  const postSubmit: PostSubmit = {
+const groupStore = useGroupStore();
+async function addGroupPost() {
+  const group_post_submit: GroupPostSubmit = {
     user_uuid: UUIDStore.getUUID,
-
+    group_id: groupStore.getGroup.id,
     title: postTitle.value,
     categories: postTags.value,
     content: postContent.value,
-    privacy: postPrivacy.value,
-    able_to_see: selectedFollowers.value.join(' '), //list of emails, separated by space
     picture: pictureStore.getPictureBase64String,
   };
 
   const message: WSMessage = {
-    type: WSMessageType.POST_SUBMIT,
-    data: postSubmit,
+    type: WSMessageType.GROUP_POST_SUBMIT,
+    data: group_post_submit,
   };
   wss.sendMessage(message);
 
   postTitle.value = '';
   postTags.value = '';
   postContent.value = '';
-  postPrivacy.value = 'public';
-  selectedFollowers.value = [];
   picture.value = null;
   (document.getElementById("picture") as HTMLInputElement).value = "";
   pictureStore.resetPicture()
@@ -141,42 +122,30 @@ function piniaManageDataProfile(email: string) {
   profileStore.setTargetUserEmail(email);
 }
 
-const followersList = computed(() => wss.userFollowersList);
-function updateFollowersList() {
-  wss.sendMessage({
-    type: WSMessageType.USER_FOLLOWERS_LIST,
-    data: {
-      user_uuid: UUIDStore.getUUID,
-      target_email: profileStore.getUserEmail,
-    } as TargetProfileRequest,
-  })
-}
-
 // send request to get old posts list, used inside onMounted
-function updatePostsList() {
-  console.log('=======FIRED======= updatePostsList');
+function updateGroupPostsList() {
+  console.log('=======FIRED======= updateGroupPostsList');
 
   wss.sendMessage({
-    type: WSMessageType.POSTS_LIST,
+    type: WSMessageType.GROUP_POSTS_LIST,
     data: {
       user_uuid: UUIDStore.getUUID,
-    } as PostsListRequest,
+      group_id: groupStore.getGroup.id,
+    } as GroupPostsListRequest,
   });
 }
 
 onMounted(() => {
-  updatePostsList();
-  updateFollowersList();
+  updateGroupPostsList();
 });
 
 const crap = () => {
   postTitle.value = 'Dummy post title';
   postTags.value = 'dummy, post, 111, test';
   postContent.value = 'Dummy Post content text.';
-  postPrivacy.value = 'public';
 }
 
-watch(postsList, (newVal) => {
+watch(group_posts_list, (newVal) => {
   console.log('Posts list:', newVal);
 });
 

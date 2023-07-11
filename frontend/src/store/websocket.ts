@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { WSMessage, WSMessageType, Post, Comment, UserProfile, UserForList, UserVisitorStatus as Visitor, Bell, BellType, Group } from '@/api/types';
+import { WSMessage, WSMessageType, Post as GroupPost, Comment, UserProfile, UserForList, UserVisitorStatus as Visitor, Bell, BellType, Group } from '@/api/types';
 import router from '@/router/index';
 
 const websockets: (WebSocket | null)[] = [];
@@ -112,6 +112,12 @@ export const useWebSocketStore = defineStore({
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.COMMENTS_LIST);
           break;
 
+        case WSMessageType.GROUP_POST_SUBMIT:
+        case WSMessageType.GROUP_POSTS_LIST:
+        case WSMessageType.USER_GROUP_POSTS_LIST:
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.GROUP_POSTS_LIST);
+          break;
+
         case WSMessageType.GROUP_SUBMIT:
         case WSMessageType.GROUPS_LIST:
         case WSMessageType.GROUPS_ALL_LIST:
@@ -194,13 +200,13 @@ export const useWebSocketStore = defineStore({
       return followersList
     },
     /**all the posts able to see by user. Excludes group posts(separated view)*/
-    postsList(): Post[] {
+    postsList(): GroupPost[] {
       const fresh_posts_messages = this.messages.filter((message) => message.type === WSMessageType.POST_RESPONSE);
-      const fresh_posts = fresh_posts_messages.map((message) => message.data as Post);
+      const fresh_posts = fresh_posts_messages.map((message) => message.data as GroupPost);
 
       const history_posts_messages_list = this.messages.filter((message) => message.type === WSMessageType.POSTS_LIST && message.data !== null);
       const history_posts = history_posts_messages_list.map((message) =>
-        (message.data as Post[]).map((post) => post)
+        (message.data as GroupPost[]).map((post) => post)
       ).flat();
 
       const posts = [...fresh_posts, ...history_posts];
@@ -212,6 +218,15 @@ export const useWebSocketStore = defineStore({
         (message.data as Comment[]).map((comment) => comment)
       ).flat();
       return [...comments];
+    },
+
+    groupPostsList(): GroupPost[] {
+      const group_posts_messages_list = this.messages.filter((message) => message.type === WSMessageType.GROUP_POSTS_LIST && message.data !== null);
+      const group_posts = group_posts_messages_list.map((message) =>
+        (message.data as GroupPost[]).map((post) => post)
+      ).flat();
+
+      return group_posts;
     },
 
     /**all the groups where user is member*/
@@ -296,7 +311,6 @@ export const useWebSocketStore = defineStore({
     },
 
     chatUsersList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.CHAT_USERS_LIST) },
-    groupPostsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_POSTS_LIST) },
     groupPostCommentsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_POST_COMMENTS_LIST) },
     groupEventsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_EVENTS_LIST) },
     groupEventParticipantsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_EVENT_PARTICIPANTS_LIST) },

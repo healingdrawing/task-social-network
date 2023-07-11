@@ -6,7 +6,7 @@
     <div class="nav-bar__links">
       <!-- todo: add implementation to mark/hightlight "Profile" and "Chats". Manage the "hasNewsBells" and "hasNewMessages" using backend data through the pinia store methods -->
       <router-link :class="{ highlighted: hasNewBells }" to="/profile">Profile</router-link> |
-      <router-link to="/posts" @click="piniaManageData()">Posts</router-link> |
+      <router-link to="/posts">Posts</router-link> |
       <router-link :class="{ highlighted: hasNewMessages }" to="/chats">Chats</router-link> |
       <router-link to="/groups">Groups</router-link> |
       <router-link to="/" @click="logout()">Logout</router-link>
@@ -27,7 +27,6 @@ import { computed, ref } from 'vue';
 import { ErrorResponse } from '@/api/types';
 import { useBellStore } from '@/store/bell';
 import { useChatsStore } from '@/store/chats';
-import { useGroupStore } from '@/store/group';
 
 import { useUUIDStore } from '@/store/uuid';
 import { useLoginStore } from '@/store/login';
@@ -90,11 +89,7 @@ async function logout() {
   }
 }
 
-// when "posts" click happens, reset group id to -1 or 0, to prevent backend filtering of the posts to not show group only posts, but show all
-const groupStore = useGroupStore();
-function piniaManageData() {
-  groupStore.setGroupId(-1); //todo: implement on backend. Now posts will be not filtered by group id. But only filtered by date, fresh first
-}
+
 
 const bellStore = useBellStore();
 const hasNewBells = computed(() => bellStore.bells.length > 0);

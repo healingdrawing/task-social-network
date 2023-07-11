@@ -133,6 +133,13 @@ func reader(conn *websocket.Conn, uuid string) {
 			case string(WS_GROUPS_ALL_LIST):
 				wsGroupsAllListHandler(conn, data.Data)
 
+			case string(WS_GROUP_POST_SUBMIT):
+				wsGroupPostSubmitHandler(conn, data.Data)
+			case string(WS_GROUP_POSTS_LIST):
+				wsGroupPostsListHandler(conn, data.Data)
+			case string(WS_USER_GROUP_POSTS_LIST):
+				wsUserGroupPostsListHandler(conn, data.Data)
+
 			case string(WS_POST_SUBMIT):
 				wsPostSubmitHandler(conn, data.Data)
 			case string(WS_POSTS_LIST):
@@ -264,6 +271,24 @@ func wsSendSuccess(msg WS_SUCCESS_RESPONSE_DTO) {
 func wsSendPostsList(posts_list WS_POSTS_LIST_DTO) {
 
 	outputMessage, err := wsCreateResponseMessage(WS_POSTS_LIST, posts_list)
+
+	if err != nil {
+		log.Println(err)
+	}
+	clients.Range(func(key, value interface{}) bool {
+		if c, ok := key.(*websocket.Conn); ok {
+			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return true
+	})
+}
+
+func wsSendGroupPostsList(group_posts_list WS_GROUP_POSTS_LIST_DTO) {
+
+	outputMessage, err := wsCreateResponseMessage(WS_GROUP_POSTS_LIST, group_posts_list)
 
 	if err != nil {
 		log.Println(err)

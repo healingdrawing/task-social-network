@@ -52,6 +52,7 @@ export enum WSMessageType {
   USER_LOGIN = "user_login", //  userLoginHandler
   USER_LOGOUT = "user_logout", //  userLogoutHandler
   USER_POSTS_LIST = "user_posts_list", //  userPostsHandler
+  USER_GROUP_POSTS_LIST = "user_group_posts_list", //todo:  NEW , Potential use when user profile is viewed
   USER_PRIVACY = "user_privacy", //  changePrivacyHandler
   USER_PROFILE = "user_profile", //  userProfileHandler
   USER_REGISTER = "user_register", //  userRegisterHandler
@@ -136,6 +137,37 @@ export interface PostSubmit {
 export interface PostsListRequest {
   user_uuid: string;
 }
+
+
+export interface GroupPost {
+  group_id: number;
+  group_name: string;
+  group_description: string;
+  id: number; // group post id, unique, autoincrement, primary key, all group posts must be stored one table in database
+  title: string;
+  categories: string;
+  content: string;
+  picture?: string;
+  created_at: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+}
+
+export interface GroupPostSubmit {
+  user_uuid: string;
+  group_id: number;
+  title: string;
+  categories: string;
+  content: string;
+  picture?: string; // jpeg,png,gif
+}
+
+export interface GroupPostsListRequest {
+  user_uuid: string;
+  group_id: number;
+}
+
 
 export interface Group {
   id: number;

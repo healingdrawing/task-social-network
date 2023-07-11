@@ -130,9 +130,9 @@ function updateGroupVisitor() {
 }
 
 //todo: artefact to provide commented functionality in template section of this file
-const piniaManageDataProfile = (email: string) => {
-  profileStore.setTargetUserEmail(email);
-};
+// const piniaManageDataProfile = (email: string) => {
+//   profileStore.setTargetUserEmail(email);
+// };
 
 //dummy code
 
