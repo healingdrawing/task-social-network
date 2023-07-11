@@ -6,13 +6,13 @@
     1. "event" - when an event is created in a group the user is a member of. No action required. But it must have buttons :
       - "Open Group" - to open group which event came from.
       - "Close" - to remove the bell from the list.
-    + 2. "following" - when other user sends a follow request to the user , and user profile is private. Must have two buttons:
+    ok 2. "following" - when other user sends a follow request to the user , and user profile is private. Must have two buttons:
       - "Accept" - to accept the follow request, and remove the bell from the list.
       - "Reject" - to reject the follow request, and remove the bell from the list.
-    + 3. "invitation" - when other user invites the user to a group(include case of invitation from group the creator in time of group creation). Must have buttons:
+    ok 3. "invitation" - when other user invites the user to a group(include case of invitation from group the creator in time of group creation). Must have buttons:
       - "Accept" - to join the group, and remove the bell from the list.
       - "Reject" - to reject the invitation to join the group, and remove the bell from the list.
-    + 4. "request" - when other user sends a request to join a group the user is a creator of. Must have buttons:
+    ok 4. "request" - when other user sends a request to join a group the user is a creator of. Must have buttons:
       - "Accept" - to allow other user to join the group, and remove the bell from the list.
       - "Reject" - to reject the request to join the group, and remove the bell from the list.
     
