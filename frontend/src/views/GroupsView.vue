@@ -1,7 +1,6 @@
 <template>
   <div>
-    <!-- SECTION 1 - create new group -->
-    <h2>Create new group</h2>
+    <h2>Create Group</h2>
     <form @submit.prevent="createGroup">
       <label>
         Group title:
@@ -25,9 +24,8 @@
       <button type="submit">Create Group</button>
     </form>
 
-    <!-- SECTION 2 - groups list -->
     <h2><router-link :to="{ name: 'groups_all' }">Browse All Groups</router-link></h2>
-    <h2>Groups list with membership:</h2>
+    <h2>Groups With Membership:</h2>
     <div v-for="group in groupsList" :key="group.id">
       <hr>
       <router-link :to="{ name: 'group' }" @click="piniaManageDataGroup(group)">

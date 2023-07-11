@@ -17,68 +17,100 @@
     <p>Date of Birth: {{ profile.dob }}</p>
     <p>Nickname: {{ profile.nickname }}</p>
     <p>About Me: {{ profile.about_me }}</p>
-    <p>Public: {{ profile.public }}</p>
   </div>
   <!-- separately add avatar, perhaps it should be on the right half of screen -->
   <div v-if="profile && profile.avatar !== ''">
     <p>Avatar: 
-      <img :src="`data:image/jpeg;base64,${profile.avatar}`" alt="avatar" />
+      <br> <img :src="`data:image/jpeg;base64,${profile.avatar}`" alt="avatar" />
     </p>
   </div>
   <!-- add following list. The other users followed by the user -->
   <h2>Following:</h2>
-    <div v-if="followingList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;">{{ followingList.length }} <br> {{ followingList }}
-      <div v-for="user in followingList" :key="user.email">{{ `${user.first_name} ${user.last_name} (${user.email})` }}</div>
-    </div>
-    <div v-else>No following</div>
+  <div v-if="followingList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;">{{ followingList.length }} <br> {{ followingList }}
+    <div v-for="user in followingList" :key="user.email">{{ `${user.first_name} ${user.last_name} (${user.email})` }}</div>
+  </div>
+  <div v-else>No following</div>
 
-    <!-- add followers list. The other users following the user -->
-    <h2>Followers:</h2>
-    <div v-if="followersList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;"> {{ followersList.length }} <br> {{ followersList }}
-      <div v-for="user in followersList" :key="user.email">{{ `${user.first_name} ${user.last_name} (${user.email})` }}</div>
-    </div>
-    <div v-else>No followers</div>
+  <!-- add followers list. The other users following the user -->
+  <h2>Followers:</h2>
+  <div v-if="followersList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;"> {{ followersList.length }} <br> {{ followersList }}
+    <div v-for="user in followersList" :key="user.email">{{ `${user.first_name} ${user.last_name} (${user.email})` }}</div>
+  </div>
+  <div v-else>No followers</div>
 
-    <!-- add user posts list. The posts created by the user -->
-    <h2>Posts:</h2>
-    <div v-for="post in postsList"
-      :key="post.id">
-      <hr>
-      <router-link
-        :to="{ name: 'post' }"
-        @click="piniaManageDataPost(post)">
-        <p>Post id: {{ post.id }}</p>
-        <p>Post title: {{ post.title }}</p>
-        <p>Post tags: {{ post.categories }}</p>
-        <p>Post content: {{ post.content }}</p>
-        <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
-        <p>Post created: {{ post.created_at }}</p>
-        <div v-if="post.picture !== ''">
-          <p>Post picture: 
-            <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
-          </p>
-        </div>
-      </router-link>
-      <router-link
-      :to="{ name: 'target' }"
-      @click="piniaManageDataProfile(post.email)">
-        <h3>
-          Author: {{ post.first_name }}
-          {{ post.last_name }} 
-          ({{ post.email }})
-        </h3>
-      </router-link>
+  <!-- add user posts list. The posts created by the user -->
+  <h2>Posts:</h2>
+  <div v-for="post in postsList"
+    :key="post.id">
+    <hr>
+    <router-link
+      :to="{ name: 'post' }"
+      @click="piniaManageDataPost(post)">
+      <p>Post id: {{ post.id }}</p>
+      <p>Post title: {{ post.title }}</p>
+      <p>Post tags: {{ post.categories }}</p>
+      <p>Post content: {{ post.content }}</p>
+      <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
+      <p>Post created: {{ post.created_at }}</p>
+      <div v-if="post.picture !== ''">
+        <p>Post picture: 
+          <br> <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
+        </p>
+      </div>
+    </router-link>
+    <router-link
+    :to="{ name: 'target' }"
+    @click="piniaManageDataProfile(post.email)">
+      <h3>
+        Author: {{ post.first_name }}
+        {{ post.last_name }} 
+        ({{ post.email }})
+      </h3>
+    </router-link>
   </div>
   <!-- ( :to="{ name: 'post' }" ) also can be ( :to="'/post'" ) -->
+
+  <!-- add user group posts list. The group posts created by the user in time of group membership -->
+  <h2>Group Posts:</h2>
+  <div v-for="group_post in groupPostsList"
+    :key="group_post.id">
+    <hr>
+    <router-link
+      :to="{ name: 'group' }"
+      @click="piniaManageDataGroupPost(group_post)">
+      <p>Group id: {{ group_post.group_id }}</p>
+      <p>Group name: {{ group_post.group_name }}</p>
+      <p>Group description: {{ group_post.group_description }}</p>
+    </router-link>
+      <p>Group Post id: {{ group_post.id }}</p>
+      <p>Group Post title: {{ group_post.title }}</p>
+      <p>Group Post tags: {{ group_post.categories }}</p>
+      <p>Group Post content: {{ group_post.content }}</p>
+      <p>Group Post created: {{ group_post.created_at }}</p>
+      <div v-if="group_post.picture !== ''">
+        <p>Group Post picture: 
+          <br> <img :src="`data:image/jpeg;base64,${group_post.picture}`" alt="picture" />
+        </p>
+      </div>
+    
+      <h3>
+        Author: {{ group_post.first_name }}
+        {{ group_post.last_name }} 
+        ({{ group_post.email }})
+      </h3>
+    
+  </div>
+
 </template>
 
 <script lang="ts" setup>
 import { ref, watch, onMounted, computed } from 'vue';
 import { useWebSocketStore } from '@/store/websocket';
 import { useUUIDStore } from '@/store/uuid';
-import { usePostStore } from '@/store/post';
 import { useProfileStore } from '@/store/profile';
-import { WSMessageType, ChangePrivacyRequest, TargetProfileRequest, Post } from '@/api/types';
+import { usePostStore } from '@/store/post';
+import { useGroupStore } from '@/store/group';
+import { WSMessageType, ChangePrivacyRequest, TargetProfileRequest, Post, GroupPost, GroupPostsListRequest, Group } from '@/api/types';
 
 const wss = useWebSocketStore();
 
@@ -150,7 +182,6 @@ function updateFollowersList() {
 }
 
 const postsList = computed(() => wss.postsList);
-
 /** updatePostsList updates the posts list from the server, able to see for the visitor */
 function updatePostsList() {
   wss.sendMessage({
@@ -162,10 +193,34 @@ function updatePostsList() {
   })
 }
 
-
 const postStore = usePostStore()
 const piniaManageDataPost = (post: Post) => {
   postStore.setPost(post)
+}
+
+const groupPostsList = computed(() => wss.groupPostsList);
+// send request to get all group posts list, created by user in time of membering groups
+function updateUserGroupPostsList() {
+  console.log('=======FIRED======= updateGroupPostsList');
+
+  wss.sendMessage({
+    type: WSMessageType.USER_GROUP_POSTS_LIST,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      group_id: -1, // no needed, because it is all group posts collector for user
+    } as GroupPostsListRequest,
+  });
+}
+
+const groupStore = useGroupStore()
+const piniaManageDataGroupPost = (group_post: GroupPost) => {
+  groupStore.setGroup(
+    {
+      id: group_post.group_id,
+      name: group_post.group_name,
+      description: group_post.group_description,
+    } as Group
+  )
 }
 
 onMounted(() => {
@@ -173,6 +228,7 @@ onMounted(() => {
   updateFollowingList();
   updateFollowersList();
   updatePostsList();
+  updateUserGroupPostsList();
 });
 
 </script>

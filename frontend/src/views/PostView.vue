@@ -10,7 +10,7 @@
       <p>Post created: {{ post.created_at }}</p>
       <div v-if="post.picture !== ''">
         <p>Post picture: 
-          <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
+          <br> <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
         </p>
       </div>
       <router-link

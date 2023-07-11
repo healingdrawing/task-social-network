@@ -1,6 +1,4 @@
 <template>
-  user id transfered using pinia: {{ profileStore.getUserId }}
-  <!-- todo: implement view "GroupView.vue" -->
   <pre style="text-align: left;">
     one group view gap.
     Check membership inside onMounted hook using call to backend.
@@ -108,13 +106,11 @@ import { ref, onMounted, computed } from 'vue';
 import router from '@/router/index';
 import { useWebSocketStore } from '@/store/pinia';
 import { useUUIDStore } from '@/store/pinia';
-import { useProfileStore } from '@/store/profile';
 import { useGroupStore } from '@/store/group';
 import { useChatStore } from '@/store/chat';
 import { GroupVisitorStatusRequest, VisitorStatus, WSMessageType } from '@/api/types';
 const wss = useWebSocketStore();
 const UUIDStore = useUUIDStore();
-const profileStore = useProfileStore();
 const groupStore = useGroupStore();
 const chatStore = useChatStore();
 

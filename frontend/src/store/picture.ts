@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import { blobToBase64 } from "@/api/tools";
 
 interface PictureState {
   pictureError: string;
@@ -21,13 +20,6 @@ export const usePictureStore = defineStore({
     getPictureBlob(): Blob | null {
       return this.pictureBlob;
     },
-    // async getBase64forJson(state) {
-    //   if (!state.pictureBlob) {
-    //     return "null";
-    //   }
-    //   const base64String = await blobToBase64(state.pictureBlob);
-    //   return base64String;
-    // },
     getPictureBase64String(): string {
       return this.pictureBase64String;
     },

@@ -4,10 +4,8 @@
   <div v-if="visitor">
     <button @click="handleFollowing()">{{ button_text }}</button>
   </div>
-  <div v-else>wtf where is visitor [{{ visitor }}]</div>
+  <div v-else>what is going on, where is the visitor property? [{{ visitor }}]</div>
  
-  <!-- todo: remove later . show id for dev needs-->
-  <p>target_email: {{ profileStore.getTargetUserEmail }}</p>
   <!-- add user information -->
   <div v-if="profile">
     <p>Email: {{ profile.email }}</p>
@@ -23,11 +21,12 @@
       <p>Date of Birth: {{ profile.dob }}</p>
       <p>Nickname: {{ profile.nickname }}</p>
       <p>About Me: {{ profile.about_me }}</p>
+      <p>{{ profile.public ? "Public" : "Private" }}</p>
     </div>
     <!-- separately add avatar, perhaps it should be on the right half of screen -->
     <div v-if="profile && profile.avatar !== ''">
       <p>Avatar:
-        <img :src="`data:image/jpeg;base64,${profile.avatar}`" alt="avatar" />
+        <br> <img :src="`data:image/jpeg;base64,${profile.avatar}`" alt="avatar" />
       </p>
     </div>
     <!-- add following list. The other users followed by the user -->
@@ -75,6 +74,36 @@
       </router-link>
     </div>
     <!-- ( :to="{ name: 'post' }" ) also can be ( :to="'/post'" ) -->
+
+    <!-- add user group posts list. The group posts created by the user in time of group membership -->
+    <h2>Group Posts:</h2>
+    <div v-for="group_post in groupPostsList"
+      :key="group_post.id">
+      <hr>
+      <router-link
+        :to="{ name: 'group' }"
+        @click="piniaManageDataGroupPost(group_post)">
+        <p>Group id: {{ group_post.group_id }}</p>
+        <p>Group name: {{ group_post.group_name }}</p>
+        <p>Group description: {{ group_post.group_description }}</p>
+      </router-link>
+      <p>Group Post id: {{ group_post.id }}</p>
+      <p>Group Post title: {{ group_post.title }}</p>
+      <p>Group Post tags: {{ group_post.categories }}</p>
+      <p>Group Post content: {{ group_post.content }}</p>
+      <p>Group Post created: {{ group_post.created_at }}</p>
+      <div v-if="group_post.picture !== ''">
+        <p>Group Post picture: 
+          <br> <img :src="`data:image/jpeg;base64,${group_post.picture}`" alt="picture" />
+        </p>
+      </div>
+      <h3>
+        Author: {{ group_post.first_name }}
+        {{ group_post.last_name }} 
+        ({{ group_post.email }})
+      </h3>
+    </div>
+
   </div>
 </template>
 
@@ -82,9 +111,10 @@
 import { onMounted, computed } from 'vue';
 import { useWebSocketStore } from '@/store/websocket';
 import { useUUIDStore } from '@/store/uuid';
-import { usePostStore } from '@/store/post';
 import { useProfileStore } from '@/store/profile';
-import { WSMessageType, TargetProfileRequest, UserProfile, VisitorStatus, Post } from '@/api/types';
+import { usePostStore } from '@/store/post';
+import { useGroupStore } from '@/store/group';
+import { WSMessageType, TargetProfileRequest, VisitorStatus, Post, GroupPost, GroupPostsListRequest, Group } from '@/api/types';
 
 
 
@@ -182,7 +212,6 @@ function updateFollowersList() {
 }
 
 const postsList = computed(() => wss.postsList);
-
 /** updatePostsList updates the posts list from the server, able to see for the visitor */
 function updatePostsList() {
   wss.sendMessage({
@@ -194,11 +223,36 @@ function updatePostsList() {
   })
 }
 
-
 const postStore = usePostStore()
 function piniaManageDataPost(post: Post) {
   postStore.setPost(post);
 }
+
+const groupPostsList = computed(() => wss.groupPostsList);
+// send request to get all group posts list, created by user in time of membering groups
+function updateUserGroupPostsList() {
+  console.log('=======FIRED======= updateGroupPostsList');
+
+  wss.sendMessage({
+    type: WSMessageType.USER_GROUP_POSTS_LIST,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      group_id: -1, // no needed, because it is all group posts collector for user
+    } as GroupPostsListRequest,
+  });
+}
+
+const groupStore = useGroupStore()
+const piniaManageDataGroupPost = (group_post: GroupPost) => {
+  groupStore.setGroup(
+    {
+      id: group_post.group_id,
+      name: group_post.group_name,
+      description: group_post.group_description,
+    } as Group
+  )
+}
+
 
 onMounted(() => {
   updateVisitorStatus();
@@ -206,6 +260,7 @@ onMounted(() => {
   updateFollowingList();
   updateFollowersList();
   updatePostsList();
+  updateUserGroupPostsList();
 });
 
 </script>

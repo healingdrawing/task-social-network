@@ -11,7 +11,6 @@ import { useRoute } from 'vue-router'
 import NavBar from './components/NavBar.vue'
 import NavBarGuest from './components/NavBarGuest.vue'
 import { useWebSocketStore } from './store/websocket';
-import { createDecorator } from 'vue-class-component';
 
 const wss = useWebSocketStore();
 
@@ -23,7 +22,8 @@ window.onbeforeunload = function () {
   wss.killThemAll();
 }
 
-// Register the beforeunload event listener
+// Does not work properly. Replaced by window.onbeforeunload above
+// Register the beforeunload event listener.
 // window.addEventListener('beforeunload', () => {
 //   alert("beforeunload event listener triggered")
 //   console.log("====================================")

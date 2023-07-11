@@ -68,7 +68,7 @@ const login = async () => {
       profileStore.setTargetUserEmail(loginStore.getData.email);
       wss.connect(UUIDStore.getUUID);
 
-      // slowdown this... masterpeice ... to wait for websocket to establish connection
+      // slowdown this... masterpiece ... to wait for websocket to establish connection
       if (wss.socket) {
         const socket = wss.socket
         await new Promise((resolve) => {

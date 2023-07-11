@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { BellType, Bell, BellState } from '@/api/types';
+import { Bell, BellState } from '@/api/types';
 
 export const useBellStore = defineStore({
   id: 'bell',
