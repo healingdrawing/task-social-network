@@ -143,7 +143,8 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 
 	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " post created"})
 
-	// return all posts, which user can see
+	// return all posts, which user can see.
+	// also duplicates defer wsRecover() , but shorten code. Do not want to manage bool + if into wsPostsListHandler. i am not bored, so no.
 	wsPostsListHandler(conn, messageData)
 }
 

@@ -1,4 +1,5 @@
 <template>
+  <!-- //todo: remove after implementation
   <pre style="text-align: left;">
     one group view gap.
     Check membership inside onMounted hook using call to backend.
@@ -30,7 +31,7 @@
      After that, going button is disabled/replaced by text/or restyled to green etc.
      So user can only once choose to go to event.
   </pre>
-
+ -->
   <div>
     <h6 title="group id">{{ group.id }}</h6>
     <h1 title="group name/title">{{ group.name }}</h1>

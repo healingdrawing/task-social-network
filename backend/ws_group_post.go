@@ -125,6 +125,7 @@ func wsGroupPostSubmitHandler(conn *websocket.Conn, messageData map[string]inter
 	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " group post created"})
 
 	// return all group posts
+	// duplicate defer wsRecover()
 	wsGroupPostsListHandler(conn, messageData)
 }
 

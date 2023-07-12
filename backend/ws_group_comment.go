@@ -10,26 +10,28 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type WS_COMMENT_SUBMIT_DTO struct {
-	User_uuid string `json:"user_uuid"`
-	Post_id   int    `json:"post_id"`
-	Content   string `json:"content"`
-	Picture   string `json:"picture"`
-}
+// the same implementation as "ws_comment.go", but different SQL queries
 
-type WS_COMMENT_RESPONSE_DTO struct {
-	Content    string `json:"content"`
-	Picture    string `json:"picture"`
-	Created_at string `json:"created_at"`
-	Email      string `json:"email"`
-	First_name string `json:"first_name"`
-	Last_name  string `json:"last_name"`
-}
+// type WS_COMMENT_SUBMIT_DTO struct {
+// 	User_uuid string `json:"user_uuid"`
+// 	Post_id   int    `json:"post_id"`
+// 	Content   string `json:"content"`
+// 	Picture   string `json:"picture"`
+// }
 
-type WS_COMMENTS_LIST_DTO []WS_COMMENT_RESPONSE_DTO
+// type WS_COMMENT_RESPONSE_DTO struct {
+// 	Content    string `json:"content"`
+// 	Picture    string `json:"picture"`
+// 	Created_at string `json:"created_at"`
+// 	Email      string `json:"email"`
+// 	First_name string `json:"first_name"`
+// 	Last_name  string `json:"last_name"`
+// }
 
-// wsCommentSubmitHandler creates a new comment on a post, then return all comments on that post.
-func wsCommentSubmitHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+// type WS_COMMENTS_LIST_DTO []WS_COMMENT_RESPONSE_DTO
+
+// wsGroupCommentSubmitHandler creates a new comment on a group post, then return all comments on group post.
+func wsGroupCommentSubmitHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
 
 	var data WS_COMMENT_SUBMIT_DTO
@@ -90,25 +92,24 @@ func wsCommentSubmitHandler(conn *websocket.Conn, messageData map[string]interfa
 
 	created_at := time.Now().Format("2006-01-02 15:04:05")
 
-	_, err = statements["addComment"].Exec(user_id, data.Post_id, data.Content, commentPicture, created_at)
+	_, err = statements["addGroupComment"].Exec(user_id, data.Post_id, data.Content, commentPicture, created_at)
 	if err != nil {
-		log.Println("addComment query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addComment query failed"})
+		log.Println("addGroupComment query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupComment query failed"})
 		return
 	}
 
-	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Comment created"})
+	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Group Comment created"})
 
-	// send all comments on that post
-	// will duplicate wsRecover(), but just do not want to provide bool + if statement,
-	// into wsCommentsListHandler to check if it is nested call or websocket.go call
-	wsCommentsListHandler(conn, messageData)
+	// send all comments on group post
+	// duplicate defer wsRecover(), do not want to crap the code using bool + if
+	wsGroupCommentsListHandler(conn, messageData)
 }
 
-// wsCommentsListHandler returns all comments for a post
+// wsGroupCommentsListHandler returns all comments for a group post
 //
 // - @param post_id int
-func wsCommentsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+func wsGroupCommentsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
 
 	uuid, ok := messageData["user_uuid"].(string)
@@ -132,10 +133,10 @@ func wsCommentsListHandler(conn *websocket.Conn, messageData map[string]interfac
 	}
 	post_id := int(_post_id)
 
-	rows, err := statements["getComments"].Query(post_id)
+	rows, err := statements["getGroupComments"].Query(post_id)
 	if err != nil {
-		log.Println("getComments query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getComments query failed"})
+		log.Println("getGroupComments query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroupComments query failed"})
 		return
 	}
 	defer rows.Close()
@@ -146,8 +147,8 @@ func wsCommentsListHandler(conn *websocket.Conn, messageData map[string]interfac
 		var pictureBlob []byte
 		err = rows.Scan(&comment.Email, &comment.First_name, &comment.Last_name, &comment.Content, &pictureBlob, &comment.Created_at)
 		if err != nil {
-			log.Println("getComments scan failed", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getComments scan failed"})
+			log.Println("getGroupComments scan failed", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroupComments scan failed"})
 			return
 		}
 		comment.Picture = base64.StdEncoding.EncodeToString(pictureBlob)
