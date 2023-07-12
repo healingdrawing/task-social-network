@@ -53,6 +53,7 @@ export enum WSMessageType {
   USER_LOGOUT = "user_logout", //  userLogoutHandler
   USER_POSTS_LIST = "user_posts_list", //  userPostsHandler
   USER_GROUP_POSTS_LIST = "user_group_posts_list", //todo:  NEW , Potential use when user profile is viewed
+  USER_GROUPS_FRESH_EVENTS_LIST = "user_groups_fresh_events_list", // todo: NEW , Potential use in BellView.vue as events list for decision
   USER_PRIVACY = "user_privacy", //  changePrivacyHandler
   USER_PROFILE = "user_profile", //  userProfileHandler
   USER_REGISTER = "user_register", //  userRegisterHandler
@@ -195,6 +196,7 @@ export interface GroupEventAction {
   user_uuid: string;
   event_id: number;
   decision: string;
+  group_id: number;
 }
 
 export interface Group {
@@ -291,7 +293,9 @@ export interface Bell {
   // todo: to fill the groupStore before routing to group page
 
   event_id: number; // event
-  event_name: string; // event
+  event_title: string; // event
+  event_description: string; // event
+  event_date: string; // event //todo: not sure it needed
 
   email: string; // invitation to group , and request to join group, following
   first_name: string; // invitation to group , and request to join group, following
@@ -301,4 +305,8 @@ export interface Bell {
 
 export interface BellState {
   bells: Bell[];
+}
+
+export interface BellRequest {
+  user_uuid: string;
 }

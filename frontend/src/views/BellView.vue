@@ -33,21 +33,25 @@
         <div v-if="bell.type === BellType.EVENT">
           Your Majesty! Some noise is heard from the castle walls.
           It is about:
-          <br> " {{ bell.event_name }} "
+          <br> " {{ bell.event_title }} "
           <br> from the:
           <br> " {{ bell.group_name }} "
           <!-- TODO: refactor replace close event reminder button by going / not going buttons -->
           <br> <button title="Discover" @click="openGroup(bell)">
+            Open 🧐 the window! My Majesty will survey 🥹 the scenery!
+            <br> Move me to the window 😤 ! I still taste breakfast 🥴 spirit!
+          </button>
+          <br> <button title="Going" @click="going_yes(bell)">
             This could be a matter of extreme importance 😤 !
             <br> Prepare my royal horse ! Open the gate !
           </button>
-          <button title="Close Event Reminder" @click="removeBell(bell)">
-            Again ?! 😒 Boring! Prepare my dolphins 🥹 !
+          <button title="Not Going" @click="going_no(bell)">
+            Again ?! 😒 Boring! Prepare! ... my ... dolphins 🥹 .
             <br> I am full of spirit today. Move me to the pool.
           </button>
           <h6>
             type: {{ bell.type }} notification
-            <br> name: {{ bell.event_name }}
+            <br> title: {{ bell.event_title }}
             <br> group: {{ bell.group_name }}
           </h6>
         </div>
@@ -151,7 +155,7 @@ import { computed, onMounted } from 'vue';
 import { useWebSocketStore } from '@/store/websocket';
 import router from '@/router';
 import { useGroupStore } from '@/store/group';
-import { BellType, Bell, TargetProfileRequest, WSMessageType, GroupRequestActionSubmit, GroupVisitorStatusRequest, Group } from '@/api/types';
+import { BellType, Bell, BellRequest, TargetProfileRequest, WSMessageType, WSMessage, GroupRequestActionSubmit, GroupVisitorStatusRequest, Group, GroupEventAction } from '@/api/types';
 import { useUUIDStore } from '@/store/uuid';
 import { useProfileStore } from '@/store/profile';
 
@@ -170,9 +174,39 @@ function openGroup(bell: Bell) {
   router.push({ name: 'group' });
 }
 
-function removeBell(bell: Bell) {
-  bell.status = 'hidden'
-}
+const going_yes = (bell: Bell) => {
+
+  const group_event_going = {
+    user_uuid: UUIDStore.getUUID,
+    event_id: bell.event_id,
+    decision: 'going',
+    group_id: groupStore.getGroup.id, // to collect list of events after decision
+  } as GroupEventAction;
+
+  const message: WSMessage = {
+    type: WSMessageType.GROUP_EVENT_GOING,
+    data: group_event_going,
+  };
+  wss.sendMessage(message);
+  updateBells();
+};
+
+const going_no = (bell: Bell) => {
+
+  const group_event_not_going = {
+    user_uuid: UUIDStore.getUUID,
+    event_id: bell.event_id,
+    decision: 'not going',
+    group_id: groupStore.getGroup.id, // to collect list of events after decision
+  } as GroupEventAction;
+
+  const message: WSMessage = {
+    type: WSMessageType.GROUP_EVENT_NOT_GOING,
+    data: group_event_not_going,
+  };
+  wss.sendMessage(message);
+  updateBells();
+};
 
 function acceptFollowRequest(bell: Bell) {
   wss.sendMessage({
@@ -252,22 +286,25 @@ function updateBells() {
     type: WSMessageType.FOLLOW_REQUESTS_LIST,
     data: {
       user_uuid: UUIDStore.getUUID,
-      target_email: profileStore.getTargetUserEmail,
-    } as TargetProfileRequest,
+    } as BellRequest,
   })
   wss.sendMessage({
     type: WSMessageType.GROUP_REQUESTS_LIST,
     data: {
       user_uuid: UUIDStore.getUUID,
-      target_email: profileStore.getTargetUserEmail,
-    } as TargetProfileRequest,
+    } as BellRequest,
   })
   wss.sendMessage({
     type: WSMessageType.GROUP_INVITES_LIST,
     data: {
       user_uuid: UUIDStore.getUUID,
-      target_email: profileStore.getTargetUserEmail,
-    } as TargetProfileRequest,
+    } as BellRequest,
+  })
+  wss.sendMessage({
+    type: WSMessageType.USER_GROUPS_FRESH_EVENTS_LIST,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+    } as BellRequest,
   })
   //todo: implement events too
 }

@@ -195,6 +195,8 @@ func reader(conn *websocket.Conn, uuid string) {
 				wsGroupEventSubmitHandler(conn, data.Data)
 			case string(WS_GROUP_EVENTS_LIST):
 				wsGroupEventsListHandler(conn, data.Data)
+			case string(WS_USER_GROUPS_FRESH_EVENTS_LIST):
+				wsUserGroupsFreshEventsListHandler(conn, data.Data)
 			case string(WS_GROUP_EVENT_GOING):
 				wsGroupEventGoingHandler(conn, data.Data)
 			case string(WS_GROUP_EVENT_NOT_GOING):

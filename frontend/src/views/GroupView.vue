@@ -79,6 +79,7 @@
         <h2>List of Group Events </h2>
         <ul>
           <li v-for="event in events_list" :key="event.id">
+            <hr>
             <h3>{{
               event.title }}</h3>
             <p>{{ event.datetime }}</p>
@@ -178,6 +179,7 @@ const going_yes = (event: Event) => {
     user_uuid: UUIDStore.getUUID,
     event_id: event.id,
     decision: 'going',
+    group_id: groupStore.getGroup.id, // to collect list of events after decision
   } as GroupEventAction;
 
   const message: WSMessage = {
@@ -193,10 +195,11 @@ const going_no = (event: Event) => {
     user_uuid: UUIDStore.getUUID,
     event_id: event.id,
     decision: 'not going',
+    group_id: groupStore.getGroup.id, // to collect list of events after decision
   } as GroupEventAction;
 
   const message: WSMessage = {
-    type: WSMessageType.GROUP_EVENT_GOING,
+    type: WSMessageType.GROUP_EVENT_NOT_GOING,
     data: group_event_not_going,
   };
   wss.sendMessage(message);

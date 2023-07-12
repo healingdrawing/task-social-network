@@ -154,7 +154,7 @@ func wsGroupEventsListHandler(conn *websocket.Conn, messageData map[string]inter
 
 	_group_id, ok := messageData["group_id"].(float64)
 	if !ok {
-		log.Println("failed to get group_id from messageData")
+		log.Println("failed to get group_id from messageData\n", messageData)
 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from messageData"})
 		return
 	}
@@ -210,6 +210,89 @@ func wsGroupEventsListHandler(conn *websocket.Conn, messageData map[string]inter
 	}
 
 	wsSendGroupEventsList(events_list)
+}
+
+type WS_USER_GROUPS_FRESH_EVENT_RESPOSE_DTO struct {
+	Event_id          int    `json:"event_id"`
+	Event_title       string `json:"event_title"`
+	Event_description string `json:"event_description"`
+	Event_date        string `json:"event_date"`
+
+	Group_id          int    `json:"group_id"`
+	Group_name        string `json:"group_name"`
+	Group_description string `json:"group_description"`
+}
+
+type WS_USER_GROUPS_FRESH_EVENTS_LIST_DTO []WS_USER_GROUPS_FRESH_EVENT_RESPOSE_DTO
+
+// wsUserGroupsFreshEventsListHandler returns all fresh(user decision needed) events for a user
+func wsUserGroupsFreshEventsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+	defer wsRecover()
+	//todo: refactor to return decisions for logged in user
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("failed to get user_uuid from messageData")
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
+		return
+	}
+
+	user_id, err := get_user_id_by_uuid(uuid)
+	if err != nil {
+		log.Println("failed to get ID of the message sender", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		return
+	}
+
+	rows, err := statements["getFreshEvents"].Query(user_id)
+	if err != nil {
+		log.Println("getFreshEvents query failed", err.Error())
+		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getFreshEvents query failed"})
+		return
+	}
+	var fresh_events_list WS_USER_GROUPS_FRESH_EVENTS_LIST_DTO
+	for rows.Next() {
+		var fresh_event WS_USER_GROUPS_FRESH_EVENT_RESPOSE_DTO
+		err = rows.Scan(
+			&fresh_event.Id,
+			&fresh_event.Group_id,
+			&fresh_event.Title,
+			&fresh_event.Description,
+			&fresh_event.Date,
+			&fresh_event.Created_at,
+		)
+		if err != nil {
+			log.Println("getEvents query failed to scan", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getEvents query failed to scan"})
+			return
+		}
+		fresh_events_list = append(fresh_events_list, fresh_event)
+	}
+
+	// get the user's decision for each event
+	for i, event := range fresh_events_list {
+		rows, err := statements["getEventParticipantDecision"].Query(event.Id, user_id)
+		if err != nil {
+			log.Println("getEventParticipantDecision query failed", err.Error())
+			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getEventParticipantDecision query failed"})
+			return
+		}
+		defer rows.Close()
+		if rows.Next() {
+			var decision string
+			err = rows.Scan(&decision)
+			if err != nil {
+				log.Println("getEventParticipantDecision query failed to scan", err.Error())
+				wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getEventParticipantDecision query failed to scan"})
+				return
+			}
+			fresh_events_list[i].Decision = decision
+		} else {
+			fresh_events_list[i].Decision = "waiting" // this case raise two buttons
+		}
+		rows.Close() // ugly solution inside loop
+	}
+
+	wsSendGroupEventsList(fresh_events_list)
 }
 
 // wsEventGoingHandler marks a user as going to an event

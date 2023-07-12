@@ -105,6 +105,7 @@ export const useWebSocketStore = defineStore({
         case WSMessageType.GROUP_EVENT_GOING:
         case WSMessageType.GROUP_EVENT_NOT_GOING:
         case WSMessageType.GROUP_EVENTS_LIST:
+        case WSMessageType.USER_GROUPS_FRESH_EVENTS_LIST: //todo: BellView.vue
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.GROUP_EVENTS_LIST);
           break;
 

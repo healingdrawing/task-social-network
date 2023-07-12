@@ -183,6 +183,21 @@ func statementsCreation() {
 
 		"getEvents": `SELECT id, group_id, title, description, date, created_at FROM events WHERE group_id = ? ORDER BY created_at DESC;`,
 
+		"getFreshEvents": `
+		SELECT events.id, title, events.description, date,
+		events.group_id, groups.name, groups.description
+		FROM events
+		INNER JOIN groups ON groups.id = events.group_id
+		INNER JOIN group_members ON group_members.group_id = events.group_id
+		WHERE group_members.member_id = ?
+		AND NOT EXISTS (
+			SELECT 1 FROM event_participants
+			WHERE event_participants.event_id = events.id
+			AND event_participants.user_id = ?
+		)
+		ORDER BY events.created_at DESC;
+		`,
+
 		"getUserIDwithEventCount": `SELECT COUNT(*) FROM event_participants WHERE event_id = ? AND user_id = ?;`,
 
 		"getFollowers":                   `SELECT follower_id FROM followers INNER JOIN users ON users.id = follower_id WHERE user_id = ? ORDER BY email ASC;`,
