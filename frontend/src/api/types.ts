@@ -42,8 +42,8 @@ export enum WSMessageType {
   GROUP_EVENT_SUBMIT = "group_event_submit", //  eventNewHandler
   GROUP_EVENTS_LIST = "group_events_list", //  eventsGetHandler
   GROUP_EVENT_PARTICIPANTS_LIST = "group_event_participants_list", //  eventParticipantsGetHandler
-  GROUP_EVENT_ATTEND = "group_event_attend", //  eventAttendHandler
-  GROUP_EVENT_NOT_ATTEND = "group_event_not_attend", //  eventNotAttendHandler
+  GROUP_EVENT_GOING = "group_event_going", //  
+  GROUP_EVENT_NOT_GOING = "group_event_not_going", //  
 
   USER_CHECK = "user_check", //  sessionCheckHandler
   USER_FOLLOWING_LIST = "user_following_list", //  followingHandler
@@ -168,6 +168,34 @@ export interface GroupPostsListRequest {
   group_id: number;
 }
 
+
+export interface GroupEventSubmit {
+  user_uuid: string;
+  group_id: number;
+  title: string;
+  description: string;
+  date: string;
+  decision: string;
+}
+
+export interface GroupEventsListRequest {
+  user_uuid: string;
+  group_id: number;
+}
+
+export interface Event {
+  id: number;
+  title: string;
+  datetime: string;
+  description: string;
+  decision: string;
+}
+
+export interface GroupEventAction {
+  user_uuid: string;
+  event_id: number;
+  decision: string;
+}
 
 export interface Group {
   id: number;

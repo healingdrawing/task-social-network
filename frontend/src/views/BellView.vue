@@ -36,6 +36,7 @@
           <br> " {{ bell.event_name }} "
           <br> from the:
           <br> " {{ bell.group_name }} "
+          <!-- TODO: refactor replace close event reminder button by going / not going buttons -->
           <br> <button title="Discover" @click="openGroup(bell)">
             This could be a matter of extreme importance 😤 !
             <br> Prepare my royal horse ! Open the gate !

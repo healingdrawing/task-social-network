@@ -68,26 +68,27 @@
             <textarea id="description" v-model="event.description" required> </textarea>
             <br>
             <label>Going to Event: </label>
-            <input type="radio" id="going" value="1" v-model="event.going">
-            <label for="going"> Yes </label>
-            <input type="radio" id="not-going" value="0" v-model="event.going">
-            <label for="not-going"> No </label>
+            <input type="radio" id="going" value="going" v-model="event.decision">
+            <label for="going"> going </label>
+            <input type="radio" id="not going" value="not going" v-model="event.decision">
+            <label for="not going"> not going </label>
             <br>
             <button type= "submit"> Create Event </button>
           </form>
         </div>
         <h2>List of Group Events </h2>
         <ul>
-          <li v-for="event in events" :key="event.id">
+          <li v-for="event in events_list" :key="event.id">
             <h3>{{
               event.title }}</h3>
             <p>{{ event.datetime }}</p>
             <p>{{ event.description }}</p>
-            <div>
-              <input type="radio" id="going-yes" name="going-{{ event.id }}" value="1" v-bind:checked="event.going === '1'" v-on:change="going_yes(event, '1')">
-              <label for="going-yes">Yes</label>
-              <input type="radio" id="going-no" name="going-{{ event.id }}" value="0" v-bind:checked="event.going === '0'" v-on:change="going_no(event, '0')">
-              <label for="going-no">No</label>
+            <div v-if="event.decision === 'waiting'">
+              <button @click="going_yes(event)" >going</button>
+              <button @click="going_no(event)" >not going</button>
+            </div>
+            <div v-else>
+              {{ event.decision }}
             </div>
           </li>
         </ul>
@@ -109,7 +110,7 @@ import { useWebSocketStore } from '@/store/pinia';
 import { useUUIDStore } from '@/store/pinia';
 import { useGroupStore } from '@/store/group';
 import { useChatStore } from '@/store/chat';
-import { GroupVisitorStatusRequest, VisitorStatus, WSMessageType } from '@/api/types';
+import { GroupVisitorStatusRequest, VisitorStatus, WSMessageType, GroupEventSubmit, WSMessage, Event, GroupEventAction, GroupEventsListRequest } from '@/api/types';
 const wss = useWebSocketStore();
 const UUIDStore = useUUIDStore();
 const groupStore = useGroupStore();
@@ -134,31 +135,71 @@ function updateGroupVisitor() {
 //dummy code
 
 
-interface Event {
-  id: number;
-  title: string;
-  datetime: string;
-  description: string;
-  going: string;
-}
+
 
 const group = computed(() => groupStore.getGroup)
-const event = ref<Event>({ id: 1, title: '', datetime: '', description: '', going: '1' });
-const events = ref<Event[]>([]);
+const event = ref<Event>({ id: 1, title: '', datetime: '', description: '', decision: 'going' });
+const events_list = computed(() => wss.groupEventsList)
+
+function updateGroupEventsList() {
+  wss.sendMessage({
+    type: WSMessageType.GROUP_EVENTS_LIST,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      group_id: groupStore.getGroup.id,
+    } as GroupEventsListRequest,
+  })
+}
 
 //todo: implement createEvent() function
 const createEvent = async () => {
-  event.value.id = events.value.length + 1
-  events.value.unshift(event.value)
-  event.value = { id: -1, title: '', datetime: '', description: '', going: '1' }
+
+  const group_event_submit: GroupEventSubmit = {
+    user_uuid: UUIDStore.getUUID,
+    group_id: groupStore.getGroup.id,
+    title: event.value.title,
+    date: event.value.datetime,
+    description: event.value.description,
+    decision: event.value.decision,
+  }
+
+  const message: WSMessage = {
+    type: WSMessageType.GROUP_EVENT_SUBMIT,
+    data: group_event_submit,
+  };
+  wss.sendMessage(message);
+
+  event.value = { id: -1, title: '', datetime: '', description: '', decision: 'going' }
 }
 
-const going_yes = (event: Event, value: string) => {
-  event.going = value;
+const going_yes = (event: Event) => {
+
+  const group_event_going = {
+    user_uuid: UUIDStore.getUUID,
+    event_id: event.id,
+    decision: 'going',
+  } as GroupEventAction;
+
+  const message: WSMessage = {
+    type: WSMessageType.GROUP_EVENT_GOING,
+    data: group_event_going,
+  };
+  wss.sendMessage(message);
 };
 
-const going_no = (event: Event, value: string) => {
-  event.going = value;
+const going_no = (event: Event) => {
+
+  const group_event_not_going = {
+    user_uuid: UUIDStore.getUUID,
+    event_id: event.id,
+    decision: 'not going',
+  } as GroupEventAction;
+
+  const message: WSMessage = {
+    type: WSMessageType.GROUP_EVENT_GOING,
+    data: group_event_not_going,
+  };
+  wss.sendMessage(message);
 };
 
 const joinGroup = () => {
@@ -183,6 +224,7 @@ const groupPosts = () => { router.push({ name: 'group_posts' }) }
 onMounted(() => {
 
   updateGroupVisitor();
+  updateGroupEventsList();
 
   //todo: get chat id for the group from backend using groupStore.getGroupId
   const chatId = 77; // replace with actual chat ID

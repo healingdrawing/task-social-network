@@ -52,9 +52,9 @@ const (
 
 	WS_GROUP_EVENT_SUBMIT            WSMT = "group_event_submit"
 	WS_GROUP_EVENTS_LIST             WSMT = "group_events_list"
-	WS_GROUP_EVENT_PARTICIPANTS_LIST WSMT = "group_event_participants_list"
-	WS_GROUP_EVENT_ATTEND            WSMT = "group_event_attend"
-	WS_GROUP_EVENT_NOT_ATTEND        WSMT = "group_event_not_attend"
+	WS_GROUP_EVENT_PARTICIPANTS_LIST WSMT = "group_event_participants_list" // todo: probably artefact
+	WS_GROUP_EVENT_GOING             WSMT = "group_event_going"
+	WS_GROUP_EVENT_NOT_GOING         WSMT = "group_event_not_going"
 
 	WS_USER_CHECK            WSMT = "user_check"
 	WS_USER_FOLLOWING_LIST   WSMT = "user_following_list"

@@ -191,6 +191,15 @@ func reader(conn *websocket.Conn, uuid string) {
 			case string(WS_GROUP_INVITES_LIST):
 				wsGroupInvitesListHandler(conn, data.Data)
 
+			case string(WS_GROUP_EVENT_SUBMIT):
+				wsGroupEventSubmitHandler(conn, data.Data)
+			case string(WS_GROUP_EVENTS_LIST):
+				wsGroupEventsListHandler(conn, data.Data)
+			case string(WS_GROUP_EVENT_GOING):
+				wsGroupEventGoingHandler(conn, data.Data)
+			case string(WS_GROUP_EVENT_NOT_GOING):
+				wsGroupEventNotGoingHandler(conn, data.Data)
+
 			case string(WS_USER_VISITOR_STATUS):
 				wsUserVisitorStatusHandler(conn, data.Data)
 			case string(WS_USER_GROUP_VISITOR_STATUS):
@@ -466,7 +475,7 @@ func wsSendUserGroupVisitorStatus(user_group_visitor_status WS_USER_VISITOR_STAT
 	})
 }
 
-func wsSendInvitesList(invites_list WS_GROUP_INVITES_LIST_DTO) {
+func wsSendGroupInvitesList(invites_list WS_GROUP_INVITES_LIST_DTO) {
 
 	outputMessage, err := wsCreateResponseMessage(WS_GROUP_INVITES_LIST, invites_list)
 
@@ -487,6 +496,24 @@ func wsSendInvitesList(invites_list WS_GROUP_INVITES_LIST_DTO) {
 func wsSendGroupRequestsList(requests_list WS_GROUP_REQUESTS_LIST_DTO) {
 
 	outputMessage, err := wsCreateResponseMessage(WS_GROUP_REQUESTS_LIST, requests_list)
+
+	if err != nil {
+		log.Println(err)
+	}
+	clients.Range(func(key, value interface{}) bool {
+		if c, ok := key.(*websocket.Conn); ok {
+			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return true
+	})
+}
+
+func wsSendGroupEventsList(events_list WS_GROUP_EVENTS_LIST_DTO) {
+
+	outputMessage, err := wsCreateResponseMessage(WS_GROUP_EVENTS_LIST, events_list)
 
 	if err != nil {
 		log.Println(err)

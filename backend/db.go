@@ -176,14 +176,14 @@ func statementsCreation() {
 		"addGroupComment":  `INSERT INTO group_comment (user_id, group_post_id, content, picture, created_at) VALUES (?, ?, ?, ?, ?);`,
 		"getGroupComments": `SELECT email, first_name, last_name, content, picture, created_at FROM group_comment INNER JOIN users ON users.id = user_id WHERE group_post_id = ? ORDER BY group_comment.id DESC;`,
 
-		"addEvent":                  `INSERT INTO events (group_id, event_name, event_description, event_date, event_location, creator_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?);`,
-		"addEventParticipant":       `INSERT INTO event_participants (event_id, user_id, status, status_updated_at) VALUES (?, ?, ?, ?);`,
-		"getEvents":                 `SELECT event_id, group_id, event_name, event_description, event_date, event_location, creator_id, created_at FROM events WHERE group_id = ? ORDER BY created_at DESC;`,
-		"getEvent":                  `SELECT event_id, group_id, event_name, event_description, event_date, event_location, creator_id, created_at FROM events WHERE event_id = ? LIMIT 1;`,
-		"getEventParticipants":      `SELECT user_id, first_name, last_name, email, avatar, status, status_updated_at FROM event_participants INNER JOIN users ON users.id = user_id WHERE event_id = ? ORDER BY status_updated_at DESC;`,
-		"updateEventParticipant":    `UPDATE event_participants SET status = ?, status_updated_at = ? WHERE event_id = ? AND user_id = ?;`,
-		"getEventParticipantStatus": `SELECT status FROM event_participants WHERE event_id = ? AND user_id = ? LIMIT 1;`,
-		"getUserIDwithEventCount":   `SELECT COUNT(*) FROM event_participants WHERE event_id = ? AND user_id = ?;`,
+		"addEvent": `INSERT INTO events (group_id, title, description, date, created_at) VALUES (?, ?, ?, ?, ?);`,
+
+		"addEventParticipant":         `INSERT INTO event_participants (event_id, user_id, decision) VALUES (?, ?, ?);`,
+		"getEventParticipantDecision": `SELECT decision FROM event_participants WHERE event_id = ? AND user_id = ? LIMIT 1;`,
+
+		"getEvents": `SELECT id, group_id, title, description, date, created_at FROM events WHERE group_id = ? ORDER BY created_at DESC;`,
+
+		"getUserIDwithEventCount": `SELECT COUNT(*) FROM event_participants WHERE event_id = ? AND user_id = ?;`,
 
 		"getFollowers":                   `SELECT follower_id FROM followers INNER JOIN users ON users.id = follower_id WHERE user_id = ? ORDER BY email ASC;`,
 		"getFollowersPending":            `SELECT follower_id FROM followers_pending WHERE user_id = ?;`,

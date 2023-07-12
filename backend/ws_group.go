@@ -539,6 +539,6 @@ func wsGroupInvitesListHandler(conn *websocket.Conn, messageData map[string]inte
 		invites_list = append(invites_list, invite)
 	}
 
-	wsSendInvitesList(invites_list)
+	wsSendGroupInvitesList(invites_list)
 
 }

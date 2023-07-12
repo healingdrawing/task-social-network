@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { WSMessage, WSMessageType, Post, GroupPost, Comment, UserProfile, UserForList, UserVisitorStatus as Visitor, Bell, BellType, Group } from '@/api/types';
+import { WSMessage, WSMessageType, Post, GroupPost, Comment, UserProfile, UserForList, UserVisitorStatus as Visitor, Bell, BellType, Group, Event } from '@/api/types';
 import router from '@/router/index';
 
 const websockets: (WebSocket | null)[] = [];
@@ -99,6 +99,13 @@ export const useWebSocketStore = defineStore({
         case WSMessageType.GROUP_REQUESTS_LIST:
           console.log('case clearMessages==============================', message.type);
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.GROUP_REQUESTS_LIST);
+          break;
+
+        case WSMessageType.GROUP_EVENT_SUBMIT:
+        case WSMessageType.GROUP_EVENT_GOING:
+        case WSMessageType.GROUP_EVENT_NOT_GOING:
+        case WSMessageType.GROUP_EVENTS_LIST:
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.GROUP_EVENTS_LIST);
           break;
 
         case WSMessageType.POST_SUBMIT:
@@ -247,7 +254,15 @@ export const useWebSocketStore = defineStore({
       return [...groups];
     },
 
-    followRequestsList(): Bell[] {
+    groupEventsList(): Event[] {
+      const group_events_messages_list = this.messages.filter((message) => message.type === WSMessageType.GROUP_EVENTS_LIST && message.data !== null);
+      const group_events = group_events_messages_list.map((message) =>
+        (message.data as Event[]).map((group_event) => group_event)
+      ).flat();
+      return [...group_events];
+    },
+
+    followRequestsBellList(): Bell[] {
       const fresh_follow_requests_messages = this.messages.filter((message) => message.type === WSMessageType.FOLLOW_REQUEST_RESPONSE)
       const fresh_follow_requests = fresh_follow_requests_messages.map((message) => message.data as Bell)
 
@@ -272,7 +287,7 @@ export const useWebSocketStore = defineStore({
       return follow_requests
     },
 
-    groupInvitesList(): Bell[] {
+    groupInvitesBellList(): Bell[] {
       // todo: not clear place, tried not null check, and for another lists too
       const group_invites_messages_list = this.messages.filter((message) => message.type === WSMessageType.GROUP_INVITES_LIST && message.data !== null)
       const group_invites = group_invites_messages_list.map((message) =>
@@ -289,7 +304,7 @@ export const useWebSocketStore = defineStore({
       return group_invites
     },
 
-    groupRequestsList(): Bell[] {
+    groupRequestsBellList(): Bell[] {
       const group_requests_messages_list = this.messages.filter((message) => message.type === WSMessageType.GROUP_REQUESTS_LIST && message.data !== null)
       const group_requests = group_requests_messages_list.map((message) =>
         (message.data as Bell[]).map((bell) => bell)
@@ -305,14 +320,30 @@ export const useWebSocketStore = defineStore({
       return group_requests
     },
 
+    groupEventsBellList(): Bell[] {
+      const group_events_messages_list = this.messages.filter((message) => message.type === WSMessageType.GROUP_EVENTS_LIST && message.data !== null)
+      const group_events = group_events_messages_list.map((message) =>
+        (message.data as Bell[]).map((bell) => bell)
+      ).flat()
+
+      // prepare for display, fill the empty fields
+      group_events.forEach((bell) => {
+        bell.type = BellType.EVENT
+      })
+
+      console.log('pinia \n group_requests========== ', group_events.length,
+        '\n group_requests_messages_list========== ', group_events_messages_list.length);
+      return group_events
+    },
+
     bellsList(): Bell[] {
       //TODO: add other bells x4 summary
-      return [...this.followRequestsList, ...this.groupInvitesList, ...this.groupRequestsList]
+      return [...this.followRequestsBellList, ...this.groupInvitesBellList, ...this.groupRequestsBellList, ...this.groupEventsBellList]
     },
 
     chatUsersList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.CHAT_USERS_LIST) },
     groupPostCommentsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_POST_COMMENTS_LIST) },
-    groupEventsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_EVENTS_LIST) },
+
     groupEventParticipantsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_EVENT_PARTICIPANTS_LIST) },
 
 
