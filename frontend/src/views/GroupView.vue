@@ -62,7 +62,7 @@
             <input type="text" id="title" v-model="event.title" required>
             <br>
             <label for="datetime"> Date and Time: </label>
-            <input type="datetime-local" id="datetime" v-model="event.datetime" required>
+            <input type="datetime-local" id="datetime" v-model="event.date" required>
             <br>
             <label for="description"> Description: </label>
             <textarea id="description" v-model="event.description" required> </textarea>
@@ -77,11 +77,10 @@
           </form>
         </div>
         <h2>List of Group Events </h2>
-        <ul>
-          <li v-for="event in events_list" :key="event.id">
+          <div v-for="event in events_list" :key="event.id">
             <hr>
+            <p>{{ event.date }}</p>
             <h3> {{ event.title }} </h3>
-            <p>{{ event.datetime }}</p>
             <p>{{ event.description }}</p>
             <div v-if="event.decision === 'waiting'">
               <button @click="going_yes(event)" >going</button>
@@ -90,8 +89,7 @@
             <div v-else>
               {{ event.decision }}
             </div>
-          </li>
-        </ul>
+          </div>
       </div>
       <div v-else-if="group_visitor.status === VisitorStatus.REQUESTER">
         <p>Request to join group is pending.</p>
@@ -138,7 +136,7 @@ function updateGroupVisitor() {
 
 
 const group = computed(() => groupStore.getGroup)
-const event = ref<Event>({ id: 1, title: '', datetime: '', description: '', decision: 'going' });
+const event = ref<Event>({ id: 1, title: '', date: '', description: '', decision: 'going' });
 const events_list = computed(() => wss.groupEventsList)
 
 function updateGroupEventsList() {
@@ -158,7 +156,7 @@ const createEvent = async () => {
     user_uuid: UUIDStore.getUUID,
     group_id: groupStore.getGroup.id,
     title: event.value.title,
-    date: event.value.datetime,
+    date: event.value.date, // to do not refactor all, will be just date
     description: event.value.description,
     decision: event.value.decision,
   }
@@ -169,7 +167,7 @@ const createEvent = async () => {
   };
   wss.sendMessage(message);
 
-  event.value = { id: -1, title: '', datetime: '', description: '', decision: 'going' }
+  event.value = { id: -1, title: '', date: '', description: '', decision: 'going' }
 }
 
 const going_yes = (event: Event) => {

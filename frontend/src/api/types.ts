@@ -187,7 +187,7 @@ export interface GroupEventsListRequest {
 export interface Event {
   id: number;
   title: string;
-  datetime: string;
+  date: string;
   description: string;
   decision: string;
 }
