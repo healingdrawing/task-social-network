@@ -1,24 +1,23 @@
 <template>
   <router-link to="/group">Back to Group</router-link>
   <div>
-    <h1>Create Group Post:</h1>
+    <h1>Create Group Post</h1>
 
     <div><hr><button type="button" @click="crap" title="remove in production">Fill Debug / remove later</button><hr></div> <!-- todo: remove later -->
 
     <form @submit.prevent="addGroupPost">
-      <label for="postTitle">Post Title:</label>
-      <input type="text" id="postTitle" v-model="postTitle" required>
+      <label for="postTitle">Group Post Title:</label>
+      <br> <input type="text" id="postTitle" v-model="postTitle" required>
       <br>
-      <label for="postTags">Post Tags:</label>
-      <input type="text" id="postTags" v-model="postTags">
+      <label for="postTags">Group Post Tags:</label>
+      <br> <input type="text" id="postTags" v-model="postTags">
       <br>
-      <label for="postContent">Post Content:</label>
-      <textarea id="postContent" v-model="postContent" required></textarea>
+      <label for="postContent">Group Post Content:</label>
+      <br> <textarea id="postContent" v-model="postContent" required></textarea>
       
       <div>
-        <label for="picture">Picture:</label>
-        <input type="file" id="picture" accept="image/jpeg, image/png, image/gif" @change="handlePictureChange">
-        <div class="optional">(optional)</div>
+        <label for="picture"> with picture(optional): </label>
+        <br> <input type="file" id="picture" accept="image/jpeg, image/png, image/gif" @change="handlePictureChange">
       </div>
 
       <br>

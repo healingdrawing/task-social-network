@@ -6,6 +6,7 @@
       <br>
       <label>
         Invite followers:
+        <br>
         <select multiple v-model="selectedFollowers">
           <option v-for="follower in followersList" :key="follower.email" :value="follower.email">{{ follower.first_name }} {{ follower.last_name }} ({{ follower.email }})</option>
         </select>

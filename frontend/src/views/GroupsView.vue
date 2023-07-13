@@ -4,17 +4,17 @@
     <form @submit.prevent="createGroup">
       <label>
         Group title:
-        <input type="text" v-model="name" required>
+        <br> <input type="text" v-model="name" required>
       </label>
       <br>
       <label>
         Group description:
-        <textarea v-model="description" required></textarea>
+        <br> <textarea v-model="description" required></textarea>
       </label>
       <div v-if="followersList && followersList.length > 0">
-        <br>
         <label>
           Invite followers:
+          <br>
           <select multiple v-model="selectedFollowers">
           <option v-for="follower in followersList" :key="follower.email" :value="follower.email">{{ follower.first_name }} {{ follower.last_name }} ({{ follower.email }})</option>
         </select>

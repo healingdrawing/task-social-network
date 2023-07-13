@@ -53,19 +53,19 @@
     <div v-if="group_visitor">
       <div v-if="group_visitor.status === VisitorStatus.MEMBER">
         <button @click= "groupChat"> Open Group Chat </button>
-        <button @click="groupInvite"> Invite User </button>
+        <button @click="groupInvite"> Invite Followers </button>
         <button @click="groupPosts"> Group Posts </button>
         <div>
           <h2> Create Event </h2>
           <form @submit.prevent="createEvent">
             <label for="title"> Title: </label>
-            <input type="text" id="title" v-model="event.title" required>
+            <br> <input type="text" id="title" v-model="event.title" required>
             <br>
             <label for="datetime"> Date and Time: </label>
-            <input type="datetime-local" id="datetime" v-model="event.date" required>
+            <br> <input type="datetime-local" id="datetime" v-model="event.date" required>
             <br>
             <label for="description"> Description: </label>
-            <textarea id="description" v-model="event.description" required> </textarea>
+            <br> <textarea id="description" v-model="event.description" required> </textarea>
             <br>
             <label>Going to Event: </label>
             <input type="radio" id="going" value="going" v-model="event.decision">
@@ -76,20 +76,20 @@
             <button type= "submit"> Create Event </button>
           </form>
         </div>
-        <h2>List of Group Events </h2>
-          <div v-for="event in events_list" :key="event.id">
-            <hr>
-            <p>{{ event.date }}</p>
-            <h3> {{ event.title }} </h3>
-            <p>{{ event.description }}</p>
-            <div v-if="event.decision === 'waiting'">
-              <button @click="going_yes(event)" >going</button>
-              <button @click="going_no(event)" >not going</button>
-            </div>
-            <div v-else>
-              {{ event.decision }}
-            </div>
+        <h2>List of Group Events: </h2>
+        <div v-for="event in events_list" :key="event.id">
+          <hr>
+          <p>{{ event.date }}</p>
+          <h3> {{ event.title }} </h3>
+          <p>{{ event.description }}</p>
+          <div v-if="event.decision === 'waiting'">
+            <button @click="going_yes(event)" >going</button>
+            <button @click="going_no(event)" >not going</button>
           </div>
+          <div v-else>
+            {{ event.decision }}
+          </div>
+        </div>
       </div>
       <div v-else-if="group_visitor.status === VisitorStatus.REQUESTER">
         <p>Request to join group is pending.</p>

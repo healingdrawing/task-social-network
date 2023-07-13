@@ -25,25 +25,23 @@
     </div>
   </div>
   <div>
-    <h2>Comments:</h2>
     <!-- add new comment using text area -->
+    <hr>
     <div>
       <form @submit.prevent="addComment">
-        <label for="commentContent">Comment Content:</label>
-        <textarea id="commentContent" v-model="commentContent" required></textarea>
-
+        <label for="commentContent"> Create Comment </label>
+        <br> <textarea id="commentContent" v-model="commentContent" required></textarea>
         <div>
-          <label for="picture">Picture:</label>
-          <input type="file" id="picture" accept="image/jpeg, image/png, image/gif" @change="handlePictureChange">
-          <div class="optional">(optional)</div>
+          <label for="picture"> with picture(optional): </label>
+          <br> <input type="file" id="picture" accept="image/jpeg, image/png, image/gif" @change="handlePictureChange">
         </div>
-
         <br>
         <button type="submit">Submit</button>
       </form>
       <div v-if="pictureStore.pictureError">{{ pictureStore.pictureError }}</div>
     </div>
     <!-- add comments list , already created -->
+    <h2>Comments:</h2>
     <div v-for="comment in commentsList"
       :key="comment.created_at">
       <hr>
