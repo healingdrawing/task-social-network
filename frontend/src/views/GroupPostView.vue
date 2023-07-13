@@ -93,7 +93,7 @@ const group_post = computed(() => postStore.getGroupPost);
 
 function updatePostComments() {
   wss.sendMessage({
-    type: WSMessageType.COMMENTS_LIST,
+    type: WSMessageType.GROUP_POST_COMMENTS_LIST,
     data: {
       user_uuid: UUIDStore.getUUID,
       post_id: group_post.value.id,
@@ -106,7 +106,7 @@ const commentsList = computed(() => wss.commentsList);
 const commentContent = ref('');
 
 function addComment() {
-  const commentSubmit: CommentSubmit = {
+  const group_post_comment_submit: CommentSubmit = {
     user_uuid: UUIDStore.getUUID,
     post_id: group_post.value.id,
     content: commentContent.value,
@@ -114,8 +114,8 @@ function addComment() {
   };
 
   const message: WSMessage = {
-    type: WSMessageType.COMMENT_SUBMIT,
-    data: commentSubmit,
+    type: WSMessageType.GROUP_POST_COMMENT_SUBMIT,
+    data: group_post_comment_submit,
   };
   wss.sendMessage(message);
 

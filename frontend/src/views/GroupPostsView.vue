@@ -34,13 +34,13 @@
       <router-link
         :to="{ name: 'group_post' }"
         @click="piniaManageDataGroupPost(group_post)">
-        <p>Post id: {{ group_post.id }}</p>
-        <p>Post title: {{ group_post.title }}</p>
-        <p>Post tags: {{ group_post.categories }}</p>
-        <p>Post content: {{ group_post.content }}</p>
-        <p>Post created: {{ group_post.created_at }}</p>
+        <p>Group Post id: {{ group_post.id }}</p>
+        <p>Group Post title: {{ group_post.title }}</p>
+        <p>Group Post tags: {{ group_post.categories }}</p>
+        <p>Group Post content: {{ group_post.content }}</p>
+        <p>Group Post created: {{ group_post.created_at }}</p>
         <div v-if="group_post.picture !== ''">
-          <p>Post picture: 
+          <p>Group Post picture: 
             <br> <img :src="`data:image/jpeg;base64,${group_post.picture}`" alt="picture" />
           </p>
         </div>

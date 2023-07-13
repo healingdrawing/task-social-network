@@ -278,7 +278,6 @@ function rejectJoinRequest(bell: Bell) {
 }
 
 const UUIDStore = useUUIDStore();
-const profileStore = useProfileStore();
 function updateBells() {
   // todo: add x4 cases for each type of bell
   wss.sendMessage({

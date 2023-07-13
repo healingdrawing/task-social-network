@@ -121,6 +121,8 @@ export const useWebSocketStore = defineStore({
 
         case WSMessageType.COMMENT_SUBMIT:
         case WSMessageType.COMMENTS_LIST:
+        case WSMessageType.GROUP_POST_COMMENT_SUBMIT:
+        case WSMessageType.GROUP_POST_COMMENTS_LIST:
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.COMMENTS_LIST);
           break;
 

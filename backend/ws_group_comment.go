@@ -30,8 +30,8 @@ import (
 
 // type WS_COMMENTS_LIST_DTO []WS_COMMENT_RESPONSE_DTO
 
-// wsGroupCommentSubmitHandler creates a new comment on a group post, then return all comments on group post.
-func wsGroupCommentSubmitHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+// wsGroupPostCommentSubmitHandler creates a new comment on a group post, then return all comments on group post.
+func wsGroupPostCommentSubmitHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
 
 	var data WS_COMMENT_SUBMIT_DTO
@@ -103,13 +103,13 @@ func wsGroupCommentSubmitHandler(conn *websocket.Conn, messageData map[string]in
 
 	// send all comments on group post
 	// duplicate defer wsRecover(), do not want to crap the code using bool + if
-	wsGroupCommentsListHandler(conn, messageData)
+	wsGroupPostCommentsListHandler(conn, messageData)
 }
 
-// wsGroupCommentsListHandler returns all comments for a group post
+// wsGroupPostCommentsListHandler returns all comments for a group post
 //
 // - @param post_id int
-func wsGroupCommentsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+func wsGroupPostCommentsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover()
 
 	uuid, ok := messageData["user_uuid"].(string)
