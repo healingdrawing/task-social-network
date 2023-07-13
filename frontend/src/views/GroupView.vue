@@ -41,7 +41,7 @@
       because it is headache when jump into group from invite,
       because you need provide giant pile of rare needed info into <Bell>.
       Also sql must be refactored, only for this not required case. So, no.
-      Commened to keep the same style for all cases of visiting group.
+      Commented to keep the same style for all cases of visiting group.
       With other cases, visiting group not from invite,
       the uncommented code section bottom works correct, because filled naturally.
     -->
@@ -56,7 +56,7 @@
         <button @click="groupInvite"> Invite User </button>
         <button @click="groupPosts"> Group Posts </button>
         <div>
-          <h2>Create New Event </h2>
+          <h2> Create Event </h2>
           <form @submit.prevent="createEvent">
             <label for="title"> Title: </label>
             <input type="text" id="title" v-model="event.title" required>
@@ -80,8 +80,7 @@
         <ul>
           <li v-for="event in events_list" :key="event.id">
             <hr>
-            <h3>{{
-              event.title }}</h3>
+            <h3> {{ event.title }} </h3>
             <p>{{ event.datetime }}</p>
             <p>{{ event.description }}</p>
             <div v-if="event.decision === 'waiting'">

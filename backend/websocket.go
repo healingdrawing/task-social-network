@@ -531,10 +531,28 @@ func wsSendGroupEventsList(events_list WS_GROUP_EVENTS_LIST_DTO) {
 	})
 }
 
-////////////////////////////
-// old code
-////////////////////////////
+func wsSendUserGroupsFreshEventsList(fresh_events_list WS_USER_GROUPS_FRESH_EVENTS_LIST_DTO) {
 
+	outputMessage, err := wsCreateResponseMessage(WS_USER_GROUPS_FRESH_EVENTS_LIST, fresh_events_list)
+
+	if err != nil {
+		log.Println(err)
+	}
+	clients.Range(func(key, value interface{}) bool {
+		if c, ok := key.(*websocket.Conn); ok {
+			err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return true
+	})
+}
+
+// //////////////////////////
+// old code
+// //////////////////////////
+// todo: remove code bottom only in case of full cleaning from old http implementation only. Can be not safe remove this part only
 func sendPost(post Post) {
 	data := wsPost{"post", post}
 	output, err := json.Marshal(data)

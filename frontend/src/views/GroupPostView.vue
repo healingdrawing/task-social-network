@@ -40,7 +40,6 @@
 
         <br>
         <button type="submit">Submit</button>
-        <!-- todo: add image or gif to comment required in task. Perhaps, to prevent posting "anacondas" and "caves" photos, the images can be limited from allowed lists of images, but generally it sounds like they expect any image upload, which is unsafe, like in avatar too -->
       </form>
       <div v-if="pictureStore.pictureError">{{ pictureStore.pictureError }}</div>
     </div>
@@ -51,7 +50,7 @@
       <p>Comment content: {{ comment.content }}</p>
       <div v-if="comment.picture !== ''">
         <p>Comment picture: 
-          <img :src="`data:image/jpeg;base64,${comment.picture}`" alt="picture" />
+          <br> <img :src="`data:image/jpeg;base64,${comment.picture}`" alt="picture" />
         </p>
       </div>
       <router-link
@@ -63,7 +62,6 @@
         ({{ comment.email }})
       </h6>
       </router-link>
-      
     </div>
   </div>
 </template>
@@ -85,7 +83,7 @@ function piniaManageDataProfile(email: string) {
   profileStore.setTargetUserEmail(email);
 }
 
-const picture: Ref<Blob | null> = ref(null); //todo: chat gpt solution, to fix null value case, because field is optional
+const picture: Ref<Blob | null> = ref(null);
 const pictureStore = usePictureStore();
 function handlePictureChange(event: Event) {
   pictureStore.handlePictureUpload(event);
@@ -95,7 +93,6 @@ function handlePictureChange(event: Event) {
 const postStore = usePostStore();
 const group_post = computed(() => postStore.getGroupPost);
 
-// todo: refactor to get comments from backend, using post_id
 function updatePostComments() {
   wss.sendMessage({
     type: WSMessageType.COMMENTS_LIST,
@@ -104,7 +101,6 @@ function updatePostComments() {
       post_id: group_post.value.id,
     } as CommentsListRequest,
   });
-  // todo: send message through websocket to refresh comments list
 }
 
 const commentsList = computed(() => wss.commentsList);
@@ -114,7 +110,7 @@ const commentContent = ref('');
 function addComment() {
   const commentSubmit: CommentSubmit = {
     user_uuid: UUIDStore.getUUID,
-    post_id: group_post.value.id, // idiotic gap, because golang can cast properly only strings. facepalm
+    post_id: group_post.value.id,
     content: commentContent.value,
     picture: pictureStore.getPictureBase64String,
   };

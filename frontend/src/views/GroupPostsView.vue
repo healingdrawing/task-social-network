@@ -60,7 +60,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Ref, computed, onMounted, ref, watch } from 'vue';
+import { Ref, computed, onMounted, ref } from 'vue';
 import { useUUIDStore } from '@/store/pinia';
 import { useWebSocketStore } from '@/store/websocket';
 import { useGroupStore } from '@/store/pinia';
@@ -68,7 +68,6 @@ import { usePostStore } from '@/store/pinia';
 import { useProfileStore } from '@/store/pinia';
 import { usePictureStore } from '@/store/pinia';
 import { WSMessage, WSMessageType, GroupPost, GroupPostSubmit, GroupPostsListRequest } from '@/api/types';
-import { onBeforeRouteLeave } from 'vue-router';
 
 const wss = useWebSocketStore();
 const group_posts_list = computed(() => wss.groupPostsList); // ref and reactive failed to work here, so computed used. Straight way put webSocketStore.groupPostsList to template works too,
@@ -143,16 +142,5 @@ const crap = () => {
   postTags.value = 'dummy, post, 111, test';
   postContent.value = 'Dummy Post content text.';
 }
-
-watch(group_posts_list, (newVal) => {
-  console.log('Posts list:', newVal);
-});
-
-onBeforeRouteLeave((to, from, next) => {
-  wss.facepalm();
-  // wss.clearOnBeforeRouteLeave(from.path) // todo: clear the messages. ugly but works
-  console.log('onBeforeRouteLeave fired');
-  next();
-});
 
 </script>

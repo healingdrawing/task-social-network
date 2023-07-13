@@ -76,17 +76,16 @@
 </template>
 
 <script lang="ts" setup>
-import { Ref, computed, onMounted, ref, watch } from 'vue';
+import { Ref, computed, onMounted, ref } from 'vue';
 import { useUUIDStore } from '@/store/pinia';
 import { usePostStore } from '@/store/pinia';
 import { useProfileStore } from '@/store/pinia';
 import { usePictureStore } from '@/store/pinia';
 import { useWebSocketStore } from '@/store/websocket';
 import { WSMessage, WSMessageType, PostSubmit, Post, PostsListRequest, TargetProfileRequest } from '@/api/types';
-import { onBeforeRouteLeave } from 'vue-router';
 
 const wss = useWebSocketStore();
-const postsList = computed(() => wss.postsList); // ref and reactive failed to work here, so computed used. Straight way put webSocketStore.postsList to template works too,
+const postsList = computed(() => wss.postsList); // ref and reactive failed to work here, so computed used. Straight way put wss.postsList to template works too,
 
 
 const postTitle = ref('');
@@ -175,16 +174,5 @@ const crap = () => {
   postContent.value = 'Dummy Post content text.';
   postPrivacy.value = 'public';
 }
-
-watch(postsList, (newVal) => {
-  console.log('Posts list:', newVal);
-});
-
-onBeforeRouteLeave((to, from, next) => {
-  wss.facepalm();
-  // wss.clearOnBeforeRouteLeave(from.path) // todo: clear the messages. ugly but works
-  console.log('onBeforeRouteLeave fired');
-  next();
-});
 
 </script>

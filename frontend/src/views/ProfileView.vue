@@ -26,14 +26,16 @@
   </div>
   <!-- add following list. The other users followed by the user -->
   <h2>Following:</h2>
-  <div v-if="followingList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;">{{ followingList.length }} <br> {{ followingList }}
+  <div v-if="followingList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;">
+    <!-- {{ followingList.length }} <br> {{ followingList }} -->
     <div v-for="user in followingList" :key="user.email">{{ `${user.first_name} ${user.last_name} (${user.email})` }}</div>
   </div>
   <div v-else>No following</div>
 
   <!-- add followers list. The other users following the user -->
   <h2>Followers:</h2>
-  <div v-if="followersList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;"> {{ followersList.length }} <br> {{ followersList }}
+  <div v-if="followersList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;">
+    <!-- {{ followersList.length }} <br> {{ followersList }} -->
     <div v-for="user in followersList" :key="user.email">{{ `${user.first_name} ${user.last_name} (${user.email})` }}</div>
   </div>
   <div v-else>No followers</div>

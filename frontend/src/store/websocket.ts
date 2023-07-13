@@ -77,8 +77,9 @@ export const useWebSocketStore = defineStore({
       this.messages = this.messages.filter((message) => message.type !== WSMessageType.SUCCESS_RESPONSE);
 
       switch (message.type) {
-        //todo: NOPE. FORGET ABOUT IT! perhaps refactor to replace response to list for all possible cases, and then, in case of success, function can be oneline without switch
-        //todo: add x4 cases for each type of bell
+        //todo: NOPE. FORGET ABOUT IT!
+        // perhaps refactor to replace response to list for all possible cases, and then, in case of success, function can be oneline without switch
+
         case WSMessageType.FOLLOW_REQUEST_ACCEPT:
         case WSMessageType.FOLLOW_REQUEST_REJECT:
         case WSMessageType.FOLLOW_REQUESTS_LIST:
@@ -105,8 +106,11 @@ export const useWebSocketStore = defineStore({
         case WSMessageType.GROUP_EVENT_GOING:
         case WSMessageType.GROUP_EVENT_NOT_GOING:
         case WSMessageType.GROUP_EVENTS_LIST:
-        case WSMessageType.USER_GROUPS_FRESH_EVENTS_LIST: //todo: BellView.vue
           this.messages = this.messages.filter((message) => message.type !== WSMessageType.GROUP_EVENTS_LIST);
+          break;
+
+        case WSMessageType.USER_GROUPS_FRESH_EVENTS_LIST: //todo: for BellView.vue
+          this.messages = this.messages.filter((message) => message.type !== WSMessageType.USER_GROUPS_FRESH_EVENTS_LIST);
           break;
 
         case WSMessageType.POST_SUBMIT:
@@ -322,19 +326,19 @@ export const useWebSocketStore = defineStore({
     },
 
     groupEventsBellList(): Bell[] {
-      const group_events_messages_list = this.messages.filter((message) => message.type === WSMessageType.GROUP_EVENTS_LIST && message.data !== null)
-      const group_events = group_events_messages_list.map((message) =>
+      const group_fresh_events_messages_list = this.messages.filter((message) => message.type === WSMessageType.USER_GROUPS_FRESH_EVENTS_LIST && message.data !== null)
+      const group_fresh_events = group_fresh_events_messages_list.map((message) =>
         (message.data as Bell[]).map((bell) => bell)
       ).flat()
 
       // prepare for display, fill the empty fields
-      group_events.forEach((bell) => {
+      group_fresh_events.forEach((bell) => {
         bell.type = BellType.EVENT
       })
 
-      console.log('pinia \n group_requests========== ', group_events.length,
-        '\n group_requests_messages_list========== ', group_events_messages_list.length);
-      return group_events
+      console.log('pinia \n group_requests========== ', group_fresh_events.length,
+        '\n group_requests_messages_list========== ', group_fresh_events_messages_list.length);
+      return group_fresh_events
     },
 
     bellsList(): Bell[] {

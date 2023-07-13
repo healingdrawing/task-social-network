@@ -1,9 +1,10 @@
 <template>
+
+  <!-- // todo: remove later
   <pre style="text-align: left;">
-    //todo: add implementation
     The BellView.vue which displays the list of bells for the user.
     There are x4 types of bells:
-    1. "event" - when an event is created in a group the user is a member of. No action required. But it must have buttons :
+    ok 1. "event" - when an event is created in a group the user is a member of. No action required. But it must have buttons :
       - "Open Group" - to open group which event came from.
       - "Close" - to remove the bell from the list.
     ok 2. "following" - when other user sends a follow request to the user , and user profile is private. Must have two buttons:
@@ -17,6 +18,7 @@
       - "Reject" - to reject the request to join the group, and remove the bell from the list.
     
   </pre>
+ -->
 
   <div v-if="bells.length > 0">
     <div>
