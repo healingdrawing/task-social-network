@@ -283,8 +283,6 @@ func wsGroupRequestSubmitHandler(conn *websocket.Conn, messageData map[string]in
 
 	// send back the updated visitor status
 	wsUserGroupVisitorStatusHandler(conn, messageData)
-	return
-
 }
 
 // wsGroupRequestsListHandler gets a list of all the requests to join the group from group_pending_members table

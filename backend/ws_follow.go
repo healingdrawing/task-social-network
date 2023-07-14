@@ -335,8 +335,8 @@ func wsUnfollowHandler(conn *websocket.Conn, messageData map[string]interface{})
 		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to remove follower from followers table"}, []string{uuid})
 		return
 	}
+
 	wsSend(WS_SUCCESS_RESPONSE, WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " user unfollowed"}, []string{uuid})
-	return
 }
 
 // FollowRequestListHandler returns a list of users that have sent a follow request to the current user

@@ -2,15 +2,15 @@ package main
 
 import (
 	"bytes"
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
-	"math/rand"
+	"math/big"
 	"net/http"
 	"runtime/debug"
 	"strings"
-	"time"
 )
 
 // # jsonResponse marshals and forwards json response writing to http.ResponseWriter
@@ -124,23 +124,6 @@ func get_email_by_user_id(user_id int) (email string, err error) {
 	return email, nil
 }
 
-// # getRequestSenderID gets the ID of the request sender from the cookie
-//
-// @params {r *http.Request}
-func getRequestSenderID(r *http.Request) (int, error) {
-	cookie, err := r.Cookie("user_uuid")
-	if err != nil {
-		return 0, errors.New("malformed cookie/cookie not found")
-	}
-
-	requestSenderID, err := get_user_id_by_uuid(cookie.Value)
-	if err != nil {
-		return 0, errors.New("failed to get ID of the request sender")
-	}
-
-	return requestSenderID, nil
-}
-
 // # get_user_id_by_uuid retrieves id of the user from uuid
 //
 // @params {uuid string}
@@ -188,25 +171,51 @@ func isImage(data []byte) bool {
 		return true
 	}
 	return false
-
-	// if data[0] == 0xFF && data[1] == 0xD8 && data[2] == 0xFF {
-	// 	return true // JPEG
-	// }
-
-	// if data[0] == 0x89 && data[1] == 0x50 && data[2] == 0x4E && data[3] == 0x47 {
-	// 	return true // PNG
-	// }
-
-	// if data[0] == 0x47 && data[1] == 0x49 && data[2] == 0x46 && data[3] == 0x38 {
-	// 	return true // GIF
-	// }
-
-	// return
 }
 
 // randomNum returns a random number between min and max, both inclusive.
 func randomNum(min, max int) int {
-	rng := rand.New(rand.NewSource(time.Now().Unix()))
-	rng.Seed(time.Now().Unix())
-	return rng.Intn(max+1-min) + min
+	bi := big.NewInt(int64(max + 1 - min))
+	bj, err := rand.Int(rand.Reader, bi)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return int(bj.Int64()) + min
+}
+
+func sanitizeCategories(data string) string {
+	newdata := strings.Split(data, ",")
+	returndata := ""
+	for i, w := range newdata {
+		w = strings.TrimSpace(w)
+		if w != "" && i > 0 {
+			returndata += (", " + w)
+		} else {
+			returndata += w
+		}
+		if returndata == "" {
+			returndata = generateRandomEmojiSequence()
+		}
+	}
+	return returndata
+}
+
+func generateRandomEmojiSequence() string {
+	rounds := []string{"🔴", "🟠", "🟡", "🟢", "🔵", "🟣", "🟤", "⚫", "⚪"}
+	// Shuffle the rounds using Fisher-Yates algorithm
+	for i := len(rounds) - 1; i > 0; i-- {
+		bi := big.NewInt(3)
+		bj, err := rand.Int(rand.Reader, bi)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// convert big.Int to int
+		j := int(bj.Int64())
+		rounds[i], rounds[j] = rounds[j], rounds[i]
+	}
+
+	// Join the shuffled rounds into a single string
+	mixedRounds := strings.Join(rounds, " ")
+
+	return mixedRounds
 }

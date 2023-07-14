@@ -1,5 +1,15 @@
 # task-social-network
 
+## dev run
+
+### backend
+- `cd backend`
+- `go run .`
+
+### frontend
+- `cd frontend`
+- `npm run serve`
+
 ## At the moment the recomendations are:
 - DO NOT USE `zero` branch, which is default, it can be used later as final destination
 - use your own branches , and merge them into `dev` branch, using pull requests

@@ -20,17 +20,6 @@ type wsInput struct {
 	Data map[string]interface{} `json:"data"`
 }
 
-type wsPost struct {
-	Type string `json:"type"`
-	Data Post   `json:"post"`
-}
-
-type wsComment struct {
-	Type   string  `json:"type"`
-	PostID int     `json:"postID"`
-	Data   Comment `json:"comment"`
-}
-
 type wsStatus struct {
 	Type     string `json:"type"`
 	Username string `json:"username"`
@@ -51,28 +40,6 @@ type wsTyping struct {
 type wsError struct {
 	Type  string `json:"type"`
 	Error string `json:"error"`
-}
-
-type wsGroupPosts struct {
-	Type  string              `json:"type"`
-	Posts []PostDTOoutElement `json:"posts"`
-}
-
-type wsGroupPost struct {
-	Type string `json:"type"`
-	Post Post   `json:"post"`
-}
-
-type wsGroupPostComment struct {
-	Type    string       `json:"type"`
-	PostID  int          `json:"postID"`
-	Comment GroupComment `json:"group_comment"`
-}
-
-type wsGroupPostComments struct {
-	Type          string         `json:"type"`
-	PostID        int            `json:"postID"`
-	GroupComments []GroupComment `json:"group_comments"`
 }
 
 type wsNotification struct {
@@ -255,42 +222,9 @@ func wsSend(message_type WSMT, message interface{}, uuids []string) {
 }
 
 // //////////////////////////
-// old code. remove later if full cleaning will be executed
+// fragments of old code. remove later if full cleaning will be executed
 // //////////////////////////
 // todo: remove code bottom only in case of full cleaning from old http implementation only. Can be not safe remove this part only
-func sendPost(post Post) {
-	data := wsPost{"post", post}
-	output, err := json.Marshal(data)
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, output)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
-
-func sendComment(postID int, comment Comment) {
-	data := wsComment{"comment", postID, comment}
-	output, err := json.Marshal(data)
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, output)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
 
 func sendStatus(username string, online bool) {
 	data := wsStatus{"status", username, online}
