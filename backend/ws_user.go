@@ -17,39 +17,38 @@ type WS_USER_VISITOR_STATUS_DTO struct {
 }
 
 func wsUserVisitorStatusHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from message data")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from message data"})
 		return
 	}
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
 	target_email, ok := messageData["target_email"].(string)
 	if !ok {
 		log.Println("failed to get target email", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get target email"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get target email"}, []string{uuid})
 		return
 	}
 
 	target_id, err := get_user_id_by_email(target_email)
 	if err != nil {
 		log.Println("failed to get ID of the target user", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the target user"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the target user"}, []string{uuid})
 		return
 	}
 
 	isFollower, err := isFollowing(user_id, target_id)
 	if err != nil {
 		log.Println("failed to check if user is a follower of the target user", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a follower of the target user"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a follower of the target user"}, []string{uuid})
 		return
 	}
 
@@ -59,7 +58,7 @@ func wsUserVisitorStatusHandler(conn *websocket.Conn, messageData map[string]int
 	rows, err := statements["getUserProfile"].Query(target_id)
 	if err != nil {
 		log.Println("failed to get user profile", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user profile"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user profile"}, []string{uuid})
 		return
 	}
 	defer rows.Close()
@@ -68,7 +67,7 @@ func wsUserVisitorStatusHandler(conn *websocket.Conn, messageData map[string]int
 		&profile.avatar_bytes, &profile.Nickname, &profile.About_me, &profile.Privacy)
 	if err != nil {
 		log.Println("failed to scan user profile", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to scan user profile"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to scan user profile"}, []string{uuid})
 		return
 	}
 	rows.Close()
@@ -82,7 +81,7 @@ func wsUserVisitorStatusHandler(conn *websocket.Conn, messageData map[string]int
 		is_requester, err := isRequester(user_id, target_id)
 		if err != nil {
 			log.Println("failed to check if user is a requester of the target user", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a requester of the target user"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a requester of the target user"}, []string{uuid})
 			return
 		}
 		if is_requester {
@@ -92,8 +91,7 @@ func wsUserVisitorStatusHandler(conn *websocket.Conn, messageData map[string]int
 		}
 	}
 
-	log.Println("sending user visitor status", visitor)
-	wsSendUserVisitorStatus(visitor)
+	wsSend(WS_USER_VISITOR_STATUS, visitor, []string{uuid})
 }
 
 // wsUserGroupVisitorStatusHandler used to manage button on top of group page of frontend. Button will be: request to join group/waiting for decision/member of group.
@@ -103,25 +101,24 @@ func wsUserVisitorStatusHandler(conn *websocket.Conn, messageData map[string]int
 //
 // "requester", "member", "visitor"
 func wsUserGroupVisitorStatusHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from message data")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from message data"})
 		return
 	}
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
 	_group_id, ok := messageData["group_id"].(float64)
 	if !ok {
 		log.Println("failed to get group_id from message data")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from message data"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from message data"}, []string{uuid})
 		return
 	}
 	group_id := int(_group_id)
@@ -130,12 +127,12 @@ func wsUserGroupVisitorStatusHandler(conn *websocket.Conn, messageData map[strin
 	is_requester, err := isGroupJoinRequester(user_id, group_id)
 	if err != nil {
 		log.Println("failed to check if user is a requester of the target group", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a requester of the target group"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a requester of the target group"}, []string{uuid})
 		return
 	}
 
 	if is_requester {
-		wsSendUserGroupVisitorStatus(WS_USER_VISITOR_STATUS_DTO{Status: "requester"})
+		wsSend(WS_USER_GROUP_VISITOR_STATUS, WS_USER_VISITOR_STATUS_DTO{Status: "requester"}, []string{uuid})
 		return
 	}
 
@@ -143,15 +140,15 @@ func wsUserGroupVisitorStatusHandler(conn *websocket.Conn, messageData map[strin
 	is_member, err := isGroupMember(user_id, group_id)
 	if err != nil {
 		log.Println("failed to check if user is a member of the target group", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a member of the target group"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a member of the target group"}, []string{uuid})
 		return
 	}
 
 	if is_member {
-		wsSendUserGroupVisitorStatus(WS_USER_VISITOR_STATUS_DTO{Status: "member"})
+		wsSend(WS_USER_GROUP_VISITOR_STATUS, WS_USER_VISITOR_STATUS_DTO{Status: "member"}, []string{uuid})
 		return
 	}
-	wsSendUserGroupVisitorStatus(WS_USER_VISITOR_STATUS_DTO{Status: "visitor"})
+	wsSend(WS_USER_GROUP_VISITOR_STATUS, WS_USER_VISITOR_STATUS_DTO{Status: "visitor"}, []string{uuid})
 }
 
 func isGroupJoinRequester(user_id int, group_id int) (bool, error) {
@@ -218,114 +215,119 @@ Otherwise, it returns an error:
 "403 user does not have permissions to see the target user profile"
 */
 func wsUserProfileHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from message data")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from message data"})
 		return
 	}
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
 	target_email, ok := messageData["target_email"].(string)
 	if !ok {
 		log.Println("failed to get target email", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get target email"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get target email"}, []string{uuid})
 		return
 	}
 
 	target_id, err := get_user_id_by_email(target_email)
 	if err != nil {
 		log.Println("failed to get ID of the target user", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the target user"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the target user"}, []string{uuid})
 		return
 	}
 
 	isFollower, err := isFollowing(user_id, target_id)
 	if err != nil {
 		log.Println("failed to check if user is a follower of the target user", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a follower of the target user"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is a follower of the target user"}, []string{uuid})
 		return
 	}
 
-	var profile WS_USER_PROFILE_DTO
+	var profile_DTO WS_USER_PROFILE_DTO
 	rows, err := statements["getUserProfile"].Query(target_id)
 	if err != nil {
 		log.Println("failed to get user profile", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user profile"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user profile"}, []string{uuid})
 		return
 	}
 	defer rows.Close()
 	rows.Next()
-	err = rows.Scan(&profile.Email, &profile.First_name, &profile.Last_name, &profile.Dob,
-		&profile.avatar_bytes, &profile.Nickname, &profile.About_me, &profile.Privacy)
+	err = rows.Scan(
+		&profile_DTO.Email,
+		&profile_DTO.First_name,
+		&profile_DTO.Last_name,
+		&profile_DTO.Dob,
+		&profile_DTO.avatar_bytes,
+		&profile_DTO.Nickname,
+		&profile_DTO.About_me,
+		&profile_DTO.Privacy,
+	)
 	if err != nil {
 		log.Println("failed to scan user profile", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to scan user profile"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to scan user profile"}, []string{uuid})
 		return
 	}
 	rows.Close()
 
 	full_profile := true
-	if target_id != user_id && !isFollower && profile.Privacy == "private" {
+	if target_id != user_id && !isFollower && profile_DTO.Privacy == "private" {
 		log.Println("user does not have permissions to see the target user profile")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusForbidden) + " user does not have permissions to see the target user profile"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusForbidden) + " user does not have permissions to see the target user profile"}, []string{uuid})
 		full_profile = false
 	}
 
-	profileDTO := WS_USER_PROFILE_RESPONSE_DTO{}
+	profile := WS_USER_PROFILE_RESPONSE_DTO{}
 
-	profileDTO.Email = profile.Email
-	profileDTO.First_name = profile.First_name
-	profileDTO.Last_name = profile.Last_name
+	profile.Email = profile_DTO.Email
+	profile.First_name = profile_DTO.First_name
+	profile.Last_name = profile_DTO.Last_name
 	if full_profile {
-		profileDTO.Dob = profile.Dob
-		profileDTO.Avatar = base64.StdEncoding.EncodeToString(profile.avatar_bytes)
-		profileDTO.Nickname = profile.Nickname
-		profileDTO.About_me = profile.About_me
-		if profile.Privacy == "public" {
-			profileDTO.Public = true
+		profile.Dob = profile_DTO.Dob
+		profile.Avatar = base64.StdEncoding.EncodeToString(profile_DTO.avatar_bytes)
+		profile.Nickname = profile_DTO.Nickname
+		profile.About_me = profile_DTO.About_me
+		if profile_DTO.Privacy == "public" {
+			profile.Public = true
 		} else {
-			profileDTO.Public = false
+			profile.Public = false
 		}
 	}
-	log.Println("sending user profile", profileDTO)
-	wsSendUserProfile(profileDTO)
 
+	wsSend(WS_USER_PROFILE, profile, []string{uuid})
 }
 
 func wsChangePrivacyHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from message data")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from message data"})
 		return
 	}
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
 	_make_public, ok := messageData["make_public"].(string)
 	if !ok {
 		log.Println("failed to get make_public", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get make_public"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get make_public"}, []string{uuid})
 		return
 	}
 	make_public, err := strconv.ParseBool(_make_public)
 	if err != nil {
 		log.Println("failed to parse make_public", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to parse make_public"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to parse make_public"}, []string{uuid})
 		return
 	}
 
@@ -334,11 +336,11 @@ func wsChangePrivacyHandler(conn *websocket.Conn, messageData map[string]interfa
 	_, err = statements["updateUserPrivacy"].Exec(privacy_value, user_id)
 	if err != nil {
 		log.Println("failed to update user privacy", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to update user privacy"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to update user privacy"}, []string{uuid})
 		return
 	}
 
-	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " privacy updated"})
+	wsSend(WS_SUCCESS_RESPONSE, WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " privacy updated"}, []string{uuid})
 }
 
 func isRequester(user_id int, target_id int) (bool, error) {

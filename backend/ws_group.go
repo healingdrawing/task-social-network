@@ -80,12 +80,18 @@ type WS_INVITED_USER_INFO_DTO struct {
 }
 
 func wsGroupSubmitHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
+
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("failed to get user_uuid from message data")
+		return
+	}
 
 	var data WS_GROUP_SUBMIT_DTO
+	data.User_uuid = uuid
 
 	fields := map[string]*string{
-		"user_uuid":      &data.User_uuid,
 		"name":           &data.Name,
 		"description":    &data.Description,
 		"invited_emails": &data.Invited_emails,
@@ -95,7 +101,7 @@ func wsGroupSubmitHandler(conn *websocket.Conn, messageData map[string]interface
 		value, ok := messageData[key].(string)
 		if !ok {
 			log.Printf("failed to get %s from messageData\n", key)
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprintf("%d failed to get %s from messageData", http.StatusUnprocessableEntity, key)})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprintf("%d failed to get %s from messageData", http.StatusUnprocessableEntity, key)}, []string{uuid})
 			return
 		}
 		*ptr = value
@@ -104,7 +110,7 @@ func wsGroupSubmitHandler(conn *websocket.Conn, messageData map[string]interface
 	user_id, err := get_user_id_by_uuid(data.User_uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
@@ -113,20 +119,20 @@ func wsGroupSubmitHandler(conn *websocket.Conn, messageData map[string]interface
 	data.Description = strings.TrimSpace(data.Description)
 	if data.Name == "" || data.Description == "" {
 		log.Println("empty fields")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " empty fields"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " empty fields"}, []string{uuid})
 		return
 	}
 	created_at := time.Now().Format("2006-01-02 15:04:05")
 	result, err := statements["addGroup"].Exec(data.Name, data.Description, user_id, created_at)
 	if err != nil {
 		log.Println("addGroup query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroup query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroup query failed"}, []string{uuid})
 		return
 	}
 	group_id, err := result.LastInsertId()
 	if err != nil {
 		log.Println("failed to get last insert id", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to get last insert id"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to get last insert id"}, []string{uuid})
 		return
 	}
 	invited_emails_string := strings.TrimSpace(data.Invited_emails)
@@ -137,7 +143,7 @@ func wsGroupSubmitHandler(conn *websocket.Conn, messageData map[string]interface
 			invited_user_id, err := get_user_id_by_email(email)
 			if err != nil {
 				log.Println("failed to get user id by email", err.Error())
-				wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to get user id by email"})
+				wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to get user id by email"}, []string{uuid})
 				return
 			}
 			// add the invited user to the groupPendingMembers table
@@ -145,7 +151,7 @@ func wsGroupSubmitHandler(conn *websocket.Conn, messageData map[string]interface
 			_, err = statements["addGroupInvitedUser"].Exec(invited_user_id, group_id, user_id, created_at)
 			if err != nil {
 				log.Println("addGroupInvitedUser query failed", err.Error())
-				wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupInvitedUser query failed"})
+				wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupInvitedUser query failed"}, []string{uuid})
 				return
 			}
 		}
@@ -154,12 +160,12 @@ func wsGroupSubmitHandler(conn *websocket.Conn, messageData map[string]interface
 	_, err = statements["addGroupMember"].Exec(group_id, user_id)
 	if err != nil {
 		log.Println("addGroupMember query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupMember query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupMember query failed"}, []string{uuid})
 		return
 	}
 
 	// send response
-	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " group created"})
+	wsSend(WS_SUCCESS_RESPONSE, WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " group created"}, []string{uuid})
 
 	// send the list of all groups where user is a member, for GroupsView.vue
 	wsGroupsListHandler(conn, messageData)
@@ -171,19 +177,19 @@ func wsGroupsListHandler(conn *websocket.Conn, messageData map[string]interface{
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"}, []string{uuid})
 		return
 	}
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 	rows, err := statements["getGroups"].Query(user_id)
 	if err != nil {
 		log.Println("getGroups query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroups query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroups query failed"}, []string{uuid})
 		return
 	}
 	defer rows.Close()
@@ -193,12 +199,13 @@ func wsGroupsListHandler(conn *websocket.Conn, messageData map[string]interface{
 		err = rows.Scan(&group.Id, &group.Name, &group.Description, &group.Created_at, &group.Email, &group.First_name, &group.Last_name)
 		if err != nil {
 			log.Println("getGroups query failed to scan", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroups query failed to scan row"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroups query failed to scan row"}, []string{uuid})
 			return
 		}
 		groups = append(groups, group)
 	}
-	wsSendGroupsList(groups)
+
+	wsSend(WS_GROUPS_LIST, groups, []string{uuid})
 }
 
 // wsGroupsAllListHandler returns list of all groups, for GroupsAllView.vue
@@ -206,19 +213,19 @@ func wsGroupsAllListHandler(conn *websocket.Conn, messageData map[string]interfa
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"}, []string{uuid})
 		return
 	}
 	_, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 	rows, err := statements["getAllGroups"].Query()
 	if err != nil {
 		log.Println("getAllGroups query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getAllGroups query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getAllGroups query failed"}, []string{uuid})
 		return
 	}
 	defer rows.Close()
@@ -228,37 +235,37 @@ func wsGroupsAllListHandler(conn *websocket.Conn, messageData map[string]interfa
 		err = rows.Scan(&group.Id, &group.Name, &group.Description, &group.Created_at, &group.Email, &group.First_name, &group.Last_name)
 		if err != nil {
 			log.Println("getAllGroups query failed to scan", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getAllGroups query failed to scan row"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getAllGroups query failed to scan row"}, []string{uuid})
 			return
 		}
 		groups = append(groups, group)
 	}
-	wsSendGroupsList(groups)
+
+	wsSend(WS_GROUPS_LIST, groups, []string{uuid})
 }
 
 // wsGroupRequestSubmitHandler add user to groupPendingMembers table
 //
 // @params: group_id
 func wsGroupRequestSubmitHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
 		return
 	}
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
 	_group_id, ok := messageData["group_id"].(float64)
 	if !ok {
 		log.Println("failed to get group_id from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from messageData"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from messageData"}, []string{uuid})
 		return
 	}
 	group_id := int64(_group_id)
@@ -267,12 +274,12 @@ func wsGroupRequestSubmitHandler(conn *websocket.Conn, messageData map[string]in
 	_, err = statements["addGroupPendingMember"].Exec(group_id, user_id)
 	if err != nil {
 		log.Println("addGroupPendingMember query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupPendingMember query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupPendingMember query failed"}, []string{uuid})
 		return
 	}
 
 	//todo: perhaps remove later, at the moment not used
-	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " group joining request sent to group creator, waiting for approval"})
+	wsSend(WS_SUCCESS_RESPONSE, WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " group joining request sent to group creator, waiting for approval"}, []string{uuid})
 
 	// send back the updated visitor status
 	wsUserGroupVisitorStatusHandler(conn, messageData)
@@ -284,18 +291,17 @@ func wsGroupRequestSubmitHandler(conn *websocket.Conn, messageData map[string]in
 //
 // @params: {group_id : int}
 func wsGroupRequestsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
 		return
 	}
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
@@ -304,7 +310,7 @@ func wsGroupRequestsListHandler(conn *websocket.Conn, messageData map[string]int
 	rows, err := statements["getCreatorAllGroupsPendings"].Query(user_id)
 	if err != nil {
 		log.Println("getCreatorAllGroupsPendings query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getCreatorAllGroupsPendings query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getCreatorAllGroupsPendings query failed"}, []string{uuid})
 		return
 	}
 	defer rows.Close()
@@ -323,38 +329,37 @@ func wsGroupRequestsListHandler(conn *websocket.Conn, messageData map[string]int
 		)
 		if err != nil {
 			log.Println("request scan failed", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " request scan failed"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " request scan failed"}, []string{uuid})
 			return
 		}
 		requests_list = append(requests_list, request)
 	}
 
-	wsSendGroupRequestsList(requests_list)
+	wsSend(WS_GROUP_REQUESTS_LIST, requests_list, []string{uuid})
 }
 
 // wsGroupInvitesSubmitHandler send invites to the group for emails(users) space separated
 //
 // @params: group_id, invited_emails
 func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
 		return
 	}
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
 	_group_id, ok := messageData["group_id"].(float64)
 	if !ok {
 		log.Println("failed to get group_id from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from messageData"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from messageData"}, []string{uuid})
 		return
 	}
 	group_id := int64(_group_id)
@@ -362,7 +367,7 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 	invited_emails, ok := messageData["invited_emails"].(string) // space separated emails
 	if !ok {
 		log.Println("failed to get invited_emails from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get invited_emails from messageData"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get invited_emails from messageData"}, []string{uuid})
 		return
 	}
 	//remove all not single spaces and trailing spaces
@@ -370,7 +375,7 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 	//check the string is enough long, at least "a@" or "a b"(should not happens, cause filtered by frontend html tag built-in checker for email)
 	if len(invited_emails) < 2 {
 		log.Println("no invited_emails in messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " no invited_emails in messageData"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " no invited_emails in messageData"}, []string{uuid})
 		return
 	}
 	emails := strings.Split(invited_emails, " ")
@@ -382,7 +387,7 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 		invited_user_id, err := get_user_id_by_email(email)
 		if err != nil {
 			log.Printf("failed to get ID of the invited user with email [%s] %s", email, err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the invited user"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the invited user"}, []string{uuid})
 			err_counter++
 			continue
 		}
@@ -392,7 +397,7 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 	rows, err := statements["getGroupMembers"].Query(group_id)
 	if err != nil {
 		log.Println("getGroupMembers query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroupMembers query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroupMembers query failed"}, []string{uuid})
 		return
 	}
 	defer rows.Close()
@@ -403,7 +408,7 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 		err = rows.Scan(&group_member_id)
 		if err != nil {
 			log.Println("group_member_id scan failed", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " scan failed"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " scan failed"}, []string{uuid})
 			return
 		}
 		group_member_ids[group_member_id] = group_member_id
@@ -415,7 +420,7 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 		_, ok := group_member_ids[id]
 		if ok {
 			log.Printf("user with ID [%d] is already a member of the group with ID [%d]", id, group_id)
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " user is already a member of the group"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " user is already a member of the group"}, []string{uuid})
 			err_counter++
 			continue
 		}
@@ -426,7 +431,7 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 	rows, err = statements["getGroupInvitedUsers"].Query(group_id)
 	if err != nil {
 		log.Println("getGroupInvitedUsers query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroupInvitedUsers query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroupInvitedUsers query failed"}, []string{uuid})
 		return
 	}
 	defer rows.Close()
@@ -437,7 +442,7 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 		err = rows.Scan(&group_invited_user_id)
 		if err != nil {
 			log.Println("group_invited_user_id scan failed", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " scan failed"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " scan failed"}, []string{uuid})
 			return
 		}
 		group_invited_user_ids[group_invited_user_id] = group_invited_user_id
@@ -449,7 +454,7 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 		_, ok := group_invited_user_ids[id]
 		if ok {
 			log.Printf("user with ID [%d] is already invited to the group with ID [%d]", id, group_id)
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " user is already invited to the group"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " user is already invited to the group"}, []string{uuid})
 			err_counter++
 			continue
 		}
@@ -461,7 +466,7 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 	bulkInsertStmt, err := db.Prepare("INSERT INTO group_invited_users (user_id, group_id, inviter_id, created_at) VALUES (?, ?, ?, ?)")
 	if err != nil {
 		log.Println("Failed to prepare bulk insert statement", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to prepare bulk insert statement"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to prepare bulk insert statement"}, []string{uuid})
 		return
 	}
 
@@ -477,7 +482,7 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 	_, err = bulkInsertStmt.Exec(values...)
 	if err != nil {
 		log.Println("Bulk insert failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " bulk insert failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " bulk insert failed"}, []string{uuid})
 		return
 	}
 
@@ -486,29 +491,28 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 	// 	_, err = statements["addGroupInvitedUser"].Exec(invited_user_id, group_id, user_id, time.Now().Format("2006-01-02 15:04:05"))
 	// 	if err != nil {
 	// 		log.Println("addGroupInvitedUser query failed", err.Error())
-	// 		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupInvitedUser query failed"})
+	// 		wsSend(WS_ERROR_RESPONSE,WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupInvitedUser query failed"},[]string{uuid})
 	// 		err_counter++
 	// 		continue
 	// 	}
 	// }
 
-	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprintf("%d Number of errors:%d. User/s invited to the group", http.StatusOK, err_counter)})
+	wsSend(WS_SUCCESS_RESPONSE, WS_SUCCESS_RESPONSE_DTO{fmt.Sprintf("%d Number of errors:%d. User/s invited to the group", http.StatusOK, err_counter)}, []string{uuid})
 }
 
 // wsGroupInvitesListHandler returns invites into the groups for the user
 func wsGroupInvitesListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
 		return
 	}
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
@@ -517,7 +521,7 @@ func wsGroupInvitesListHandler(conn *websocket.Conn, messageData map[string]inte
 	rows, err := statements["getUserInvites"].Query(user_id)
 	if err != nil {
 		log.Println("getUserInvites query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getUserInvites query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getUserInvites query failed"}, []string{uuid})
 		return
 	}
 	defer rows.Close()
@@ -533,12 +537,11 @@ func wsGroupInvitesListHandler(conn *websocket.Conn, messageData map[string]inte
 			&invite.Inviter_last_name)
 		if err != nil {
 			log.Println("invite scan failed", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " invite scan failed"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " invite scan failed"}, []string{uuid})
 			return
 		}
 		invites_list = append(invites_list, invite)
 	}
 
-	wsSendGroupInvitesList(invites_list)
-
+	wsSend(WS_GROUP_INVITES_LIST, invites_list, []string{uuid})
 }

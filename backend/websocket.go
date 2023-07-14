@@ -96,12 +96,12 @@ func wsConnection(w http.ResponseWriter, r *http.Request) {
 		log.Println("====================================")
 		return
 	}
-	reader(ws, uuid)
+	reader(uuid, ws)
 }
 
-func reader(conn *websocket.Conn, uuid string) {
-	clients.Store(conn, uuid)
-	defer clients.Delete(conn)
+func reader(uuid string, conn *websocket.Conn) {
+	clients.Store(uuid, conn)
+	defer clients.Delete(uuid)
 	defer conn.Close()
 	for {
 		messageType, incoming, err := conn.ReadMessage()
@@ -230,332 +230,32 @@ func reader(conn *websocket.Conn, uuid string) {
 	}
 }
 
-//todo: there is tiny chance it can be simplified. Check after all wsSend... is done
-
-func wsSendError(msg WS_ERROR_RESPONSE_DTO) {
-	outputMessage, err := wsCreateResponseMessage(WS_ERROR_RESPONSE, msg)
-
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
-
-func wsSendSuccess(msg WS_SUCCESS_RESPONSE_DTO) {
-	outputMessage, err := wsCreateResponseMessage(WS_SUCCESS_RESPONSE, msg)
+// send message to connections by uuids provided
+func wsSend(message_type WSMT, message interface{}, uuids []string) {
+	outputMessage, err := wsCreateResponseMessage(message_type, message)
 
 	if err != nil {
 		log.Println(err)
 	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-			if err != nil {
-				log.Println(err)
+
+	for _, uuid := range uuids {
+		if conn, ok := clients.Load(uuid); ok {
+			if c, ok := conn.(*websocket.Conn); ok {
+				err = c.WriteMessage(websocket.TextMessage, outputMessage)
+				if err != nil {
+					log.Println(err)
+				}
+			} else {
+				log.Println("wsSend: clients.Load(uuid) is not *websocket.Conn")
 			}
+		} else {
+			log.Println("wsSend: client not found . clients.Load(uuid) failed")
 		}
-		return true
-	})
-}
-
-// func wsSendPost(post WS_POST_RESPONSE_DTO) {
-
-// 	outputMessage, err := wsCreateResponseMessage(WS_POST_RESPONSE, post)
-
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
-// 	clients.Range(func(key, value interface{}) bool {
-// 		if c, ok := key.(*websocket.Conn); ok {
-// 			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-// 			if err != nil {
-// 				log.Println(err)
-// 			}
-// 		}
-// 		return true
-// 	})
-// }
-
-func wsSendPostsList(posts_list WS_POSTS_LIST_DTO) {
-
-	outputMessage, err := wsCreateResponseMessage(WS_POSTS_LIST, posts_list)
-
-	if err != nil {
-		log.Println(err)
 	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
-
-func wsSendGroupPostsList(group_posts_list WS_GROUP_POSTS_LIST_DTO) {
-
-	outputMessage, err := wsCreateResponseMessage(WS_GROUP_POSTS_LIST, group_posts_list)
-
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
-
-func wsSendGroupsList(groups_list WS_GROUPS_LIST_DTO) {
-
-	outputMessage, err := wsCreateResponseMessage(WS_GROUPS_LIST, groups_list)
-
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
-
-// func wsSendComment(comment WS_COMMENT_RESPONSE_DTO) {
-
-// 	outputMessage, err := wsCreateResponseMessage(WS_COMMENT_RESPONSE, comment)
-
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
-// 	clients.Range(func(key, value interface{}) bool {
-// 		if c, ok := key.(*websocket.Conn); ok {
-// 			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-// 			if err != nil {
-// 				log.Println(err)
-// 			}
-// 		}
-// 		return true
-// 	})
-// }
-
-func wsSendCommentsList(comments_list WS_COMMENTS_LIST_DTO) {
-
-	outputMessage, err := wsCreateResponseMessage(WS_COMMENTS_LIST, comments_list)
-
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
-
-func wsSendUserProfile(profile WS_USER_PROFILE_RESPONSE_DTO) {
-
-	outputMessage, err := wsCreateResponseMessage(WS_USER_PROFILE, profile)
-
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
-
-func wsSendFollowingList(following_list WS_FOLLOWING_LIST_DTO) {
-
-	outputMessage, err := wsCreateResponseMessage(WS_USER_FOLLOWING_LIST, following_list)
-
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
-
-func wsSendFollowersList(following_list WS_FOLLOWERS_LIST_DTO) {
-
-	outputMessage, err := wsCreateResponseMessage(WS_USER_FOLLOWERS_LIST, following_list)
-
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
-
-func wsSendFollowRequestsList(follow_requests_list WS_FOLLOW_REQUESTS_LIST_DTO) {
-
-	outputMessage, err := wsCreateResponseMessage(WS_FOLLOW_REQUESTS_LIST, follow_requests_list)
-
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
-
-func wsSendUserVisitorStatus(user_visitor_status WS_USER_VISITOR_STATUS_DTO) {
-
-	outputMessage, err := wsCreateResponseMessage(WS_USER_VISITOR_STATUS, user_visitor_status)
-
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
-
-func wsSendUserGroupVisitorStatus(user_group_visitor_status WS_USER_VISITOR_STATUS_DTO) {
-
-	outputMessage, err := wsCreateResponseMessage(WS_USER_GROUP_VISITOR_STATUS, user_group_visitor_status)
-
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
-
-func wsSendGroupInvitesList(invites_list WS_GROUP_INVITES_LIST_DTO) {
-
-	outputMessage, err := wsCreateResponseMessage(WS_GROUP_INVITES_LIST, invites_list)
-
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
-
-func wsSendGroupRequestsList(requests_list WS_GROUP_REQUESTS_LIST_DTO) {
-
-	outputMessage, err := wsCreateResponseMessage(WS_GROUP_REQUESTS_LIST, requests_list)
-
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
-
-func wsSendGroupEventsList(events_list WS_GROUP_EVENTS_LIST_DTO) {
-
-	outputMessage, err := wsCreateResponseMessage(WS_GROUP_EVENTS_LIST, events_list)
-
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
-
-func wsSendUserGroupsFreshEventsList(fresh_events_list WS_USER_GROUPS_FRESH_EVENTS_LIST_DTO) {
-
-	outputMessage, err := wsCreateResponseMessage(WS_USER_GROUPS_FRESH_EVENTS_LIST, fresh_events_list)
-
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if c, ok := key.(*websocket.Conn); ok {
-			err = c.WriteMessage(websocket.TextMessage, outputMessage)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
 }
 
 // //////////////////////////
-// old code
+// old code. remove later if full cleaning will be executed
 // //////////////////////////
 // todo: remove code bottom only in case of full cleaning from old http implementation only. Can be not safe remove this part only
 func sendPost(post Post) {

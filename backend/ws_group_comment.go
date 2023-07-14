@@ -32,29 +32,35 @@ import (
 
 // wsGroupPostCommentSubmitHandler creates a new comment on a group post, then return all comments on group post.
 func wsGroupPostCommentSubmitHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
+
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("failed to get user_uuid from message data")
+		return
+	}
 
 	var data WS_COMMENT_SUBMIT_DTO
+	data.User_uuid = uuid
 
 	_post_id, ok := messageData["post_id"].(float64)
 	if !ok {
 		log.Println("failed to get post_id from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity, " failed to get post_id from messageData")})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity, " failed to get post_id from messageData")}, []string{uuid})
 		return
 	}
 	data.Post_id = int(_post_id)
 
 	fields := map[string]*string{
-		"user_uuid": &data.User_uuid,
-		"content":   &data.Content,
-		"picture":   &data.Picture,
+		"content": &data.Content,
+		"picture": &data.Picture,
 	}
 
 	for key, ptr := range fields {
 		value, ok := messageData[key].(string)
 		if !ok {
 			log.Printf("failed to get %s from messageData\n", key)
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprintf("%d failed to get %s from messageData", http.StatusUnprocessableEntity, key)})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprintf("%d failed to get %s from messageData", http.StatusUnprocessableEntity, key)}, []string{uuid})
 			return
 		}
 		*ptr = value
@@ -63,7 +69,7 @@ func wsGroupPostCommentSubmitHandler(conn *websocket.Conn, messageData map[strin
 	user_id, err := get_user_id_by_uuid(data.User_uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
@@ -73,18 +79,18 @@ func wsGroupPostCommentSubmitHandler(conn *websocket.Conn, messageData map[strin
 		imageData, err := extractImageData(data.Picture)
 		if err != nil {
 			log.Println("=FAIL extractPictureData: ", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " =FAIL extractPictureData:" + err.Error()})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " =FAIL extractPictureData:" + err.Error()}, []string{uuid})
 			return
 		}
 		pictureData, err := base64.StdEncoding.DecodeString(imageData)
 		if err != nil {
 			log.Println("Invalid picture ", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " Invalid picture"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " Invalid picture"}, []string{uuid})
 			return
 		}
 		if !isImage(pictureData) {
 			log.Println("picture is not a valid image", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnsupportedMediaType) + " picture is not a valid image"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnsupportedMediaType) + " picture is not a valid image"}, []string{uuid})
 			return
 		}
 		commentPicture = pictureData
@@ -95,14 +101,13 @@ func wsGroupPostCommentSubmitHandler(conn *websocket.Conn, messageData map[strin
 	_, err = statements["addGroupComment"].Exec(user_id, data.Post_id, data.Content, commentPicture, created_at)
 	if err != nil {
 		log.Println("addGroupComment query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupComment query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupComment query failed"}, []string{uuid})
 		return
 	}
 
-	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Group Comment created"})
+	wsSend(WS_SUCCESS_RESPONSE, WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Group Comment created"}, []string{uuid})
 
 	// send all comments on group post
-	// duplicate defer wsRecover(), do not want to crap the code using bool + if
 	wsGroupPostCommentsListHandler(conn, messageData)
 }
 
@@ -110,25 +115,24 @@ func wsGroupPostCommentSubmitHandler(conn *websocket.Conn, messageData map[strin
 //
 // - @param post_id int
 func wsGroupPostCommentsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity, " failed to get user_uuid from messageData")})
 		return
 	}
 	_, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
 	_post_id, ok := messageData["post_id"].(float64)
 	if !ok {
 		log.Println("failed to get post_id from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity, " failed to get post_id from messageData")})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity, " failed to get post_id from messageData")}, []string{uuid})
 		return
 	}
 	post_id := int(_post_id)
@@ -136,7 +140,7 @@ func wsGroupPostCommentsListHandler(conn *websocket.Conn, messageData map[string
 	rows, err := statements["getGroupComments"].Query(post_id)
 	if err != nil {
 		log.Println("getGroupComments query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroupComments query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroupComments query failed"}, []string{uuid})
 		return
 	}
 	defer rows.Close()
@@ -148,11 +152,12 @@ func wsGroupPostCommentsListHandler(conn *websocket.Conn, messageData map[string
 		err = rows.Scan(&comment.Email, &comment.First_name, &comment.Last_name, &comment.Content, &pictureBlob, &comment.Created_at)
 		if err != nil {
 			log.Println("getGroupComments scan failed", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroupComments scan failed"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroupComments scan failed"}, []string{uuid})
 			return
 		}
 		comment.Picture = base64.StdEncoding.EncodeToString(pictureBlob)
 		commentsList = append(commentsList, comment)
 	}
-	wsSendCommentsList(commentsList)
+
+	wsSend(WS_COMMENTS_LIST, commentsList, []string{uuid})
 }

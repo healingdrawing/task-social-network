@@ -100,7 +100,14 @@ func wsCreateResponseMessage(messageType WSMT, data interface{}) ([]byte, error)
 
 // todo: CHECK IT! old version refactored, raw code
 // wsRecover recover from panic and send a json err response over websocket
-func wsRecover() {
+func wsRecover(messageData map[string]interface{}) {
+
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("wsRecover: failed to get user_uuid from message data")
+		return
+	}
+
 	if r := recover(); r != nil {
 		fmt.Println("=====================================")
 		stackTrace := debug.Stack()
@@ -121,9 +128,7 @@ func wsRecover() {
 		relevantPanicLine := strings.Join(relevantPanicLines, "\n")
 		log.Println(relevantPanicLines)
 
-		wsSendError(WS_ERROR_RESPONSE_DTO{
-			Content: relevantPanicLine,
-		})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{Content: relevantPanicLine}, []string{uuid})
 		fmt.Println("=====================================")
 		// to print the full stack trace
 		log.Println(string(stackTrace))

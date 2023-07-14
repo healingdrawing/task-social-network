@@ -30,29 +30,35 @@ type WS_COMMENTS_LIST_DTO []WS_COMMENT_RESPONSE_DTO
 
 // wsCommentSubmitHandler creates a new comment on a post, then return all comments on that post.
 func wsCommentSubmitHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
+
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("failed to get user_uuid from messageData")
+		return
+	}
 
 	var data WS_COMMENT_SUBMIT_DTO
+	data.User_uuid = uuid
 
 	_post_id, ok := messageData["post_id"].(float64)
 	if !ok {
 		log.Println("failed to get post_id from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity, " failed to get post_id from messageData")})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity, " failed to get post_id from messageData")}, []string{uuid})
 		return
 	}
 	data.Post_id = int(_post_id)
 
 	fields := map[string]*string{
-		"user_uuid": &data.User_uuid,
-		"content":   &data.Content,
-		"picture":   &data.Picture,
+		"content": &data.Content,
+		"picture": &data.Picture,
 	}
 
 	for key, ptr := range fields {
 		value, ok := messageData[key].(string)
 		if !ok {
 			log.Printf("failed to get %s from messageData\n", key)
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprintf("%d failed to get %s from messageData", http.StatusUnprocessableEntity, key)})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprintf("%d failed to get %s from messageData", http.StatusUnprocessableEntity, key)}, []string{uuid})
 			return
 		}
 		*ptr = value
@@ -61,7 +67,7 @@ func wsCommentSubmitHandler(conn *websocket.Conn, messageData map[string]interfa
 	user_id, err := get_user_id_by_uuid(data.User_uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
@@ -71,18 +77,18 @@ func wsCommentSubmitHandler(conn *websocket.Conn, messageData map[string]interfa
 		imageData, err := extractImageData(data.Picture)
 		if err != nil {
 			log.Println("=FAIL extractPictureData: ", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " =FAIL extractPictureData:" + err.Error()})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " =FAIL extractPictureData:" + err.Error()}, []string{uuid})
 			return
 		}
 		pictureData, err := base64.StdEncoding.DecodeString(imageData)
 		if err != nil {
 			log.Println("Invalid picture ", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " Invalid picture"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " Invalid picture"}, []string{uuid})
 			return
 		}
 		if !isImage(pictureData) {
 			log.Println("picture is not a valid image", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnsupportedMediaType) + " picture is not a valid image"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnsupportedMediaType) + " picture is not a valid image"}, []string{uuid})
 			return
 		}
 		commentPicture = pictureData
@@ -93,15 +99,13 @@ func wsCommentSubmitHandler(conn *websocket.Conn, messageData map[string]interfa
 	_, err = statements["addComment"].Exec(user_id, data.Post_id, data.Content, commentPicture, created_at)
 	if err != nil {
 		log.Println("addComment query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addComment query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addComment query failed"}, []string{uuid})
 		return
 	}
 
-	wsSendSuccess(WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Comment created"})
+	wsSend(WS_SUCCESS_RESPONSE, WS_SUCCESS_RESPONSE_DTO{fmt.Sprint(http.StatusOK) + " Comment created"}, []string{uuid})
 
 	// send all comments on that post
-	// will duplicate wsRecover(), but just do not want to provide bool + if statement,
-	// into wsCommentsListHandler to check if it is nested call or websocket.go call
 	wsCommentsListHandler(conn, messageData)
 }
 
@@ -109,25 +113,24 @@ func wsCommentSubmitHandler(conn *websocket.Conn, messageData map[string]interfa
 //
 // - @param post_id int
 func wsCommentsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity, " failed to get user_uuid from messageData")})
 		return
 	}
 	_, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
 	_post_id, ok := messageData["post_id"].(float64)
 	if !ok {
 		log.Println("failed to get post_id from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity, " failed to get post_id from messageData")})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity, " failed to get post_id from messageData")}, []string{uuid})
 		return
 	}
 	post_id := int(_post_id)
@@ -135,7 +138,7 @@ func wsCommentsListHandler(conn *websocket.Conn, messageData map[string]interfac
 	rows, err := statements["getComments"].Query(post_id)
 	if err != nil {
 		log.Println("getComments query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getComments query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getComments query failed"}, []string{uuid})
 		return
 	}
 	defer rows.Close()
@@ -147,11 +150,12 @@ func wsCommentsListHandler(conn *websocket.Conn, messageData map[string]interfac
 		err = rows.Scan(&comment.Email, &comment.First_name, &comment.Last_name, &comment.Content, &pictureBlob, &comment.Created_at)
 		if err != nil {
 			log.Println("getComments scan failed", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getComments scan failed"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getComments scan failed"}, []string{uuid})
 			return
 		}
 		comment.Picture = base64.StdEncoding.EncodeToString(pictureBlob)
 		commentsList = append(commentsList, comment)
 	}
-	wsSendCommentsList(commentsList)
+
+	wsSend(WS_COMMENTS_LIST, commentsList, []string{uuid})
 }

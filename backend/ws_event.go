@@ -23,26 +23,25 @@ type WS_GROUP_EVENT_SUBMIT_DTO struct {
 //
 // @rparam {group_id int, name string, description string, date string}
 func wsGroupEventSubmitHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
 		return
 	}
 
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
 	_group_id, ok := messageData["group_id"].(float64)
 	if !ok {
 		log.Println("failed to get group_id from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from messageData"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from messageData"}, []string{uuid})
 		return
 	}
 	group_id := int(_group_id)
@@ -50,12 +49,12 @@ func wsGroupEventSubmitHandler(conn *websocket.Conn, messageData map[string]inte
 	is_member, err := isGroupMember(user_id, group_id)
 	if err != nil {
 		log.Println("failed to check if user is member of the group", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is member of the group"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to check if user is member of the group"}, []string{uuid})
 		return
 	}
 	if !is_member {
 		log.Println("user is not member of the group")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " user is not member of the group"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " user is not member of the group"}, []string{uuid})
 		return
 	}
 
@@ -71,7 +70,7 @@ func wsGroupEventSubmitHandler(conn *websocket.Conn, messageData map[string]inte
 		value, ok := messageData[key].(string)
 		if !ok {
 			log.Printf("failed to get %s from messageData\n", key)
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprintf("%d failed to get %s from messageData", http.StatusUnprocessableEntity, key)})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprintf("%d failed to get %s from messageData", http.StatusUnprocessableEntity, key)}, []string{uuid})
 			return
 		}
 		*ptr = value
@@ -84,13 +83,13 @@ func wsGroupEventSubmitHandler(conn *websocket.Conn, messageData map[string]inte
 
 	if data.Decision != "going" && data.Decision != "not going" {
 		log.Println("invalid decision")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " invalid decision"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " invalid decision"}, []string{uuid})
 		return
 	}
 
 	if data.Title == "" || data.Description == "" || data.Date == "" {
 		log.Println("empty fields")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " empty fields"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " empty fields"}, []string{uuid})
 		return
 	}
 	created_at := time.Now().Format("2006-01-02 15:04:05")
@@ -99,21 +98,21 @@ func wsGroupEventSubmitHandler(conn *websocket.Conn, messageData map[string]inte
 	result, err := statements["addEvent"].Exec(group_id, data.Title, data.Description, data.Date, created_at)
 	if err != nil {
 		log.Println("addEvent query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addEvent query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addEvent query failed"}, []string{uuid})
 		return
 	}
 
 	event_id, err := result.LastInsertId()
 	if err != nil {
 		log.Println("failed to get last insert id", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to get last insert id"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to get last insert id"}, []string{uuid})
 		return
 	}
 
 	_, err = statements["addEventParticipant"].Exec(event_id, user_id, data.Decision)
 	if err != nil {
 		log.Println("addEventParticipant query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addEventParticipant query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addEventParticipant query failed"}, []string{uuid})
 		return
 	}
 
@@ -136,26 +135,25 @@ type WS_GROUP_EVENTS_LIST_DTO []WS_GROUP_EVENT_RESPONSE_DTO
 //
 // @rparam {group_id int}
 func wsGroupEventsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
 		return
 	}
 
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
 	_group_id, ok := messageData["group_id"].(float64)
 	if !ok {
 		log.Println("failed to get group_id from messageData\n", messageData)
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from messageData"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get group_id from messageData"}, []string{uuid})
 		return
 	}
 	group_id := int(_group_id)
@@ -163,7 +161,7 @@ func wsGroupEventsListHandler(conn *websocket.Conn, messageData map[string]inter
 	rows, err := statements["getEvents"].Query(group_id)
 	if err != nil {
 		log.Println("getEvents query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getEvents query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getEvents query failed"}, []string{uuid})
 		return
 	}
 	var events_list WS_GROUP_EVENTS_LIST_DTO
@@ -179,7 +177,7 @@ func wsGroupEventsListHandler(conn *websocket.Conn, messageData map[string]inter
 		)
 		if err != nil {
 			log.Println("getEvents query failed to scan", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getEvents query failed to scan"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getEvents query failed to scan"}, []string{uuid})
 			return
 		}
 		events_list = append(events_list, event)
@@ -190,7 +188,7 @@ func wsGroupEventsListHandler(conn *websocket.Conn, messageData map[string]inter
 		rows, err := statements["getEventParticipantDecision"].Query(event.Id, user_id)
 		if err != nil {
 			log.Println("getEventParticipantDecision query failed", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getEventParticipantDecision query failed"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getEventParticipantDecision query failed"}, []string{uuid})
 			return
 		}
 		defer rows.Close()
@@ -199,7 +197,7 @@ func wsGroupEventsListHandler(conn *websocket.Conn, messageData map[string]inter
 			err = rows.Scan(&decision)
 			if err != nil {
 				log.Println("getEventParticipantDecision query failed to scan", err.Error())
-				wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getEventParticipantDecision query failed to scan"})
+				wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getEventParticipantDecision query failed to scan"}, []string{uuid})
 				return
 			}
 			events_list[i].Decision = decision
@@ -209,7 +207,7 @@ func wsGroupEventsListHandler(conn *websocket.Conn, messageData map[string]inter
 		rows.Close() // yes, it is ugly solution inside loop, but not a time for adventures now
 	}
 
-	wsSendGroupEventsList(events_list)
+	wsSend(WS_GROUP_EVENTS_LIST, events_list, []string{uuid})
 }
 
 type WS_USER_GROUPS_FRESH_EVENT_RESPOSE_DTO struct {
@@ -227,26 +225,25 @@ type WS_USER_GROUPS_FRESH_EVENTS_LIST_DTO []WS_USER_GROUPS_FRESH_EVENT_RESPOSE_D
 
 // wsUserGroupsFreshEventsListHandler returns all fresh(user decision needed) events for a user
 func wsUserGroupsFreshEventsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
 		return
 	}
 
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
 	rows, err := statements["getFreshEvents"].Query(user_id, user_id)
 	if err != nil {
 		log.Println("getFreshEvents query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getFreshEvents query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getFreshEvents query failed"}, []string{uuid})
 		return
 	}
 	var fresh_events_list WS_USER_GROUPS_FRESH_EVENTS_LIST_DTO
@@ -263,39 +260,38 @@ func wsUserGroupsFreshEventsListHandler(conn *websocket.Conn, messageData map[st
 		)
 		if err != nil {
 			log.Println("getFreshEvents query failed to scan", err.Error())
-			wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getFreshEvents query failed to scan"})
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getFreshEvents query failed to scan"}, []string{uuid})
 			return
 		}
 		fresh_events_list = append(fresh_events_list, fresh_event)
 	}
 
-	wsSendUserGroupsFreshEventsList(fresh_events_list)
+	wsSend(WS_USER_GROUPS_FRESH_EVENTS_LIST, fresh_events_list, []string{uuid})
 }
 
 // wsEventGoingHandler marks a user as going to an event
 //
 // @rparam {event_id int}
 func wsGroupEventGoingHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
 		return
 	}
 
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
 	_event_id, ok := messageData["event_id"].(float64)
 	if !ok {
 		log.Println("failed to get event_id from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get event_id from messageData"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get event_id from messageData"}, []string{uuid})
 		return
 	}
 	event_id := int(_event_id)
@@ -303,7 +299,7 @@ func wsGroupEventGoingHandler(conn *websocket.Conn, messageData map[string]inter
 	_, err = statements["addEventParticipant"].Exec(event_id, user_id, "going")
 	if err != nil {
 		log.Println("addEventParticipant query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addEventParticipant query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addEventParticipant query failed"}, []string{uuid})
 		return
 	}
 
@@ -315,26 +311,25 @@ func wsGroupEventGoingHandler(conn *websocket.Conn, messageData map[string]inter
 //
 // @rparam {event_id int}
 func wsGroupEventNotGoingHandler(conn *websocket.Conn, messageData map[string]interface{}) {
-	defer wsRecover()
+	defer wsRecover(messageData)
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get user_uuid from messageData"})
 		return
 	}
 
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
 	_event_id, ok := messageData["event_id"].(float64)
 	if !ok {
 		log.Println("failed to get event_id from messageData")
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get event_id from messageData"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get event_id from messageData"}, []string{uuid})
 		return
 	}
 	event_id := int(_event_id)
@@ -342,7 +337,7 @@ func wsGroupEventNotGoingHandler(conn *websocket.Conn, messageData map[string]in
 	_, err = statements["addEventParticipant"].Exec(event_id, user_id, "not going")
 	if err != nil {
 		log.Println("addEventParticipant query failed", err.Error())
-		wsSendError(WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addEventParticipant query failed"})
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addEventParticipant query failed"}, []string{uuid})
 		return
 	}
 
