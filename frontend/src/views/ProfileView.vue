@@ -1,5 +1,4 @@
 <template>
-  <router-link to="/bell" @click="wss.facepalm()" >Express Royal Will</router-link>
   <h1>Profile:</h1>
   <!-- todo: add button to open BellView.vue this button should be highlighted in case of still present a new, not marked by user as read already, notifications -->
   <!-- add checkbox to make profile public -->
