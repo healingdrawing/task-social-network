@@ -97,6 +97,7 @@ export interface ChatMessage {
   first_name: string;
   last_name: string;
   created_at: string; // use inside v-for like id, because no id in chat message
+  group_id: number;
 }
 
 export interface Comment {

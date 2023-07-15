@@ -28,7 +28,7 @@ export const useWebSocketStore = defineStore({
         data: {
           user_uuid: uuid,
           private_chat_user_id: this.private_chat_user_id,
-          message: message,
+          content: message,
         },
       };
       this.sendMessage(wsMessage);
@@ -40,7 +40,7 @@ export const useWebSocketStore = defineStore({
         data: {
           user_uuid: uuid,
           group_id: this.group_chat_id,
-          message: message,
+          content: message,
         },
       };
       this.sendMessage(wsMessage);
@@ -77,6 +77,14 @@ export const useWebSocketStore = defineStore({
       this.socket?.close();
       this.socket = null;
       console.log('socket', this.socket);
+    },
+
+    //todo: at the moment not used, may be implement clear chats history button later
+    clearChatMessages() {
+      this.messages = this.messages.filter((message) =>
+        message.type !== WSMessageType.PRIVATE_CHAT_MESSAGE
+        && message.type !== WSMessageType.GROUP_CHAT_MESSAGE
+      );
     },
 
     /**clearMessagesWhenNewMessageArrives removes all the messages of type = message.Type, before unshift new message, to prevent duplication of messages in getters ( -> screen/view) */
@@ -340,7 +348,7 @@ export const useWebSocketStore = defineStore({
     group_chat_messages_list(): ChatMessage[] {
       const group_chat_messages = this.messages.filter((message) => message.type === WSMessageType.GROUP_CHAT_MESSAGE && message.data !== null);
       const chat_messages = group_chat_messages.map((message) =>
-        (message.data as ChatMessage))
+        (message.data as ChatMessage)).filter((message) => message.group_id === this.group_chat_id)
       return [...chat_messages];
     },
 

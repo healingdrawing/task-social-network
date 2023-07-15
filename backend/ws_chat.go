@@ -11,11 +11,12 @@ import (
 )
 
 type WS_GROUP_CHAT_MESSAGE_DTO struct {
-	Content    string
-	Email      string
-	First_name string
-	Last_name  string
-	Created_at string
+	Content    string `json:"content"`
+	Email      string `json:"email"`
+	First_name string `json:"first_name"`
+	Last_name  string `json:"last_name"`
+	Created_at string `json:"created_at"`
+	Group_id   int    `json:"group_id"`
 }
 
 func wsGroupChatMessageHandler(conn *websocket.Conn, messageData map[string]interface{}) {
@@ -54,6 +55,7 @@ func wsGroupChatMessageHandler(conn *websocket.Conn, messageData map[string]inte
 
 	message.Content = content
 	message.Created_at = created_at
+	message.Group_id = group_id
 
 	// Get user info
 	user_id, err := get_user_id_by_uuid(uuid)
@@ -100,47 +102,31 @@ func wsGroupChatMessageHandler(conn *websocket.Conn, messageData map[string]inte
 		group_member_ids = append(group_member_ids, member_id)
 	}
 
-	//get all uuids of users who is connected/logged in
-	var connected_user_uuids []string
+	// get connected user ids
+
+	// get ids of users who is member and connected
+	connected_group_member_ids := map[int]int{}
 	clients.Range(func(key, value interface{}) bool {
-		connected_user_uuids = append(connected_user_uuids, key.(string))
+		client := value.(*Client)
+		for _, member_id := range group_member_ids {
+			if client.USER_ID == member_id {
+				connected_group_member_ids[member_id] = member_id
+				break
+			}
+		}
 		return true
 	})
 
-	// get all ids of connected users
-	query := fmt.Sprintf("SELECT user_id FROM session WHERE uuid IN (%s)", strings.Join(connected_user_uuids, ","))
-	rows, err = db.Query(query)
-	if err != nil {
-		log.Println("failed to get connected users", err.Error())
-		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError, " failed to get connected users")}, []string{uuid})
-		return
-	}
-	defer rows.Close()
-	connected_user_ids := map[string]int{}
-	for rows.Next() {
-		var user_id int
-		err := rows.Scan(&user_id)
-		if err != nil {
-			log.Println("failed to scan connected users", err.Error())
-			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError, " failed to scan connected users")}, []string{uuid})
-			return
-		}
-		connected_user_ids = append(connected_user_ids, user_id)
-	}
-
-	// keep only user ids who is the member and connected
-	var user_ids []int
-	for _, member_id := range group_member_ids {
-		for _, connected_user_id := range connected_user_ids {
-			if member_id == connected_user_id {
-				user_ids = append(user_ids, member_id)
-			}
-		}
-	}
-
-	// get uuids of users who is the member and connected
+	//get all uuids of users who is connected/logged in and member of the group
 	var user_uuids []string
 	clients.Range(func(key, value interface{}) bool {
+		client := value.(*Client)
+		_, ok := connected_group_member_ids[client.USER_ID]
+		if ok {
+			user_uuids = append(user_uuids, key.(string))
+		} else {
+			log.Println("user is not connected/logged in anymore")
+		}
 		return true
 	})
 

@@ -66,8 +66,20 @@ func wsConnection(w http.ResponseWriter, r *http.Request) {
 	reader(uuid, ws)
 }
 
+type Client struct {
+	CONN    *websocket.Conn
+	USER_ID int
+}
+
 func reader(uuid string, conn *websocket.Conn) {
-	clients.Store(uuid, conn)
+	user_id, err := get_user_id_by_uuid(uuid)
+	if err != nil {
+		log.Println("inside reader", err.Error())
+		return
+	}
+
+	client := &Client{CONN: conn, USER_ID: user_id}
+	clients.Store(uuid, client)
 	defer clients.Delete(uuid)
 	defer conn.Close()
 	for {
@@ -211,13 +223,13 @@ func wsSend(message_type WSMT, message interface{}, uuids []string) {
 
 	for _, uuid := range uuids {
 		if conn, ok := clients.Load(uuid); ok {
-			if c, ok := conn.(*websocket.Conn); ok {
-				err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if c, ok := conn.(*Client); ok {
+				err = c.CONN.WriteMessage(websocket.TextMessage, outputMessage)
 				if err != nil {
 					log.Println(err)
 				}
 			} else {
-				log.Println("wsSend: clients.Load(uuid) is not *websocket.Conn")
+				log.Println("wsSend: clients.Load(uuid) is not a *Client")
 			}
 		} else {
 			log.Println("wsSend: client not found . clients.Load(uuid) failed")
