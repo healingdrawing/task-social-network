@@ -7,8 +7,9 @@ export enum WSMessageType {
   COMMENT_RESPONSE = "comment_response",
   COMMENTS_LIST = "comments_list",
 
-  CHAT_USERS_LIST = "chat_users_list",
-  CHAT_MESSAGE_SUBMIT = "chat_message_submit",
+  PRIVATE_CHAT_USERS_LIST = "private_chat_users_list",
+  PRIVATE_CHAT_MESSAGE_SUBMIT = "private_chat_message_submit",
+  GROUP_CHAT_MESSAGE_SUBMIT = "group_chat_message_submit",
 
   FOLLOW_REQUEST_REJECT = "follow_request_reject",
   FOLLOW_REQUEST_ACCEPT = "follow_request_accept",
@@ -18,7 +19,6 @@ export enum WSMessageType {
   POST_SUBMIT = "post_submit",
   POST_RESPONSE = "post_response",
   POSTS_LIST = "posts_list",
-  // ANY_PROFILE_VIEW_POSTS_LIST = "any_profile_view_posts_list",
 
   GROUPS_LIST = "groups_list",
   GROUPS_ALL_LIST = "groups_all_list",

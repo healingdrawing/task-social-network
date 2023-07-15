@@ -9,34 +9,41 @@ export const useWebSocketStore = defineStore({
   state: () => ({
     socket: null as WebSocket | null,
     messages: [] as WSMessage[],
+    private_chat_user_id: 0,
+    group_chat_id: 0,
   }),
   actions: {
-    /**remove all the messages from the store */
-    facepalm() {
-      console.log('===BEFORE facepalm===');
-      this.$state.messages = [];
-      console.log('===facepalm===');
+    /**for internal usage of send message for private chat */
+    set_private_chat_user_id(id: number) {
+      this.private_chat_user_id = id;
+    },
+    /**for internal usage of send message for group chat */
+    set_group_chat_id(id: number) {
+      this.group_chat_id = id;
     },
 
-    /**
-     * close all the websockets and empty the global array const websockets: (WebSocket | null)[] = [];
-     * Attempt to prevent creation of artefacts for emergency case, hardreload etc*/
-    killThemAll() {
-      console.log('===killThemAll===');
-      console.log('websockets', websockets.length);
-      websockets.forEach((websocket) => {
-        console.log('============================')
-        console.log('forEach websocket disconnecting');
-        console.log('forEach websocket', websocket);
-        websocket?.close(1000, 'killThemAll');
-        websocket = null;
-        console.log('forEach websocket', websocket);
-      });
-      // websockets.length = 0; // it is const so "= []" raises error
-      this.facepalm();
-      router.push({ name: 'login' });
-      console.log('========\n=======before reset and after push ======\n======');
-      // this.$reset();
+    send_private_chat_message(message: string, uuid: string) {
+      const wsMessage: WSMessage = {
+        type: WSMessageType.PRIVATE_CHAT_MESSAGE_SUBMIT,
+        data: {
+          user_uuid: uuid,
+          private_chat_user_id: this.private_chat_user_id,
+          message: message,
+        },
+      };
+      this.sendMessage(wsMessage);
+    },
+
+    send_group_chat_message(message: string, uuid: string) {
+      const wsMessage: WSMessage = {
+        type: WSMessageType.GROUP_CHAT_MESSAGE_SUBMIT,
+        data: {
+          user_uuid: uuid,
+          group_id: this.group_chat_id,
+          message: message,
+        },
+      };
+      this.sendMessage(wsMessage);
     },
 
     connect(uuid: string) {
@@ -103,7 +110,6 @@ export const useWebSocketStore = defineStore({
           console.log('SKIP clearMessagesWhenNewMessageArrives default============', new_message.type);
       }
     },
-
 
     /**clearMessagesBeforeSendMessage removes all the messages of type = message.Type, before fetch fresh, to prevent duplication of messages in getters ( -> screen/view) */
     clearMessagesBeforeSendMessage(message: WSMessage) {
@@ -199,6 +205,33 @@ export const useWebSocketStore = defineStore({
         default:
           console.log('SKIP clearMessagesBeforeSendMessage default============', message.type);
       }
+    },
+
+    /**remove all the messages from the store */
+    facepalm() {
+      console.log('===BEFORE facepalm===');
+      this.$state.messages = [];
+      console.log('===facepalm===');
+    },
+    /**
+     * close all the websockets and empty the global array const websockets: (WebSocket | null)[] = [];
+     * Attempt to prevent creation of artefacts for emergency case, hardreload etc*/
+    killThemAll() {
+      console.log('===killThemAll===');
+      console.log('websockets', websockets.length);
+      websockets.forEach((websocket) => {
+        console.log('============================')
+        console.log('forEach websocket disconnecting');
+        console.log('forEach websocket', websocket);
+        websocket?.close(1000, 'killThemAll');
+        websocket = null;
+        console.log('forEach websocket', websocket);
+      });
+      // websockets.length = 0; // it is const so "= []" raises error
+      this.facepalm();
+      router.push({ name: 'login' });
+      console.log('========\n=======before reset and after push ======\n======');
+      // this.$reset();
     },
 
     /** todo: later check/remove. Try to prevent artefacts between routing. Looks like it works, but facepalm generally */
@@ -383,7 +416,7 @@ export const useWebSocketStore = defineStore({
       return [...this.followRequestsBellList, ...this.groupInvitesBellList, ...this.groupRequestsBellList, ...this.groupEventsBellList]
     },
 
-    chatUsersList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.CHAT_USERS_LIST) },
+    chatUsersList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.PRIVATE_CHAT_USERS_LIST) },
     groupPostCommentsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_POST_COMMENTS_LIST) },
 
     groupEventParticipantsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_EVENT_PARTICIPANTS_LIST) },
@@ -403,37 +436,3 @@ export const useWebSocketStore = defineStore({
   },
 
 });
-
-// // Register the beforeunload event listener
-// window.addEventListener('beforeunload', () => {
-//   // Get the Pinia store instance
-//   alert('beforeunload');
-//   const wss = useWebSocketStore()
-
-//   // Call the removeConnections action
-//   wss.killThemAll()
-// })
-
-// Usage in a component
-// <script lang="ts" setup >
-// import { useWebSocketStore } from '@/stores/websocket';
-
-// const socketStore = useWebSocketStore();
-
-// socketStore.connect();
-
-// // Send a chat message
-// const chatMessage = { type: 'chat', text: 'Hello, world!', sender: 'Alice' };
-// socketStore.sendMessage(chatMessage);
-
-// // Send a post message
-// const postMessage = { type: 'post', text: 'Check out my new blog post!', sender: 'Bob' };
-// socketStore.sendMessage(postMessage);
-
-// // Send a notification message
-// const notificationMessage = { type: 'notification', text: 'You have a new message!', sender: 'Charlie' };
-// socketStore.sendMessage(notificationMessage);
-
-// // Disconnect from the WebSocket
-// socketStore.disconnect();
-// </script>
