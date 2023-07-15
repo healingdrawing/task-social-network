@@ -49,10 +49,9 @@ func dbInit() {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name TEXT,
 			description TEXT,
-			creator INTEGER,
+			creator_id INTEGER,
 			created_at TIMESTAMP,
-			privacy TEXT,
-			FOREIGN KEY (creator) REFERENCES users (id)
+			FOREIGN KEY (creator_id) REFERENCES users (id)
 			);
 		CREATE TABLE group_members (
 			group_id INTEGER,
@@ -108,6 +107,7 @@ func dbInit() {
 	}
 }
 
+// todo: CHECK IT! getPostsAbleToSee cybermonster is not checked properly
 func statementsCreation() {
 	for key, query := range map[string]string{
 		"addUser":            `INSERT INTO users (email, password, first_name, last_name, dob, avatar, nickname, about_me, privacy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
@@ -128,53 +128,87 @@ func statementsCreation() {
 
 		"addAlmostPrivate": `INSERT INTO almost_private (user_id, post_id) VALUES (?, ?);`,
 
-		"addPost":     `INSERT INTO post (user_id, title, categories, content, privacy, picture, created_at) VALUES (?, ?, ?, ?, ?, ?, ?);`,
-		"getPosts":    `SELECT post.id, title, content, categories, picture, first_name, last_name, email, created_at FROM post INNER JOIN users ON user_id=? ORDER BY created_at DESC;`,
+		"addPost":  `INSERT INTO post (user_id, title, categories, content, privacy, picture, created_at) VALUES (?, ?, ?, ?, ?, ?, ?);`,
+		"getPosts": `SELECT post.id, title, content, categories, picture, post.privacy, created_at, email, first_name, last_name FROM post INNER JOIN users ON post.user_id = users.id WHERE post.user_id = ? ORDER BY created_at DESC;`,
+
+		"getPostsAbleToSee": `SELECT post.id, title, content, categories, picture, post.privacy, created_at, email, first_name, last_name FROM post INNER JOIN users ON users.id = post.user_id LEFT JOIN followers ON followers.user_id = post.user_id AND followers.follower_id = ? LEFT JOIN almost_private ON almost_private.user_id = ? AND almost_private.post_id = post.id WHERE post.user_id = ? OR post.privacy = "public" OR (post.privacy = "private" AND followers.follower_id IS NOT NULL) OR (almost_private.post_id IS NOT NULL) ORDER BY created_at DESC;`,
+
+		"getPostsAbleToSeeToVisitor": `SELECT post.id, title, content, categories, picture, post.privacy, created_at, email, first_name, last_name FROM post INNER JOIN users ON users.id = post.user_id WHERE (post.user_id = ? AND ? = ? OR post.privacy = "public" AND post.user_id = ? OR (post.privacy = "private" AND post.user_id = ? AND EXISTS (SELECT 1 FROM followers WHERE followers.user_id = ? AND followers.follower_id = ?)) OR post.user_id = ? AND EXISTS (SELECT 1 FROM almost_private WHERE almost_private.post_id = post.id AND almost_private.user_id = ?)) ORDER BY created_at DESC;`,
+
 		"addComment":  `INSERT INTO comment (user_id, post_id, content, picture, created_at) VALUES (?, ?, ?, ?, ?);`,
-		"getComments": `SELECT first_name, last_name, content, picture FROM comment INNER JOIN users ON user_id = users.id WHERE post_id = ? ORDER BY comment.id DESC;`,
+		"getComments": `SELECT email, first_name, last_name, content, picture, created_at FROM comment INNER JOIN users ON user_id = users.id WHERE post_id = ? ORDER BY comment.id DESC;`,
 		"addMessage":  `INSERT INTO message (from_id, to_id, content, created_at) VALUES (?, ?, ?, ?);`,
 		"getMessages": `SELECT from_id, to_id, content, created_at FROM message WHERE (from_id = ? AND to_id = ?) OR (from_id = ? AND to_id = ?) ORDER BY created_at DESC;`,
 
-		"addGroup":  `INSERT INTO groups (name, description, creator, created_at, privacy) VALUES (?, ?, ?, ?, ?);`,
-		"getGroups": `SELECT id, name, description, creator, created_at, privacy FROM groups ORDER BY created_at DESC;`,
-		"getGroup":  `SELECT id, name, description, creator, created_at, privacy FROM groups WHERE id = ?;`,
+		"addGroup":     `INSERT INTO groups (name, description, creator_id, created_at) VALUES (?, ?, ?, ?);`,
+		"getGroup":     `SELECT id, name, description, creator_id, created_at FROM groups WHERE id = ?;`,
+		"getAllGroups": `SELECT groups.id, name, description, created_at, email, first_name, last_name FROM groups INNER JOIN users ON users.id = creator_id ORDER BY created_at DESC;`,
+		"getGroups":    `SELECT groups.id, name, description, created_at, email, first_name, last_name FROM groups INNER JOIN users ON users.id = creator_id INNER JOIN group_members ON group_id = groups.id WHERE member_id = ? ORDER BY created_at DESC;`,
 
-		"addGroupMember":           `INSERT INTO group_members (group_id, member_id) VALUES (?, ?);`,
-		"getGroupMembers":          `SELECT member_id FROM group_members WHERE group_id = ?;`,
-		"getGroupMembersInfo":      `SELECT nickname, first_name, last_name FROM users WHERE id = ?;`,
-		"getGroupPendingMembers":   `SELECT member_id FROM group_pending_members WHERE group_id = ?;`,
+		"getCreatorAllGroupsPendings": `SELECT group_pending_members.group_id, group_pending_members.member_id, groups.name, groups.description, users.email, users.first_name, users.last_name FROM groups INNER JOIN group_pending_members ON group_pending_members.group_id = groups.id INNER JOIN users ON group_pending_members.member_id = users.id WHERE groups.creator_id = ?`,
+
+		"addGroupMember":  `INSERT INTO group_members (group_id, member_id) VALUES (?, ?);`,
+		"getGroupMembers": `SELECT member_id FROM group_members WHERE group_id = ?;`,
+		"getGroupMember":  `SELECT member_id FROM group_members WHERE group_id = ? AND member_id = ?;`,
+
+		"getGroupMembersInfo":    `SELECT nickname, first_name, last_name FROM users WHERE id = ?;`,
+		"getGroupPendingMembers": `SELECT member_id FROM group_pending_members WHERE group_id = ?;`,
+		"getGroupPendingMember":  `SELECT member_id FROM group_pending_members WHERE group_id = ? AND member_id = ?;`,
+
 		"addGroupPendingMember":    `INSERT INTO group_pending_members (group_id, member_id) VALUES (?, ?);`,
 		"removeGroupPendingMember": `DELETE FROM group_pending_members WHERE group_id = ? AND member_id = ?;`,
 		"removeGroupMember":        `DELETE FROM group_members WHERE group_id = ? AND member_id = ?;`,
 
-		"addGroupInvitedUser":    `INSERT INTO group_invited_users (user_id, group_id, inviter_id, created_at) VALUES (?, ?, ?, ?);`,
+		"addGroupInvitedUser": `INSERT INTO group_invited_users (user_id, group_id, inviter_id, created_at) VALUES (?, ?, ?, ?);`,
+
+		"getUserInvites": `SELECT groups.id, groups.name, groups.description, group_invited_users.created_at, users.email, users.first_name, users.last_name FROM group_invited_users JOIN groups ON groups.id = group_invited_users.group_id JOIN users ON users.id = group_invited_users.inviter_id WHERE group_invited_users.user_id = ?;`,
+
 		"getGroupInvitedUsers":   `SELECT user_id, group_id, inviter_id, created_at FROM group_invited_users WHERE group_id = ?;`,
 		"removeGroupInvitedUser": `DELETE FROM group_invited_users WHERE user_id = ? AND group_id = ?;`,
 
 		"addGroupPost":           `INSERT INTO group_post (user_id, title, categories, content, picture, created_at) VALUES (?, ?, ?, ?, ?, ?);`,
 		"addGroupPostMembership": `INSERT INTO group_post_membership (group_id, group_post_id) VALUES (?, ?);`,
-		"getGroupPosts":          `SELECT group_post.id, title, content, categories, first_name, last_name, email, created_at, picture FROM group_post JOIN group_post_membership ON group_post.id = group_post_membership.group_post_id JOIN users ON group_post.user_id = users.id ORDER BY created_at DESC;`,
+
+		"getGroupPosts": `SELECT groups.id, groups.name, groups.description, group_post.id, title, content, categories, picture, group_post.created_at, email, first_name, last_name FROM group_post INNER JOIN group_post_membership ON group_post.id = group_post_membership.group_post_id INNER JOIN groups ON groups.id = group_post_membership.group_id INNER JOIN users ON group_post.user_id = users.id WHERE group_post_membership.group_id = ? ORDER BY group_post.created_at DESC;`,
+
+		"getUserAllGroupPosts": `SELECT groups.id, groups.name, groups.description, group_post.id, title, content, categories, picture, group_post.created_at, email, first_name, last_name FROM group_post INNER JOIN group_post_membership ON group_post.id = group_post_membership.group_post_id INNER JOIN groups ON groups.id = group_post_membership.group_id INNER JOIN users ON group_post.user_id = users.id WHERE group_post.user_id = ? ORDER BY group_post.created_at DESC;`,
 
 		"addGroupComment":  `INSERT INTO group_comment (user_id, group_post_id, content, picture, created_at) VALUES (?, ?, ?, ?, ?);`,
 		"getGroupComments": `SELECT email, first_name, last_name, content, picture, created_at FROM group_comment INNER JOIN users ON users.id = user_id WHERE group_post_id = ? ORDER BY group_comment.id DESC;`,
 
-		"addEvent":                  `INSERT INTO events (group_id, event_name, event_description, event_date, event_location, creator_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?);`,
-		"addEventParticipant":       `INSERT INTO event_participants (event_id, user_id, status, status_updated_at) VALUES (?, ?, ?, ?);`,
-		"getEvents":                 `SELECT event_id, group_id, event_name, event_description, event_date, event_location, creator_id, created_at FROM events WHERE group_id = ? ORDER BY created_at DESC;`,
-		"getEvent":                  `SELECT event_id, group_id, event_name, event_description, event_date, event_location, creator_id, created_at FROM events WHERE event_id = ? LIMIT 1;`,
-		"getEventParticipants":      `SELECT user_id, first_name, last_name, email, avatar, status, status_updated_at FROM event_participants INNER JOIN users ON users.id = user_id WHERE event_id = ? ORDER BY status_updated_at DESC;`,
-		"updateEventParticipant":    `UPDATE event_participants SET status = ?, status_updated_at = ? WHERE event_id = ? AND user_id = ?;`,
-		"getEventParticipantStatus": `SELECT status FROM event_participants WHERE event_id = ? AND user_id = ? LIMIT 1;`,
-		"getUserIDwithEventCount":   `SELECT COUNT(*) FROM event_participants WHERE event_id = ? AND user_id = ?;`,
+		"addEvent": `INSERT INTO events (group_id, title, description, date, created_at) VALUES (?, ?, ?, ?, ?);`,
 
-		"getFollowers":          `SELECT follower_id FROM followers WHERE user_id = ?;`,
-		"getFollowersPending":   `SELECT follower_id FROM followers_pending WHERE user_id = ?;`,
-		"addFollower":           `INSERT INTO followers (user_id, follower_id) VALUES (?, ?);`,
-		"addFollowerPending":    `INSERT INTO followers_pending (user_id, follower_id) VALUES (?, ?);`,
-		"removeFollower":        `DELETE FROM followers WHERE user_id = ? AND follower_id = ?;`,
-		"removeFollowerPending": `DELETE FROM followers_pending WHERE user_id = ? AND follower_id = ?;`,
-		"getFollowing":          `SELECT user_id FROM followers WHERE follower_id = ?;`,
-		"doesSecondFollowFirst": `SELECT * FROM followers WHERE user_id = ? AND follower_id = ? LIMIT 1;`,
+		"addEventParticipant":         `INSERT INTO event_participants (event_id, user_id, decision) VALUES (?, ?, ?);`,
+		"getEventParticipantDecision": `SELECT decision FROM event_participants WHERE event_id = ? AND user_id = ? LIMIT 1;`,
+
+		"getEvents": `SELECT id, group_id, title, description, date, created_at FROM events WHERE group_id = ? ORDER BY created_at DESC;`,
+
+		"getFreshEvents": `
+		SELECT events.id, title, events.description, date,
+		events.group_id, groups.name, groups.description
+		FROM events
+		INNER JOIN groups ON groups.id = events.group_id
+		INNER JOIN group_members ON group_members.group_id = events.group_id
+		WHERE group_members.member_id = ?
+		AND NOT EXISTS (
+			SELECT 1 FROM event_participants
+			WHERE event_participants.event_id = events.id
+			AND event_participants.user_id = ?
+		)
+		ORDER BY events.created_at DESC;
+		`,
+
+		"getUserIDwithEventCount": `SELECT COUNT(*) FROM event_participants WHERE event_id = ? AND user_id = ?;`,
+
+		"getFollowers":                   `SELECT follower_id FROM followers INNER JOIN users ON users.id = follower_id WHERE user_id = ? ORDER BY email ASC;`,
+		"getFollowersPending":            `SELECT follower_id FROM followers_pending WHERE user_id = ?;`,
+		"addFollower":                    `INSERT INTO followers (user_id, follower_id) VALUES (?, ?);`,
+		"addFollowerPending":             `INSERT INTO followers_pending (user_id, follower_id) VALUES (?, ?);`,
+		"removeFollower":                 `DELETE FROM followers WHERE user_id = ? AND follower_id = ?;`,
+		"removeFollowerPending":          `DELETE FROM followers_pending WHERE user_id = ? AND follower_id = ?;`,
+		"getFollowing":                   `SELECT user_id FROM followers WHERE follower_id = ?;`,
+		"doesSecondFollowFirst":          `SELECT * FROM followers WHERE user_id = ? AND follower_id = ? LIMIT 1;`,
+		"doesSecondRequesterFollowFirst": `SELECT * FROM followers_pending WHERE user_id = ? AND follower_id = ? LIMIT 1;`,
 	} {
 		err := error(nil)
 		statements[key], err = db.Prepare(query)

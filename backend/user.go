@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"regexp"
@@ -22,39 +21,15 @@ import (
 type signupData struct {
 	Email       string `json:"email"`
 	Password    string `json:"password"`
-	FirstName   string `json:"firstName"`
-	LastName    string `json:"lastName"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
 	Dob         string `json:"dob"`
 	Avatar      string `json:"avatar"`
 	avatarBytes []byte `sqlite3:"avatar"`
 	Nickname    string `json:"nickname"`
-	AboutMe     string `json:"aboutMe"`
+	AboutMe     string `json:"about_me"`
 	Public      bool   `json:"public"`
 	Privacy     string `sqlite3:"privacy"`
-}
-
-type ProfileData struct {
-	Email       string `json:"email"`
-	FirstName   string `json:"firstname"`
-	LastName    string `json:"lastname"`
-	Dob         string `json:"dob"`
-	Avatar      string `json:"avatar"`
-	avatarBytes []byte `sqlite3:"avatar"`
-	Nickname    string `json:"nickname"`
-	AboutMe     string `json:"aboutMe"`
-	Public      bool   `json:"public"`
-	Privacy     string `sqlite3:"privacy"`
-}
-
-type ProfileDTOtoFrontend struct {
-	Email     string `json:"email"`
-	FirstName string `json:"firstname"`
-	LastName  string `json:"lastname"`
-	Dob       string `json:"dob"`
-	Avatar    string `json:"avatar"`
-	Nickname  string `json:"nickname"`
-	AboutMe   string `json:"aboutMe"`
-	Public    bool   `json:"public"`
 }
 
 type loginData struct {
@@ -66,164 +41,10 @@ type UUIDData struct {
 	UUID string `json:"UUID"`
 }
 
-func changePrivacyHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	defer recovery(w)
-
-	ID, err := getRequestSenderID(r)
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	incomingData := map[string]any{}
-	// decode the request body into the DTO
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&incomingData)
-	if err != nil {
-		jsonResponse(w, http.StatusBadRequest, "Bad request")
-		return
-	}
-	wantPublic := incomingData["public"].(bool)
-
-	privacyvalue := map[bool]string{true: "public", false: "private"}[wantPublic]
-
-	_, err = statements["updateUserPrivacy"].Exec(privacyvalue, ID)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "updateUserPrivacy query failed")
-		return
-	}
-
-	jsonResponse(w, http.StatusOK, "Privacy updated")
-}
-
-func userProfileHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	defer recovery(w)
-
-	myID, err := getRequestSenderID(r)
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	// get the email from the json request
-	var incomingData map[string]any
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&incomingData)
-	if err != nil && err.Error() != "EOF" {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusBadRequest, "Bad request")
-		return
-	}
-	incomingEmail := ""
-	if incomingData != nil {
-		incomingEmail = incomingData["email"].(string)
-	}
-	if incomingEmail == "" {
-		// get the email of the user that is currently logged in
-		rows, err := statements["getEmailByID"].Query(myID)
-		if err != nil {
-			log.Println(err.Error())
-			jsonResponse(w, http.StatusUnauthorized, "getEmailByID query failed, user not found")
-			return
-		}
-		defer rows.Close()
-		rows.Next()
-		err = rows.Scan(&incomingEmail)
-		if err != nil {
-			jsonResponse(w, http.StatusUnauthorized, "getEmailByID query failed, incomingEmail scan failed")
-			return
-		}
-		rows.Close()
-	}
-
-	log.Println(incomingEmail)
-
-	// get the ID of the user that we want to see
-	ID, err := getIDbyEmail(incomingEmail)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusUnauthorized, "User not found, getIDbyEmail failed")
-		return
-	}
-
-	var profile ProfileData
-	rows, err := statements["getUserProfile"].Query(ID)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusUnauthorized, "getUserProfile query failed, user not found")
-		return
-	}
-	defer rows.Close()
-	rows.Next()
-	err = rows.Scan(&profile.Email, &profile.FirstName, &profile.LastName, &profile.Dob,
-		&profile.avatarBytes, &profile.Nickname, &profile.AboutMe, &profile.Privacy)
-	if err != nil {
-		jsonResponse(w, http.StatusUnauthorized, "getUserProfile -> profile scan failed")
-		return
-	}
-	rows.Close()
-
-	profileDTO := ProfileDTOtoFrontend{}
-
-	profileDTO.Email = profile.Email
-	profileDTO.FirstName = profile.FirstName
-	profileDTO.LastName = profile.LastName
-	profileDTO.Dob = profile.Dob
-	profileDTO.Avatar = base64.StdEncoding.EncodeToString(profile.avatarBytes)
-	profileDTO.Nickname = profile.Nickname
-	profileDTO.AboutMe = profile.AboutMe
-	if profile.Privacy == "public" {
-		profileDTO.Public = true
-	} else {
-		profileDTO.Public = false
-	}
-
-	if myID == ID {
-		w.WriteHeader(200)
-		jsonResponseObj, _ := json.Marshal(profileDTO)
-		_, err = w.Write(jsonResponseObj)
-		if err != nil {
-			jsonResponse(w, http.StatusInternalServerError, "w.Write(jsonResponseObj) <- profileDTO failed")
-		}
-		return
-	}
-
-	// if the profile is private, check if I am following the user
-	// if I am not following the user, return 401
-	if profile.Privacy == "private" {
-		following, err := isFollowing(myID, ID)
-		if err != nil {
-			log.Println(err.Error())
-			jsonResponse(w, http.StatusInternalServerError, "isFollowing failed")
-			return
-		}
-		if !following {
-			jsonResponse(w, http.StatusUnauthorized, "User is private, you cannot check their profile without following them")
-			return
-		}
-	}
-
-	w.WriteHeader(200)
-	jsonResponseObj, err := json.Marshal(profileDTO)
-	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, "json.Marshal(profileDTO) failed")
-		return
-	}
-	_, err = w.Write(jsonResponseObj)
-	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, "w.Write(jsonResponseObj) <- profileDTO failed")
-	}
-
-}
-
 func isFollowing(myID int, ID int) (bool, error) {
 	rows, err := statements["doesSecondFollowFirst"].Query(ID, myID)
 	if err != nil {
+		log.Println("doesSecondFollowFirst query failed", err.Error())
 		return false, err
 	}
 	defer rows.Close()
@@ -258,14 +79,22 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	// check the avatar validity
 	if data.Avatar != "" {
-		avatarData, err := base64.StdEncoding.DecodeString(data.Avatar)
+		// cut prefix "data:image/jpeg;base64," or "data:image/png;base64,"
+		// use comma as delimiter
+		imageData, err := extractImageData(data.Avatar)
+		if err != nil {
+			log.Println("=FAIL extractImageData:", err.Error())
+			jsonResponse(w, http.StatusUnprocessableEntity, err.Error()) //error is handmade
+			return
+		}
+		avatarData, err := base64.StdEncoding.DecodeString(imageData)
 		if err != nil {
 			log.Println(err.Error())
 			jsonResponse(w, http.StatusUnprocessableEntity, "Invalid avatar")
 			return
 		}
 		if !isImage(avatarData) {
-			log.Println(err.Error())
+			log.Println("avatar is not a valid image")
 			jsonResponse(w, http.StatusUnsupportedMediaType, "avatar is not a valid image")
 			return
 		}
@@ -369,7 +198,7 @@ Password must only contain english characters and numbers`
 	w.WriteHeader(200)
 	jsonResponseObj, _ := json.Marshal(map[string]string{
 		"UUID":  UUID,
-		"email": data.Email,
+		"email": data.Email, // todo: perhaps remove later
 	})
 	_, err = w.Write(jsonResponseObj)
 	if err != nil {
@@ -404,7 +233,8 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	rows.Next()
 	err = rows.Scan(&email, &hash)
 	if err != nil {
-		jsonResponse(w, http.StatusInternalServerError, "scan credentials failed")
+		log.Println(err.Error())
+		jsonResponse(w, http.StatusInternalServerError, "scan credentials failed") // bug: it fires also when the user is not registered and try to login with error "Rows are closed"
 		return
 	}
 	rows.Close()
@@ -448,7 +278,7 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	jsonResponseObj, _ := json.Marshal(map[string]string{
 		"UUID":  UUID,
-		"email": email,
+		"email": email, // todo: perhaps remove later
 	})
 	_, err = w.Write(jsonResponseObj)
 	if err != nil {
@@ -457,6 +287,45 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func userLogoutHandler(w http.ResponseWriter, r *http.Request) {
+	defer recovery(w)
+
+	cookie, err := r.Cookie("user_uuid")
+	if err != nil || cookie.Value == "" || cookie == nil {
+		jsonResponse(w, http.StatusOK, "You are not logged in")
+		return
+	}
+
+	uuid := cookie.Value
+
+	_, err = statements["removeSession"].Exec(uuid)
+	if err != nil {
+		log.Println(err.Error())
+		jsonResponse(w, http.StatusInternalServerError, "removeSession query failed")
+		return
+	}
+	w.Header().Set("Cache-Control", "no-cache, private, max-age=0")
+	w.Header().Set("Expires", time.Unix(0, 0).Format(http.TimeFormat))
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("X-Accel-Expires", "0")
+	jsonResponse(w, http.StatusOK, "Session deleted")
+}
+
+func createSession(email string) (UUID string, err error) {
+	random, _ := uuid.NewV4()
+	UUID = random.String()
+	ID, err := get_user_id_by_email(email)
+	if err != nil {
+		return "", err
+	}
+	_, err = statements["addSession"].Exec(UUID, ID)
+	if err != nil {
+		return "", err
+	}
+	return UUID, nil
+}
+
+// todo : still not refactored to ws. Because not used at the moment
 func sessionCheckHandler(w http.ResponseWriter, r *http.Request) {
 	defer recovery(w)
 	var data UUIDData
@@ -501,101 +370,4 @@ func sessionCheckHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-}
-
-func userLogoutHandler(w http.ResponseWriter, r *http.Request) {
-	defer recovery(w)
-
-	cookie, err := r.Cookie("user_uuid")
-	if err != nil || cookie.Value == "" || cookie == nil {
-		jsonResponse(w, http.StatusOK, "You are not logged in")
-		return
-	}
-
-	uuid := cookie.Value
-
-	_, err = statements["removeSession"].Exec(uuid)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "removeSession query failed")
-		return
-	}
-	w.Header().Set("Cache-Control", "no-cache, private, max-age=0")
-	w.Header().Set("Expires", time.Unix(0, 0).Format(http.TimeFormat))
-	w.Header().Set("Pragma", "no-cache")
-	w.Header().Set("X-Accel-Expires", "0")
-	jsonResponse(w, http.StatusOK, "Session deleted")
-}
-
-func createSession(email string) (UUID string, err error) {
-	random, _ := uuid.NewV4()
-	UUID = random.String()
-	ID, err := getIDbyEmail(email)
-	if err != nil {
-		return "", err
-	}
-	_, err = statements["addSession"].Exec(UUID, ID)
-	if err != nil {
-		return "", err
-	}
-	return UUID, nil
-}
-
-func getIDbyEmail(email string) (ID int, err error) {
-	rows, err := statements["getUserIDByEmail"].Query(email)
-	if err != nil {
-		return 0, err
-	}
-	defer rows.Close()
-	rows.Next()
-	err = rows.Scan(&ID)
-	if err != nil {
-		return 0, err
-	}
-	rows.Close()
-	return ID, nil
-}
-
-func getUserEmailbyID(ID int) (email string, err error) {
-	rows, err := statements["getEmailByID"].Query(ID)
-	if err != nil {
-		return "", err
-	}
-	defer rows.Close()
-	rows.Next()
-	err = rows.Scan(&email)
-	if err != nil {
-		return "", err
-	}
-	rows.Close()
-	return email, nil
-}
-
-func isImage(data []byte) bool {
-	if len(data) < 4 {
-		return false
-	}
-
-	if data[0] == 0xFF && data[1] == 0xD8 && data[2] == 0xFF {
-		return true // JPEG
-	}
-
-	if data[0] == 0x89 && data[1] == 0x50 && data[2] == 0x4E && data[3] == 0x47 {
-		return true // PNG
-	}
-
-	if data[0] == 0x47 && data[1] == 0x49 && data[2] == 0x46 && data[3] == 0x38 {
-		return true // GIF
-	}
-
-	return false
-}
-
-// todo: CHECK IT! , it is refactored to prevent warning
-func randomNum(min, max int) int {
-	rng := rand.New(rand.NewSource(time.Now().Unix()))
-	rng.Seed(time.Now().Unix())
-	return rng.Intn(max-min) + min
-	// rand.Seed(time.Now().Unix())
-	// return rand.Intn(max-min) + min
 }

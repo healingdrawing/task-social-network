@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
+	"math/big"
 	"net/http"
 	"runtime/debug"
 	"strings"
@@ -91,38 +94,128 @@ func recovery(w http.ResponseWriter) {
 	}
 }
 
-// # getRequestSenderID gets the ID of the request sender from the cookie
-//
-// @params {r *http.Request}
-func getRequestSenderID(r *http.Request) (int, error) {
-	cookie, err := r.Cookie("user_uuid")
-	if err != nil {
-		return 0, errors.New("malformed cookie/cookie not found")
-	}
-
-	requestSenderID, err := getIDbyUUID(cookie.Value)
-	if err != nil {
-		return 0, errors.New("failed to get ID of the request sender")
-	}
-
-	return requestSenderID, nil
-}
-
-// # getIDbyUUID retrieves ID of the user from uuid
-//
-// @params {UUID string}
-// execute DB prepared statement getIDbyUUID.query
-func getIDbyUUID(UUID string) (ID int, err error) {
-	rows, err := statements["getIDbyUUID"].Query(UUID)
+func get_user_id_by_email(email string) (user_id int, err error) {
+	rows, err := statements["getUserIDByEmail"].Query(email)
 	if err != nil {
 		return 0, err
 	}
 	defer rows.Close()
 	rows.Next()
-	err = rows.Scan(&ID)
+	err = rows.Scan(&user_id)
 	if err != nil {
 		return 0, err
 	}
 	rows.Close()
-	return ID, nil
+	return user_id, nil
+}
+
+func get_email_by_user_id(user_id int) (email string, err error) {
+	rows, err := statements["getEmailByID"].Query(user_id)
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+	rows.Next()
+	err = rows.Scan(&email)
+	if err != nil {
+		return "", err
+	}
+	rows.Close()
+	return email, nil
+}
+
+// # get_user_id_by_uuid retrieves id of the user from uuid
+//
+// @params {uuid string}
+// execute DB prepared statement get_user_id_by_uuid.query
+func get_user_id_by_uuid(uuid string) (user_id int, err error) {
+	rows, err := statements["getIDbyUUID"].Query(uuid)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+	rows.Next()
+	err = rows.Scan(&user_id)
+	if err != nil {
+		return 0, err
+	}
+	rows.Close()
+	return user_id, nil
+}
+
+// extractImageData extracts image data from dataURI
+//
+// @params {dataURI string}
+//
+// it will split the dataURI into two parts, using "," as the delimiter, then return the second part
+func extractImageData(dataURI string) (string, error) {
+	parts := strings.SplitN(dataURI, ",", 2)
+	if len(parts) != 2 {
+		return "", errors.New("invalid dataURI")
+	}
+	return parts[1], nil
+}
+
+func isImage(data []byte) bool {
+	if len(data) < 4 {
+		log.Println("len(data) < 4")
+		return false
+	}
+
+	switch {
+	case bytes.HasPrefix(data, []byte{0xFF, 0xD8, 0xFF}): // JPEG
+		return true
+	case bytes.HasPrefix(data, []byte{0x89, 0x50, 0x4E, 0x47}): // PNG
+		return true
+	case bytes.HasPrefix(data, []byte{0x47, 0x49, 0x46, 0x38}): // GIF
+		return true
+	}
+	return false
+}
+
+// randomNum returns a random number between min and max, both inclusive.
+func randomNum(min, max int) int {
+	bi := big.NewInt(int64(max + 1 - min))
+	bj, err := rand.Int(rand.Reader, bi)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return int(bj.Int64()) + min
+}
+
+func sanitizeCategories(data string) string {
+	newdata := strings.Split(data, ",")
+	returndata := ""
+	for i, w := range newdata {
+		w = strings.TrimSpace(w)
+		if w != "" && i > 0 {
+			returndata += (", " + w)
+		} else {
+			returndata += w
+		}
+		if returndata == "" {
+			returndata = generateRandomEmojiSequence()
+		}
+	}
+	return returndata
+}
+
+func generateRandomEmojiSequence() string {
+	rounds := []string{"🔴", "🟠", "🟡", "🟢", "🔵", "🟣", "🟤", "⚫", "⚪"}
+	// Shuffle the rounds using Fisher-Yates algorithm
+	for i := len(rounds) - 1; i > 0; i-- {
+		bi := big.NewInt(3)
+		bj, err := rand.Int(rand.Reader, bi)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// convert big.Int to int
+		j := int(bj.Int64())
+		rounds[i], rounds[j] = rounds[j], rounds[i]
+	}
+
+	// Join the shuffled rounds into a single string
+	mixedRounds := strings.Join(rounds, " ")
+
+	return mixedRounds
 }

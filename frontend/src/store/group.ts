@@ -1,21 +1,27 @@
+import { Group } from '@/api/types';
 import { defineStore } from 'pinia';
 
 interface GroupState {
-  groupId: number;
+  group: Group;
 }
 
 export const useGroupStore = defineStore({
   id: 'group',
-  state: ():GroupState => ({
-    // Define your state properties here
-    groupId: -1, 
+  state: (): GroupState => ({
+    group: {
+      id: -1,
+      name: '',
+      description: '',
+      created_at: '',
+      email: '',
+      first_name: '',
+      last_name: '',
+    },
   }),
   getters: {
-    // Define your getters here
-    getGroupId(): number { return this.groupId; },
+    getGroup(): Group { return this.group; },
   },
   actions: {
-    // Define your actions here
-    setGroupId(postId: number) { this.groupId = postId; },
+    setGroup(group: Group) { this.group = group; },
   },
 });

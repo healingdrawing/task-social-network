@@ -79,7 +79,7 @@ function scrollToBottom() {
  */
 
 function piniaManageData(message: Message) {
-  profileStore.setTargetUserId(message.userId);
+  profileStore.setTargetUserEmail(message.senderEmail);
 }
 
 onMounted(() => {

@@ -1,25 +1,25 @@
 <template>
+  <router-link to="/group_posts">Back to Group Posts</router-link>
   <div>
-    <h1>Post:</h1>
+    <h1>Group Post:</h1>
     <div>
-      <p>Post id: {{ post.id }}</p>
-      <p>Post title: {{ post.title }}</p>
-      <p>Post tags: {{ post.categories }}</p>
-      <p>Post content: {{ post.content }}</p>
-      <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
-      <p>Post created: {{ post.created_at }}</p>
-      <div v-if="post.picture !== ''">
-        <p>Post picture: 
-          <br> <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
+      <p>Group Post id: {{ group_post.id }}</p>
+      <p>Group Post title: {{ group_post.title }}</p>
+      <p>Group Post tags: {{ group_post.categories }}</p>
+      <p>Group Post content: {{ group_post.content }}</p>
+      <p>Group Post created: {{ group_post.created_at }}</p>
+      <div v-if="group_post.picture !== ''">
+        <p>Group Post picture: 
+          <br> <img :src="`data:image/jpeg;base64,${group_post.picture}`" alt="picture" />
         </p>
       </div>
       <router-link
       :to="{ name: 'target' }"
-      @click="piniaManageDataProfile(post.email)">
+      @click="piniaManageDataProfile(group_post.email)">
         <h3>
-          Author: {{ post.first_name }}
-          {{ post.last_name }} 
-          ({{ post.email }})
+          Author: {{ group_post.first_name }}
+          {{ group_post.last_name }} 
+          ({{ group_post.email }})
         </h3>
       </router-link>
     </div>
@@ -89,14 +89,14 @@ function handlePictureChange(event: Event) {
 }
 
 const postStore = usePostStore();
-const post = computed(() => postStore.getPost);
+const group_post = computed(() => postStore.getGroupPost);
 
 function updatePostComments() {
   wss.sendMessage({
-    type: WSMessageType.COMMENTS_LIST,
+    type: WSMessageType.GROUP_POST_COMMENTS_LIST,
     data: {
       user_uuid: UUIDStore.getUUID,
-      post_id: post.value.id,
+      post_id: group_post.value.id,
     } as CommentsListRequest,
   });
 }
@@ -106,16 +106,16 @@ const commentsList = computed(() => wss.commentsList);
 const commentContent = ref('');
 
 function addComment() {
-  const commentSubmit: CommentSubmit = {
+  const group_post_comment_submit: CommentSubmit = {
     user_uuid: UUIDStore.getUUID,
-    post_id: post.value.id,
+    post_id: group_post.value.id,
     content: commentContent.value,
     picture: pictureStore.getPictureBase64String,
   };
 
   const message: WSMessage = {
-    type: WSMessageType.COMMENT_SUBMIT,
-    data: commentSubmit,
+    type: WSMessageType.GROUP_POST_COMMENT_SUBMIT,
+    data: group_post_comment_submit,
   };
   wss.sendMessage(message);
 

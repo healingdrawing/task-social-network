@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 interface PictureState {
   pictureError: string;
   pictureBlob: Blob | null;
+  pictureBase64String: string;
 }
 
 export const usePictureStore = defineStore({
@@ -10,6 +11,7 @@ export const usePictureStore = defineStore({
   state: (): PictureState => ({
     pictureError: "",
     pictureBlob: null,
+    pictureBase64String: "",
   }),
   getters: {
     getPictureError(): string {
@@ -17,7 +19,10 @@ export const usePictureStore = defineStore({
     },
     getPictureBlob(): Blob | null {
       return this.pictureBlob;
-    }
+    },
+    getPictureBase64String(): string {
+      return this.pictureBase64String;
+    },
   },
   actions: {
     setPictureError(pictureError: string) {
@@ -71,10 +76,16 @@ export const usePictureStore = defineStore({
             } else {
               this.pictureBlob = blob;
               this.pictureError = '';
+              this.pictureBase64String = reader.result?.toString() || '';
             }
           }, 'image/jpeg', 0.8);
         };
       };
     },
+    resetPicture() {
+      this.pictureError = '';
+      this.pictureBlob = null;
+      this.pictureBase64String = '';
+    }
   }
 });

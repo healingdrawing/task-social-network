@@ -1,15 +1,18 @@
 <template>
   <div>
-    <h1>Create Post:</h1>
+    <h1>Create Post</h1>
+
+    <div><hr><button type="button" @click="crap" title="remove in production">Fill Debug / remove later</button><hr></div> <!-- todo: remove later -->
+
     <form @submit.prevent="addPost">
       <label for="postTitle">Post Title:</label>
-      <input type="text" id="postTitle" v-model="postTitle" required>
+      <br> <input type="text" id="postTitle" v-model="postTitle" required>
       <br>
       <label for="postTags">Post Tags:</label>
-      <input type="text" id="postTags" v-model="postTags"> <!-- todo: the "required" field removed, because in "real-time-forum" backend the empty tag was implemented as decoration using randomly colored circles from emoji, and i like it generally. There is no strict requirements about tags in the task. And no post filtering required to implement in the task, the tags can be not clickable. So it is ok at the moment. But check and keep in mind this -->
+      <br> <input type="text" id="postTags" v-model="postTags">
       <br>
       <label for="postContent">Post Content:</label>
-      <textarea id="postContent" v-model="postContent" required></textarea>
+      <br> <textarea id="postContent" v-model="postContent" required></textarea>
       
       <br>
       <label for="postPrivacy">Post Privacy:</label>
@@ -20,22 +23,20 @@
       <input type="radio" id="private" name="postPrivacy" value="private" v-model="postPrivacy">
       <label for="private">Private - for all followers</label>
       <br>
-      <input type="radio" id="almostPrivate" name="postPrivacy" value="almostPrivate" v-model="postPrivacy">
-      <label for="almostPrivate">Almost Private - for selected followers</label>
+      <input type="radio" id="almost_private" name="postPrivacy" value="almost private" v-model="postPrivacy">
+      <label for="almost_private">Almost Private - for selected followers</label>
       <br>
-      <select v-if="postPrivacy === 'almostPrivate'" multiple v-model="selectedFollowers">
-        <option v-for="follower in followers" :key="follower.id" :value="follower.id">{{ follower.name }}</option>
+      <select v-if="postPrivacy === 'almost private'" multiple v-model="selectedFollowers">
+        <option v-for="follower in followersList" :key="follower.email" :value="follower.email">{{ follower.first_name }} {{ follower.last_name }} ({{ follower.email }})</option>
       </select>
       
       <div>
-        <label for="picture">Picture:</label>
-        <input type="file" id="picture" accept="image/jpeg, image/png, image/gif" @change="handlePictureChange">
-        <div class="optional">(optional)</div>
+        <label for="picture"> with picture(optional): </label>
+        <br> <input type="file" id="picture" accept="image/jpeg, image/png, image/gif" @change="handlePictureChange">
       </div>
 
       <br>
       <button type="submit">Submit</button>
-      <!-- todo: add image or gif to post required in task. Perhaps, to prevent posting "anacondas" and "caves" photos, the images can be limited from allowed lists of images, but generally it sounds like they expect any image upload, which is unsafe, like in picture too -->
     </form>
     <div v-if="pictureStore.pictureError">{{ pictureStore.pictureError }}</div>
   </div>
@@ -46,62 +47,52 @@
       :key="post.id">
       <hr>
       <router-link
-      :to="{ name: 'post' }"
-      @click="piniaManageData(post)">
-        <p>Post Author id: {{ post.authorId }}</p>
-        <h3>Post Author: {{ post.authorFullName }}</h3>
+        :to="{ name: 'post' }"
+        @click="piniaManageDataPost(post)">
         <p>Post id: {{ post.id }}</p>
         <p>Post title: {{ post.title }}</p>
-        <p>Post tags: {{ post.tags }}</p>
+        <p>Post tags: {{ post.categories }}</p>
         <p>Post content: {{ post.content }}</p>
         <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
-        <p>Post followers: {{ post.followers }}</p> <!-- todo: no need to display it of course, it is used on backend side, before return post as visible or not -->
-        <p>Post picture: {{ post.picture }}</p> <!-- todo: no need to display it of course, it is used on backend side, before return post as visible or not -->
+        <p>Post created: {{ post.created_at }}</p>
+        <div v-if="post.picture !== ''">
+          <p>Post picture: 
+            <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
+          </p>
+        </div>
+      </router-link>
+      <router-link
+      :to="{ name: 'target' }"
+      @click="piniaManageDataProfile(post.email)">
+        <h3>
+          Author: {{ post.first_name }}
+          {{ post.last_name }} 
+          ({{ post.email }})
+        </h3>
       </router-link>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { Ref, onMounted, ref } from 'vue';
+import { Ref, computed, onMounted, ref } from 'vue';
+import { useUUIDStore } from '@/store/pinia';
 import { usePostStore } from '@/store/pinia';
+import { useProfileStore } from '@/store/pinia';
 import { usePictureStore } from '@/store/pinia';
+import { useWebSocketStore } from '@/store/websocket';
+import { WSMessage, WSMessageType, PostSubmit, Post, PostsListRequest, TargetProfileRequest } from '@/api/types';
 
-interface Follower {
-  id: number;
-  name: string;
-}
+const wss = useWebSocketStore();
+const postsList = computed(() => wss.postsList); // ref and reactive failed to work here, so computed used. Straight way put wss.postsList to template works too,
 
-interface Post {
-  id: number; // post id, unique, autoincrement, primary key, all posts must be stored one table in database
-  authorId: number; //todo: need to implement clickable link to user profile
-  authorFullName: string; //todo: need to implement clickable link to user profile
-  title: string;
-  tags: string;
-  content: string;
-  privacy: string;
-  followers?: number[]; // user ids, to filter posts by privacy, on backend side, before sending to frontend
-  picture?: Blob | null; //todo: need to implement image or gif to post required in task. Perhaps, to prevent posting "anacondas" and "caves" photos, the images can be limited from allowed lists of images, but generally it sounds like they expect any image upload, which is unsafe, like in picture too
-}
-
-//todo: remove/refactor later, dummy data, must be collected from backend
-function getPosts() {
-  const posts: Post[] = [
-    { id: 1, authorId: 11, authorFullName: 'John Doe 11', title: "Dummy post title", tags: "dummy, post, 111", content: 'Dummy Post content text.', privacy: 'public' },
-    { id: 2, authorId: 22, authorFullName: 'Jane Doe 22', title: "Dummy post title", tags: "dummy, post, 222", content: 'Dummy Post content text.', privacy: 'private' },
-  ];
-  return posts;
-}
-
-const postsList = ref(getPosts());
 
 const postTitle = ref('');
 const postTags = ref('');
 const postContent = ref('');
 const postPrivacy = ref('public');
-const selectedFollowers = ref([]);
-const followers = ref<Follower[]>([]);
-const picture: Ref<Blob | null> = ref(null); //todo: chat gpt solution, to fix null value case, because field is optional
+const selectedFollowers = ref<string[]>([]);
+const picture: Ref<Blob | null> = ref(null);
 
 const pictureStore = usePictureStore();
 function handlePictureChange(event: Event) {
@@ -109,25 +100,24 @@ function handlePictureChange(event: Event) {
   picture.value = (event.target as HTMLInputElement).files?.[0] ?? null;
 }
 
-//todo: refactor to send post to backend
-function addPost() {
-  //todo: first send to backend, and if success, then add to postsList on page, so all the data finally must be from backend. The "postTitle.value" etc must be used in request to backend, to create new post. The authorId is the current user id, f.e. managed using pinia storage, or cookies, not sure yet.
-  const post: Post = {
-    id: -1, //todo: must be collected from backend
-    authorId: -1, //todo: must be the current user id , returned from backend
-    authorFullName: "must be the current user full name",
+const UUIDStore = useUUIDStore();
+async function addPost() {
+  const postSubmit: PostSubmit = {
+    user_uuid: UUIDStore.getUUID,
+
     title: postTitle.value,
-    tags: postTags.value, //todo: comma separated tags, but for dummy case just string on screen
+    categories: postTags.value,
     content: postContent.value,
     privacy: postPrivacy.value,
-    picture: picture.value,
+    able_to_see: selectedFollowers.value.join(' '), //list of emails, separated by space
+    picture: pictureStore.getPictureBase64String,
   };
 
-  if (postPrivacy.value === 'almostPrivate') {
-    post.followers = selectedFollowers.value;
-  }
-
-  postsList.value.unshift(post);
+  const message: WSMessage = {
+    type: WSMessageType.POST_SUBMIT,
+    data: postSubmit,
+  };
+  wss.sendMessage(message);
 
   postTitle.value = '';
   postTags.value = '';
@@ -135,25 +125,53 @@ function addPost() {
   postPrivacy.value = 'public';
   selectedFollowers.value = [];
   picture.value = null;
-
-}
-
-//todo: remove/refactor later, dummy data, must be collected from backend
-function updateFollowersList() {
-  followers.value = [
-    { id: 11, name: 'John Doe 11' },
-    { id: 22, name: 'Jane Doe 22' },
-    { id: 33, name: 'Sir Flex 33' },
-  ];
+  (document.getElementById("picture") as HTMLInputElement).value = "";
+  pictureStore.resetPicture()
 }
 
 const postStore = usePostStore();
-function piniaManageData(post: Post) {
-  postStore.setPostId(post.id);
+function piniaManageDataPost(post: Post) {
+  postStore.setPost(post);
+}
+
+const profileStore = useProfileStore();
+function piniaManageDataProfile(email: string) {
+  profileStore.setTargetUserEmail(email);
+}
+
+const followersList = computed(() => wss.userFollowersList);
+function updateFollowersList() {
+  wss.sendMessage({
+    type: WSMessageType.USER_FOLLOWERS_LIST,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      target_email: profileStore.getUserEmail,
+    } as TargetProfileRequest,
+  })
+}
+
+// send request to get old posts list, used inside onMounted
+function updatePostsList() {
+  console.log('=======FIRED======= updatePostsList');
+
+  wss.sendMessage({
+    type: WSMessageType.POSTS_LIST,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+    } as PostsListRequest,
+  });
 }
 
 onMounted(() => {
+  updatePostsList();
   updateFollowersList();
 });
+
+const crap = () => {
+  postTitle.value = 'Dummy post title';
+  postTags.value = 'dummy, post, 111, test';
+  postContent.value = 'Dummy Post content text.';
+  postPrivacy.value = 'public';
+}
 
 </script>

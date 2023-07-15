@@ -1,209 +1,268 @@
 <template>
-  <h1>Profile:</h1>
+  <h1>Target Profile:</h1>
 
-  <div>
-    <button @click="handleFollowing()">
-      {{ isVisitorNotFollowerAndDidNotRequested ? 'Request To Follow' : 'Unfollow' }}
-    </button>
+  <div v-if="visitor">
+    <button @click="handleFollowing()">{{ button_text }}</button>
   </div>
+  <div v-else>what is going on, where is the visitor property? [{{ visitor }}]</div>
+ 
+  <!-- add user information -->
+  <div v-if="profile">
+    <p>Email: {{ profile.email }}</p>
+    <p>First Name: {{ profile.first_name }}</p>
+    <p>Last Name: {{ profile.last_name }}</p>
+  </div>
+  <div v-else>no profile</div>
 
-  <div v-if="isProfilePublicOrVisitorFollower">
-    <!-- todo: remove later . show id for dev needs-->
-    <p>Id: {{ profileStore.getTargetUserId }}</p>
-    <!-- add user information -->
-    <div>
-      <p>Email: {{ email }}</p>
-      <p>First Name: {{ firstName }}</p>
-      <p>Last Name: {{ lastName }}</p>
-      <p>Date of Birth: {{ dob }}</p>
-      <p>Nickname: {{ nickname }}</p>
-      <p>About Me: {{ aboutMe }}</p>
+  <div v-if="profile && (profile.public ||
+    visitor && visitor.status == VisitorStatus.FOLLOWER ||
+    visitor && visitor.status == VisitorStatus.OWNER)">
+    <div v-if="profile">
+      <p>Date of Birth: {{ profile.dob }}</p>
+      <p>Nickname: {{ profile.nickname }}</p>
+      <p>About Me: {{ profile.about_me }}</p>
+      <p>{{ profile.public ? "Public" : "Private" }}</p>
     </div>
     <!-- separately add avatar, perhaps it should be on the right half of screen -->
-    <div>
-      <p>Avatar: <img :src="getImgUrl(avatar)" alt="fail again"></p>
+    <div v-if="profile && profile.avatar !== ''">
+      <p>Avatar:
+        <br> <img :src="`data:image/jpeg;base64,${profile.avatar}`" alt="avatar" />
+      </p>
     </div>
     <!-- add following list. The other users followed by the user -->
     <h2>Following:</h2>
-    <div class="user-list" style="height: 100px; overflow-y: scroll;">
-      <div v-for="user in followingList" :key="user.id">{{ user.name }}</div>
+    <div v-if="followingList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;">
+      <!-- {{ followingList.length }} <br> {{ followingList }} -->
+      <div v-for="user in followingList" :key="user.email">{{ `${user.first_name} ${user.last_name} (${user.email})` }}</div>
     </div>
+    <div v-else>No following</div>
+
     <!-- add followers list. The other users following the user -->
     <h2>Followers:</h2>
-    <div class="user-list" style="height: 100px; overflow-y: scroll;">
-      <div v-for="user in followersList" :key="user.id">{{ user.name }}</div>
+    <div v-if="followersList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;">
+      <!-- {{ followersList.length }} <br> {{ followersList }} -->
+      <div v-for="user in followersList" :key="user.email">{{ `${user.first_name} ${user.last_name} (${user.email})` }}</div>
     </div>
+    <div v-else>No followers</div>
+
     <!-- add user posts list. The posts created by the user -->
     <h2>Posts:</h2>
     <div v-for="post in postsList"
       :key="post.id">
+      <hr>
       <router-link
-      :to="{ name: 'post' }"
-      @click="piniaManageData(post)">
-        {{ post.title }}
+        :to="{ name: 'post' }"
+        @click="piniaManageDataPost(post)">
+        <p>Post id: {{ post.id }}</p>
+        <p>Post title: {{ post.title }}</p>
+        <p>Post tags: {{ post.categories }}</p>
+        <p>Post content: {{ post.content }}</p>
+        <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
+        <p>Post created: {{ post.created_at }}</p>
+        <div v-if="post.picture !== ''">
+          <p>Post picture: 
+            <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
+          </p>
+        </div>
+      </router-link>
+      <router-link
+      :to="{ name: 'target' }"
+      @click="piniaManageDataProfile(post.email)">
+        <h3>
+          Author: {{ post.first_name }}
+          {{ post.last_name }} 
+          ({{ post.email }})
+        </h3>
       </router-link>
     </div>
     <!-- ( :to="{ name: 'post' }" ) also can be ( :to="'/post'" ) -->
+
+    <!-- add user group posts list. The group posts created by the user in time of group membership -->
+    <h2>Group Posts:</h2>
+    <div v-for="group_post in groupPostsList"
+      :key="group_post.id">
+      <hr>
+      <router-link
+        :to="{ name: 'group' }"
+        @click="piniaManageDataGroupPost(group_post)">
+        <p>Group id: {{ group_post.group_id }}</p>
+        <p>Group name: {{ group_post.group_name }}</p>
+        <p>Group description: {{ group_post.group_description }}</p>
+      </router-link>
+      <p>Group Post id: {{ group_post.id }}</p>
+      <p>Group Post title: {{ group_post.title }}</p>
+      <p>Group Post tags: {{ group_post.categories }}</p>
+      <p>Group Post content: {{ group_post.content }}</p>
+      <p>Group Post created: {{ group_post.created_at }}</p>
+      <div v-if="group_post.picture !== ''">
+        <p>Group Post picture: 
+          <br> <img :src="`data:image/jpeg;base64,${group_post.picture}`" alt="picture" />
+        </p>
+      </div>
+      <h3>
+        Author: {{ group_post.first_name }}
+        {{ group_post.last_name }} 
+        ({{ group_post.email }})
+      </h3>
+    </div>
+
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, onMounted } from 'vue';
-import { usePostStore } from '@/store/post';
+import { onMounted, computed } from 'vue';
+import { useWebSocketStore } from '@/store/websocket';
+import { useUUIDStore } from '@/store/uuid';
 import { useProfileStore } from '@/store/profile';
+import { usePostStore } from '@/store/post';
+import { useGroupStore } from '@/store/group';
+import { WSMessageType, TargetProfileRequest, VisitorStatus, Post, GroupPost, GroupPostsListRequest, Group } from '@/api/types';
 
-// if true/false, then show follow/unfollow text on button
-const isVisitorNotFollowerAndDidNotRequested = ref(true);
 
-watch(isVisitorNotFollowerAndDidNotRequested, (newValue, oldValue) => {
-  alert(`isVisitorNotFollowerAndDidNotRequested: ${newValue}`);
-  // handleFollowing(newValue);
+
+const wss = useWebSocketStore();
+const visitor = computed(() => wss.visitor);
+
+function updateVisitorStatus() {
+  wss.sendMessage({
+    type: WSMessageType.USER_VISITOR_STATUS,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      target_email: profileStore.getTargetUserEmail,
+    } as TargetProfileRequest,
+  })
+}
+
+const button_text = computed(() => {
+  if (visitor.value.status === 'visitor') {
+    return 'Follow'
+  } else if (visitor.value.status === 'follower') {
+    return 'Unfollow';
+  } else if (visitor.value.status === 'requester') {
+    return 'Waiting for Decision';
+  } else {
+    return 'Train Finger Muscles';
+  }
 });
 
 function handleFollowing() {
-  // Call your method here
-  isVisitorNotFollowerAndDidNotRequested.value = !isVisitorNotFollowerAndDidNotRequested.value;
+  if (visitor.value.status === 'visitor') {
+    wss.sendMessage({
+      type: WSMessageType.USER_FOLLOW,
+      data: {
+        user_uuid: UUIDStore.getUUID,
+        target_email: profileStore.getTargetUserEmail,
+      } as TargetProfileRequest,
+    })
+  } else if (visitor.value.status === 'follower') {
+    wss.sendMessage({
+      type: WSMessageType.USER_UNFOLLOW,
+      data: {
+        user_uuid: UUIDStore.getUUID,
+        target_email: profileStore.getTargetUserEmail,
+      } as TargetProfileRequest,
+    })
+  } else if (visitor.value.status === 'requester') {
+    alert("Agree!!! it is too long to wait.")
+  } else {
+    alert("Your prestige is raising!!!")
+  }
+  updateVisitorStatus();
 }
 
-// if true then show all profile information on screen
-const isProfilePublicOrVisitorFollower = ref(true);
-
-function getImgUrl(imageNameWithExtension: string) {
-  return require(`../assets/${imageNameWithExtension}`)
-}
-
-const email = ref('john.doe@example.com');
-const firstName = ref('John');
-const lastName = ref('Doe');
-const dob = ref('01/01/1990');
-const avatar = ref('logo.png'); //todo: have to be at least logo.png in intial moment or fail with updateProfile() inside onMounted(). Outside onMounted() it works fine, with any initial string value
-const nickname = ref('johndoe');
-const aboutMe = ref('Lorem ipsum dolor sit amet, consectetur adipiscing elit.');
-
-//todo: remove/refactor later, to get data from backend
-interface Profile {
-  email: string;
-  firstName: string;
-  lastName: string;
-  dob: string;
-  avatar: string;
-  nickname: string;
-  aboutMe: string;
-}
-
-function fillDummyProfileData(userId: number): Profile {
-  return {
-    email: 'dummy@mail.com',
-    firstName: 'Dummy',
-    lastName: 'Doe',
-    dob: '01/01/1990',
-    avatar: 'logo.png',
-    nickname: 'dummydoe',
-    aboutMe: 'Very interesting text.',
-  };
-}
-
+const UUIDStore = useUUIDStore();
 const profileStore = useProfileStore();
-/** Function to update the profile data using dummy data at the moment*/
+function piniaManageDataProfile(email: string) {
+  profileStore.setTargetUserEmail(email);
+}
+
+
+const profile = computed(() => wss.userProfile);
+/** updateProfile updates the profile data from server*/
 function updateProfile() {
-  //todo: get data from backend based on user() id from profileStore
-  const profile = fillDummyProfileData(profileStore.getTargetUserId);
-
-  email.value = profile.email;
-  firstName.value = profile.firstName;
-  lastName.value = profile.lastName;
-  dob.value = profile.dob;
-  avatar.value = profile.avatar;//todo: placeholder.it must be image(uploaded or anonymous placeholder), so or from assets, like it is now, or from public folder(requires another code) * /
-  nickname.value = profile.nickname;
-  aboutMe.value = profile.aboutMe;
+  wss.sendMessage({
+    type: WSMessageType.USER_PROFILE,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      target_email: profileStore.getTargetUserEmail,
+    } as TargetProfileRequest,
+  })
 }
 
-// following and followers section
-interface User {
-  id: number;
-  name: string;
-}
-
-const followingList = ref<User[]>([]);
-
-// todo: dummy data, remove/refactor later
+const followingList = computed(() => wss.userFollowingList);
+/** updateFollowingList updates the following list from server*/
 function updateFollowingList() {
-  // Code to get the user list goes here
-  const users: User[] = [
-    { id: 1, name: 'John' },
-    { id: 2, name: 'Jane' },
-    { id: 3, name: 'Bob' },
-    { id: 4, name: 'Alice' },
-    { id: 5, name: 'Mike' },
-    { id: 6, name: 'Sara' },
-    { id: 7, name: 'Tom' },
-    { id: 8, name: 'Kate' },
-    { id: 9, name: 'David' },
-    { id: 10, name: 'Emily' },
-  ];
-  followingList.value = users;
-  console.log('Following list updated');
+  wss.sendMessage({
+    type: WSMessageType.USER_FOLLOWING_LIST,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      target_email: profileStore.getTargetUserEmail,
+    } as TargetProfileRequest,
+  })
 }
 
-const followersList = ref<User[]>([]);
-
-// todo: dummy data, remove/refactor later
+const followersList = computed(() => wss.userFollowersList);
+/** updateFollowersList updates the followers list from server*/
 function updateFollowersList() {
-  // Code to get the user list goes here
-  const users: User[] = [
-    { id: 1, name: 'John follower' },
-    { id: 2, name: 'Jane follower' },
-    { id: 3, name: 'Bob follower' },
-    { id: 4, name: 'Alice follower' },
-    { id: 5, name: 'Mike follower' },
-    { id: 6, name: 'Sara follower' },
-    { id: 7, name: 'Tom follower' },
-    { id: 8, name: 'Kate follower' },
-    { id: 9, name: 'David follower' },
-    { id: 10, name: 'Emily follower' },
-  ];
-  followersList.value = users;
-  console.log('Followers list updated');
+  wss.sendMessage({
+    type: WSMessageType.USER_FOLLOWERS_LIST,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      target_email: profileStore.getTargetUserEmail,
+    } as TargetProfileRequest,
+  })
 }
 
-// user posts section
-interface Post {
-  id: number;
-  title: string;
-}
-
-const postsList = ref<Post[]>([]);
-
-// todo: dummy data, remove/refactor later
+const postsList = computed(() => wss.postsList);
+/** updatePostsList updates the posts list from the server, able to see for the visitor */
 function updatePostsList() {
-  // Code to get the user posts goes here
-  const posts: Post[] = [
-    { id: 1, title: 'Dummy Post 1 Title' },
-    { id: 2, title: 'Dummy Post 2 Title' },
-    { id: 3, title: 'Dummy Post 3 Title' },
-    { id: 4, title: 'Dummy Post 4 Title' },
-    { id: 5, title: 'Dummy Post 5 Title' },
-    { id: 6, title: 'Dummy Post 6 Title' },
-    { id: 7, title: 'Dummy Post 7 Title' },
-    { id: 8, title: 'Dummy Post 8 Title' },
-    { id: 9, title: 'Dummy Post 9 Title' },
-    { id: 10, title: 'Dummy Post 10 Title' },
-  ];
-  postsList.value = posts;
-  console.log('Posts list updated');
+  wss.sendMessage({
+    type: WSMessageType.USER_POSTS_LIST, // todo: do not forget filter by able to see
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      target_email: profileStore.getTargetUserEmail,
+    } as TargetProfileRequest,
+  })
 }
-
 
 const postStore = usePostStore()
-const piniaManageData = (post: Post) => {
-  postStore.setPostId(post.id)
+function piniaManageDataPost(post: Post) {
+  postStore.setPost(post);
 }
 
+const groupPostsList = computed(() => wss.groupPostsList);
+// send request to get all group posts list, created by user in time of membering groups
+function updateUserGroupPostsList() {
+  console.log('=======FIRED======= updateGroupPostsList');
+
+  wss.sendMessage({
+    type: WSMessageType.USER_GROUP_POSTS_LIST,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      group_id: -1, // no needed, because it is all group posts collector for user
+    } as GroupPostsListRequest,
+  });
+}
+
+const groupStore = useGroupStore()
+const piniaManageDataGroupPost = (group_post: GroupPost) => {
+  groupStore.setGroup(
+    {
+      id: group_post.group_id,
+      name: group_post.group_name,
+      description: group_post.group_description,
+    } as Group
+  )
+}
+
+
 onMounted(() => {
+  updateVisitorStatus();
   updateProfile();
   updateFollowingList();
   updateFollowersList();
   updatePostsList();
+  updateUserGroupPostsList();
 });
 
 </script>

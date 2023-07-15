@@ -72,12 +72,12 @@ func chatMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		jsonResponse(w, http.StatusBadRequest, "")
 		return
 	}
-	ID1, err := getIDbyEmail(data.Username)
+	ID1, err := get_user_id_by_email(data.Username)
 	if err != nil {
 		jsonResponse(w, http.StatusInternalServerError, "ID1")
 		return
 	}
-	ID2, err := getIDbyEmail(data.OtherUser)
+	ID2, err := get_user_id_by_email(data.OtherUser)
 	if err != nil {
 		jsonResponse(w, http.StatusInternalServerError, "ID2")
 		return
@@ -105,12 +105,12 @@ func chatMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	rows.Close()
 	for i := 0; i < len(messages.Messages); i++ {
-		messages.Messages[i].UsernameFrom, err = getUserEmailbyID(IDpairs[i][0])
+		messages.Messages[i].UsernameFrom, err = get_email_by_user_id(IDpairs[i][0])
 		if err != nil {
 			jsonResponse(w, http.StatusInternalServerError, "getUserEmailbyID IDpairs[i][0]")
 			return
 		}
-		messages.Messages[i].UsernameTo, err = getUserEmailbyID(IDpairs[i][1])
+		messages.Messages[i].UsernameTo, err = get_email_by_user_id(IDpairs[i][1])
 		if err != nil {
 			jsonResponse(w, http.StatusInternalServerError, "getUserEmailbyID IDpairs[i][1]")
 			return
@@ -144,13 +144,13 @@ func chatUsersHandler(w http.ResponseWriter, r *http.Request) {
 		users.Users = append(users.Users, user)
 	}
 	rows.Close()
-	ID1, err := getIDbyEmail(data.Username)
+	ID1, err := get_user_id_by_email(data.Username)
 	if err != nil {
 		jsonResponse(w, http.StatusInternalServerError, "getIDbyEmail ID1 failed")
 		return
 	}
 	for i := 0; i < len(users.Users); i++ {
-		ID2, err := getIDbyEmail(users.Users[i].Username)
+		ID2, err := get_user_id_by_email(users.Users[i].Username)
 		if err != nil {
 			jsonResponse(w, http.StatusInternalServerError, "getIDbyEmail ID2 failed")
 			return
@@ -210,13 +210,13 @@ func chatNewHandler(w http.ResponseWriter, r *http.Request) {
 		jsonResponse(w, http.StatusBadRequest, "")
 		return
 	}
-	fromID, err := getIDbyEmail(data.UsernameFrom)
+	fromID, err := get_user_id_by_email(data.UsernameFrom)
 	if err != nil {
 		log.Println(err.Error())
 		jsonResponse(w, http.StatusInternalServerError, "getIDbyEmail fromID failed")
 		return
 	}
-	toID, err := getIDbyEmail(data.UsernameTo)
+	toID, err := get_user_id_by_email(data.UsernameTo)
 	if err != nil {
 		log.Println(err.Error())
 		jsonResponse(w, http.StatusInternalServerError, "getIDbyEmail toID failed")

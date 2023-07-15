@@ -47,14 +47,31 @@
     <button type="submit">Submit</button>
   </form>
   <div v-if="avatarStore.avatarError">{{ avatarStore.avatarError }}</div>
+  <div v-if="error">{{ error }}</div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { Ref, ref } from 'vue';
 import router from '@/router/index'
-import { signupUser } from '@/api/methods'
+import { useWebSocketStore } from '@/store/pinia';
+import { useUUIDStore } from '@/store/pinia';
+import { useSignupStore } from '@/store/pinia';
+import { useProfileStore } from '@/store/pinia';
 import { useAvatarStore } from '@/store/pinia';
+
+
+const wss = useWebSocketStore();
+const UUIDStore = useUUIDStore();
+const signupStore = useSignupStore();
+const profileStore = useProfileStore();
+const error = signupStore.error
+
+function resetPiniaStores() {
+  signupStore.$reset();
+  UUIDStore.$reset();
+  wss.$reset();
+}
 
 const email = ref('');
 const password = ref('');
@@ -73,22 +90,79 @@ function handleAvatarChange(event: Event) {
 }
 
 const signup = async () => {
-  /* todo: shoud happens only if signup is successful */
+  resetPiniaStores();
+  try {
+    /* todo: should happen only if signup is successful */
+    await signupStore.fetchData({
+      email: email.value,
+      password: password.value,
+      first_name: firstName.value,
+      last_name: lastName.value,
+      dob: dob.value,
+      avatar: avatarStore.getAvatarBase64String,
+      nickname: nickname.value,
+      about_me: aboutMe.value,
+      public: false
+    });
+
+
+    // Result storage logic here
+    // For example, you can store the result in a Vuex store or any other storage mechanism
+    // Assuming you have a Vuex store setup, you can dispatch an action to store the result
+    // Example:
+    // await store.dispatch('storeSignupResult', result);
+
+    if (signupStore.getData.UUID === undefined) {
+      signupStore.error = "Error: UUID is undefined. Signup failed.";
+      throw new Error(signupStore.error);
+    } else {
+      console.log("UUID: " + UUIDStore.getUUID);
+      UUIDStore.setUUID(signupStore.getData.UUID)
+      profileStore.setUserEmail(signupStore.getData.email);
+      profileStore.setTargetUserEmail(signupStore.getData.email);
+      wss.connect(UUIDStore.getUUID);
+
+      // slowdown this... masterpeice ... to wait for websocket to establish connection
+      if (wss.socket) {
+        const socket = wss.socket
+        await new Promise((resolve) => {
+          socket.onopen = resolve;
+        });
+      } else {
+        throw new Error('WebSocket connection is null');
+      }
+
+      router.push('/profile');
+    }
+
+  } catch (error) {
+    // Error handling logic here
+    // For example, you can display the error message or log it
+    // Assuming you have a Vuex store setup for error handling, you can dispatch an action to handle the error
+    // Example:
+    // await store.dispatch('handleSignupError', error);
+    console.error(error);
+  } finally {
+    // Finally logic here
+    console.log('finally');
+    // print the result to the console
+    // router.push('/profile');
+  }
+
+
   // downscale avatar image and convert it into Blob string of bytes
-  signupUser({
-    email: email.value,
-    password: password.value,
-    firstName: firstName.value,
-    lastName: lastName.value,
-    dob: dob.value,
-    avatar: avatar.value,
-    nickname: nickname.value,
-    aboutMe: aboutMe.value,
-    public: false
-  })
-  /* todo: go to profile, after signup successful, plus autologin after success signup */
-  router.push('/profile')
-}
+  // signupUser({
+  //   email: email.value,
+  //   password: password.value,
+  //   firstName: firstName.value,
+  //   lastName: lastName.value,
+  //   dob: dob.value,
+  //   avatar: avatar.value,
+  //   nickname: nickname.value,
+  //   aboutMe: aboutMe.value,
+  //   public: false
+  // })
+};
 
 // todo: remove later
 const crap = () => {

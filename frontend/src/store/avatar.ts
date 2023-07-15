@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 interface AvatarState {
   avatarError: string;
   avatarBlob: Blob | null;
+  avatarBase64String: string;
 }
 
 export const useAvatarStore = defineStore({
@@ -10,6 +11,7 @@ export const useAvatarStore = defineStore({
   state: (): AvatarState => ({
     avatarError: "",
     avatarBlob: null,
+    avatarBase64String: "",
   }),
   getters: {
     getAvatarError(): string {
@@ -17,7 +19,10 @@ export const useAvatarStore = defineStore({
     },
     getAvatarBlob(): Blob | null {
       return this.avatarBlob;
-    }
+    },
+    getAvatarBase64String(): string {
+      return this.avatarBase64String;
+    },
   },
   actions: {
     setAvatarError(avatarError: string) {
@@ -25,6 +30,8 @@ export const useAvatarStore = defineStore({
     },
     handleAvatarUpload(event: Event) {
       const file = (event.target as HTMLInputElement).files?.[0];
+      // console.log('===============begin handle avatar upload======================')
+      // console.log('store/avatar.ts file', file)
       if (!file) return;
 
       const reader = new FileReader();
@@ -70,7 +77,11 @@ export const useAvatarStore = defineStore({
               this.avatarError = 'The image must be less than or equal to 500 pixels in width and height.';
             } else {
               this.avatarBlob = blob;
+              console.log('===========================================')
+              console.log('resized avatar blob inside handleAvatarUpload')
+              console.log('store/avatar.ts this.avatarBlob', this.avatarBlob)
               this.avatarError = '';
+              this.avatarBase64String = reader.result?.toString() || '';
             }
           }, 'image/jpeg', 0.8);
         };

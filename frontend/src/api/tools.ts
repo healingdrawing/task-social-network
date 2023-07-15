@@ -4,6 +4,25 @@ interface ResizedImage {
   height: number;
 }
 
+/**prepare picture data for send to backend in string form*/
+export function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    reader.onloadend = () => {
+      const base64String = reader.result?.toString().split(',')[1];
+      if (base64String) {
+        resolve(base64String);
+      } else {
+        reject(new Error('Failed to convert Blob to Base64-encoded string'));
+      }
+    };
+    reader.onerror = () => {
+      reject(new Error('Failed to read Blob'));
+    };
+  });
+}
+
 // todo: remove later. not used at the moment. not tested.
 export function resizeImage(file: File, maxSizeKb: number, maxWidthPx: number, maxHeightPx: number): Promise<ResizedImage> {
   return new Promise((resolve, reject) => {
