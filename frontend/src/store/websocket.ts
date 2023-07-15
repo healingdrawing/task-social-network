@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { WSMessage, WSMessageType, Post, GroupPost, Comment, UserProfile, UserForList, UserVisitorStatus as Visitor, Bell, BellType, Group, Event } from '@/api/types';
+import { WSMessage, WSMessageType, Post, GroupPost, Comment, UserProfile, UserForList, UserVisitorStatus as Visitor, Bell, BellType, Group, Event, ChatMessage } from '@/api/types';
 import router from '@/router/index';
 
 const websockets: (WebSocket | null)[] = [];
@@ -24,7 +24,7 @@ export const useWebSocketStore = defineStore({
 
     send_private_chat_message(message: string, uuid: string) {
       const wsMessage: WSMessage = {
-        type: WSMessageType.PRIVATE_CHAT_MESSAGE_SUBMIT,
+        type: WSMessageType.PRIVATE_CHAT_MESSAGE,
         data: {
           user_uuid: uuid,
           private_chat_user_id: this.private_chat_user_id,
@@ -36,7 +36,7 @@ export const useWebSocketStore = defineStore({
 
     send_group_chat_message(message: string, uuid: string) {
       const wsMessage: WSMessage = {
-        type: WSMessageType.GROUP_CHAT_MESSAGE_SUBMIT,
+        type: WSMessageType.GROUP_CHAT_MESSAGE,
         data: {
           user_uuid: uuid,
           group_id: this.group_chat_id,
@@ -337,6 +337,20 @@ export const useWebSocketStore = defineStore({
       return [...group_events];
     },
 
+    group_chat_messages_list(): ChatMessage[] {
+      const group_chat_messages = this.messages.filter((message) => message.type === WSMessageType.GROUP_CHAT_MESSAGE && message.data !== null);
+      const chat_messages = group_chat_messages.map((message) =>
+        (message.data as ChatMessage))
+      return [...chat_messages];
+    },
+
+    private_chat_messages_list(): ChatMessage[] {
+      const private_chat_messages = this.messages.filter((message) => message.type === WSMessageType.PRIVATE_CHAT_MESSAGE && message.data !== null);
+      const chat_messages = private_chat_messages.map((message) =>
+        (message.data as ChatMessage))
+      return [...chat_messages];
+    },
+
     followRequestsBellList(): Bell[] {
       const fresh_follow_requests_messages = this.messages.filter((message) => message.type === WSMessageType.FOLLOW_REQUEST_RESPONSE)
       const fresh_follow_requests = fresh_follow_requests_messages.map((message) => message.data as Bell)
@@ -416,23 +430,6 @@ export const useWebSocketStore = defineStore({
       return [...this.followRequestsBellList, ...this.groupInvitesBellList, ...this.groupRequestsBellList, ...this.groupEventsBellList]
     },
 
-    chatUsersList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.PRIVATE_CHAT_USERS_LIST) },
-    groupPostCommentsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_POST_COMMENTS_LIST) },
-
-    groupEventParticipantsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.GROUP_EVENT_PARTICIPANTS_LIST) },
-
-
-    // userPostsList(): WSMessage[] { return this.messages.filter((message) => message.type === WSMessageType.USER_POSTS_LIST) },
-
-    // chatMessages(): Message[] {
-    //   return this.messages.filter((message) => message.type === 'chat');
-    // },
-    // postMessages(): Message[] {
-    //   return this.messages.filter((message) => message.type === 'post');
-    // },
-    // notificationMessages(): Message[] {
-    //   return this.messages.filter((message) => message.type === 'notification');
-    // },
   },
 
 });

@@ -107,12 +107,10 @@ import router from '@/router/index';
 import { useWebSocketStore } from '@/store/pinia';
 import { useUUIDStore } from '@/store/pinia';
 import { useGroupStore } from '@/store/group';
-import { useChatStore } from '@/store/chat';
 import { GroupVisitorStatusRequest, VisitorStatus, WSMessageType, GroupEventSubmit, WSMessage, Event, GroupEventAction, GroupEventsListRequest } from '@/api/types';
 const wss = useWebSocketStore();
 const UUIDStore = useUUIDStore();
 const groupStore = useGroupStore();
-const chatStore = useChatStore();
 
 const group_visitor = computed(() => wss.groupVisitor)
 function updateGroupVisitor() {
@@ -124,16 +122,6 @@ function updateGroupVisitor() {
     } as GroupVisitorStatusRequest,
   })
 }
-
-//todo: artefact to provide commented functionality in template section of this file
-// const piniaManageDataProfile = (email: string) => {
-//   profileStore.setTargetUserEmail(email);
-// };
-
-//dummy code
-
-
-
 
 const group = computed(() => groupStore.getGroup)
 const event = ref<Event>({ id: 1, title: '', date: '', description: '', decision: 'going' });
@@ -213,7 +201,7 @@ const joinGroup = () => {
 }
 
 // open ChatView.vue
-const groupChat = () => { router.push({ name: 'chat' }) }
+const groupChat = () => { router.push({ name: 'group_chat' }) }
 
 // open GroupInviteView.vue
 const groupInvite = () => { router.push({ name: 'group_invite' }) }
@@ -226,9 +214,7 @@ onMounted(() => {
   updateGroupVisitor();
   updateGroupEventsList();
 
-  //todo: get chat id for the group from backend using groupStore.getGroupId
-  const chatId = 77; // replace with actual chat ID
-  //then set it using pinia, to use it in ChatView.vue, to collect needed data from backend
-  chatStore.setChatId(chatId);
+  wss.set_group_chat_id(group.value.id)
+  wss.set_private_chat_user_id(0)
 });
 </script>

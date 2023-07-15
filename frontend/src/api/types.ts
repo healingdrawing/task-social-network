@@ -8,8 +8,8 @@ export enum WSMessageType {
   COMMENTS_LIST = "comments_list",
 
   PRIVATE_CHAT_USERS_LIST = "private_chat_users_list",
-  PRIVATE_CHAT_MESSAGE_SUBMIT = "private_chat_message_submit",
-  GROUP_CHAT_MESSAGE_SUBMIT = "group_chat_message_submit",
+  PRIVATE_CHAT_MESSAGE = "private_chat_message",
+  GROUP_CHAT_MESSAGE = "group_chat_message",
 
   FOLLOW_REQUEST_REJECT = "follow_request_reject",
   FOLLOW_REQUEST_ACCEPT = "follow_request_accept",
@@ -89,6 +89,14 @@ export interface ErrorResponse {
 
 export interface SuccessResponse {
   message: string;
+}
+
+export interface ChatMessage {
+  content: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  created_at: string; // use inside v-for like id, because no id in chat message
 }
 
 export interface Comment {

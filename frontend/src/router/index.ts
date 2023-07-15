@@ -68,6 +68,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import(/* webpackChunkName: "groups_all" */ '../views/GroupsAllView.vue')
   },
   {
+    path: '/group_chat',
+    name: 'group_chat',
+    component: () => import(/* webpackChunkName: "group_chat" */ '../views/GroupChatView.vue')
+  },
+  {
     path: '/chat',
     name: 'chat',
     component: () => import(/* webpackChunkName: "chat" */ '../views/ChatView.vue')

@@ -18,9 +18,9 @@ const (
 	WS_COMMENT_SUBMIT WSMT = "comment_submit"
 	WS_COMMENTS_LIST  WSMT = "comments_list"
 
-	WS_PRIVATE_CHAT_USERS_LIST     WSMT = "private_chat_users_list"
-	WS_PRIVATE_CHAT_MESSAGE_SUBMIT WSMT = "private_chat_message_submit"
-	WS_GROUP_CHAT_MESSAGE_SUBMIT   WSMT = "group_chat_message_submit"
+	WS_PRIVATE_CHAT_USERS_LIST WSMT = "private_chat_users_list"
+	WS_PRIVATE_CHAT_MESSAGE    WSMT = "private_chat_message"
+	WS_GROUP_CHAT_MESSAGE      WSMT = "group_chat_message"
 
 	WS_FOLLOW_REQUEST_RESPONSE WSMT = "follow_request_response" // NEW when broadcast the follow request from fan user, to idol user. Not implemented yet
 	WS_FOLLOW_REQUEST_REJECT   WSMT = "follow_request_reject"

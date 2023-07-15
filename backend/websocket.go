@@ -93,6 +93,9 @@ func reader(uuid string, conn *websocket.Conn) {
 			log.Println("data after unmarshalling: ", data) //todo: delete debug
 
 			switch data.Type {
+			case string(WS_GROUP_CHAT_MESSAGE):
+				wsGroupChatMessageHandler(conn, data.Data)
+
 			case string(WS_GROUP_SUBMIT):
 				wsGroupSubmitHandler(conn, data.Data)
 			case string(WS_GROUPS_LIST):
@@ -179,6 +182,7 @@ func reader(uuid string, conn *websocket.Conn) {
 			case string(WS_USER_GROUP_VISITOR_STATUS):
 				wsUserGroupVisitorStatusHandler(conn, data.Data)
 
+				// todo: looks like this is not used, check and delete if so
 			case "login":
 				clients.Store(conn, data.Data["username"])
 				sendStatus(data.Data["username"].(string), true)
