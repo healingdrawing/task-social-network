@@ -38,7 +38,7 @@ import { useWebSocketStore } from '@/store/pinia';
 import { useUUIDStore } from '@/store/pinia';
 import { useGroupStore } from '@/store/pinia';
 import { useProfileStore } from '@/store/pinia';
-import { ChatMessage } from '@/api/types';
+import { GroupChatMessage } from '@/api/types';
 
 const wss = useWebSocketStore();
 const UUIDStore = useUUIDStore();
@@ -76,7 +76,7 @@ function scrollToBottom() {
 }
  */
 
-function piniaManageData(message: ChatMessage) {
+function piniaManageData(message: GroupChatMessage) {
   profileStore.setTargetUserEmail(message.email);
 }
 

@@ -107,6 +107,8 @@ func reader(uuid string, conn *websocket.Conn) {
 			switch data.Type {
 			case string(WS_GROUP_CHAT_MESSAGE):
 				wsGroupChatMessageHandler(conn, data.Data)
+			case string(WS_PRIVATE_CHAT_MESSAGE):
+				wsPrivateChatMessageHandler(conn, data.Data)
 
 			case string(WS_GROUP_SUBMIT):
 				wsGroupSubmitHandler(conn, data.Data)

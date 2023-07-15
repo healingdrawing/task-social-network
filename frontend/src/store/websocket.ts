@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { WSMessage, WSMessageType, Post, GroupPost, Comment, UserProfile, UserForList, UserVisitorStatus as Visitor, Bell, BellType, Group, Event, ChatMessage } from '@/api/types';
+import { WSMessage, WSMessageType, Post, GroupPost, Comment, UserProfile, UserForList, UserVisitorStatus as Visitor, Bell, BellType, Group, Event, PrivateChatMessage, GroupChatMessage } from '@/api/types';
 import router from '@/router/index';
 
 const websockets: (WebSocket | null)[] = [];
@@ -345,17 +345,17 @@ export const useWebSocketStore = defineStore({
       return [...group_events];
     },
 
-    group_chat_messages_list(): ChatMessage[] {
+    group_chat_messages_list(): GroupChatMessage[] {
       const group_chat_messages = this.messages.filter((message) => message.type === WSMessageType.GROUP_CHAT_MESSAGE && message.data !== null);
       const chat_messages = group_chat_messages.map((message) =>
-        (message.data as ChatMessage)).filter((message) => message.group_id === this.group_chat_id)
+        (message.data as GroupChatMessage)).filter((message) => message.group_id === this.group_chat_id)
       return [...chat_messages];
     },
 
-    private_chat_messages_list(): ChatMessage[] {
+    private_chat_messages_list(): PrivateChatMessage[] {
       const private_chat_messages = this.messages.filter((message) => message.type === WSMessageType.PRIVATE_CHAT_MESSAGE && message.data !== null);
       const chat_messages = private_chat_messages.map((message) =>
-        (message.data as ChatMessage))
+        (message.data as PrivateChatMessage))
       return [...chat_messages];
     },
 

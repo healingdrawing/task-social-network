@@ -91,13 +91,22 @@ export interface SuccessResponse {
   message: string;
 }
 
-export interface ChatMessage {
+export interface PrivateChatMessage {
   content: string;
   email: string;
   first_name: string;
   last_name: string;
   created_at: string; // use inside v-for like id, because no id in chat message
-  group_id: number;
+  target_user_id: number;
+}
+
+export interface GroupChatMessage {
+  content: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  created_at: string; // use inside v-for like id, because no id in chat message
+  group_id: number; // which is group_chat_id in exact
 }
 
 export interface Comment {
