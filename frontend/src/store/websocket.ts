@@ -55,11 +55,12 @@ export const useWebSocketStore = defineStore({
       this.socket.onmessage = (event) => {
         console.log(`Received message: ${event.data}`);
         const message = JSON.parse(event.data) as WSMessage;
+        this.clearMessagesWhenNewMessageArrives(message)
         this.messages.unshift(message);
       };
     },
     sendMessage(message: WSMessage) {
-      this.clearMessages(message);
+      // this.clearMessagesBeforeSendMessage(message);
       const messageString = JSON.stringify(message);
       console.log(`\n=Sending message.\ntype: ${message.type}\ndata(json string): ${messageString}`);
       this.socket?.send(messageString);
@@ -70,9 +71,43 @@ export const useWebSocketStore = defineStore({
       this.socket = null;
       console.log('socket', this.socket);
     },
-    /**clearMessages removes all the messages of type = message.Type, before fetch fresh, to prevent duplication of messages in getters ( -> screen/view) */
-    clearMessages(message: WSMessage) {
-      console.log('==================\n=clearMessages===', message.type, '\n==================');
+
+    /**clearMessagesWhenNewMessageArrives removes all the messages of type = message.Type, before unshift new message, to prevent duplication of messages in getters ( -> screen/view) */
+    clearMessagesWhenNewMessageArrives(new_message: WSMessage) {
+      console.log('==================\n=clearMessagesWhenNewMessageArrives===', new_message.type, '\n==================');
+
+      this.messages = this.messages.filter((message) => message.type !== WSMessageType.SUCCESS_RESPONSE);
+      this.messages = this.messages.filter((message) => message.type !== WSMessageType.ERROR_RESPONSE);
+
+
+      switch (new_message.type) {
+        case WSMessageType.FOLLOW_REQUESTS_LIST:
+        case WSMessageType.GROUP_INVITES_LIST:
+        case WSMessageType.GROUP_REQUESTS_LIST:
+        case WSMessageType.GROUP_EVENTS_LIST:
+        case WSMessageType.USER_GROUPS_FRESH_EVENTS_LIST: //todo: for BellView.vue
+        case WSMessageType.POSTS_LIST:
+        case WSMessageType.COMMENTS_LIST:
+        case WSMessageType.GROUP_POSTS_LIST:
+        case WSMessageType.GROUPS_LIST:
+        case WSMessageType.USER_PROFILE:
+        case WSMessageType.USER_FOLLOWING_LIST:
+        case WSMessageType.USER_FOLLOWERS_LIST:
+        case WSMessageType.USER_VISITOR_STATUS:
+        case WSMessageType.USER_GROUP_VISITOR_STATUS:
+          this.messages = this.messages.filter((message) => message.type !== new_message.type);
+          break;
+
+
+        default:
+          console.log('SKIP clearMessagesWhenNewMessageArrives default============', new_message.type);
+      }
+    },
+
+
+    /**clearMessagesBeforeSendMessage removes all the messages of type = message.Type, before fetch fresh, to prevent duplication of messages in getters ( -> screen/view) */
+    clearMessagesBeforeSendMessage(message: WSMessage) {
+      console.log('==================\n=clearMessagesBeforeSendMessage===', message.type, '\n==================');
 
       this.messages = this.messages.filter((message) => message.type !== WSMessageType.SUCCESS_RESPONSE);
 
@@ -162,7 +197,7 @@ export const useWebSocketStore = defineStore({
           break;
 
         default:
-          console.log('SKIP clearMessages default============', message.type);
+          console.log('SKIP clearMessagesBeforeSendMessage default============', message.type);
       }
     },
 
