@@ -4,7 +4,7 @@
     <div class="chats-list">
       <div v-for="user in users_list" :key="user.email">
         <hr>
-        <router-link :to="{ name: 'chat' }" @click="piniaManageData(user.user_id)">
+        <router-link :to="{ name: 'chat' }" @click="piniaManageData(user)">
           {{ user.first_name }} {{ user.last_name }} ({{ user.email }})
         </router-link>
       </div>
@@ -27,7 +27,7 @@ import { useWebSocketStore } from '@/store/pinia'
 import { useUUIDStore } from '@/store/pinia'
 import { useProfileStore } from '@/store/pinia'
 import { useChatStore } from '@/store/chat';
-import { TargetProfileRequest, WSMessageType } from '@/api/types';
+import { TargetProfileRequest, WSMessageType, UserForChatList } from '@/api/types';
 
 const wss = useWebSocketStore()
 const UUIDStore = useUUIDStore()
@@ -38,8 +38,8 @@ const users_list = computed(() => wss.private_chat_users_list)
 
 
 /** save data in pinia storage, to use inside "ChatView.vue", to do not have deal with params */
-function piniaManageData(user_id: number) {
-  chatStore.set_target_user_id(user_id)
+function piniaManageData(user: UserForChatList) {
+  chatStore.set_target_user(user)
 }
 
 function update_private_chat_users_list() {

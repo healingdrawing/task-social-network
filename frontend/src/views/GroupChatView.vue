@@ -7,7 +7,7 @@
       <br>
       <button @click="sendMessage">Send</button>
     </div>
-    <div class="messages" ref="messages"><!--  :scrollTop="messages?.scrollHeight"> commented, because now the chat history placed under the message box -->
+    <div class="messages">
       <div class="message" v-for="message in messages_list" :key="message.created_at">
         <hr>
         <h6>
@@ -33,7 +33,7 @@
 </style>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useWebSocketStore } from '@/store/pinia';
 import { useUUIDStore } from '@/store/pinia';
 import { useGroupStore } from '@/store/pinia';
@@ -68,21 +68,8 @@ function sendMessage() {
 }
 
 const messages = ref<HTMLElement | null>(null);
-/* 
-function scrollToBottom() {
-  if (messages?.value) {
-    messages.value.scrollTop = messages.value.scrollHeight;
-  }
-}
- */
 
 function piniaManageData(message: GroupChatMessage) {
   profileStore.setTargetUserEmail(message.email);
 }
-
-onMounted(() => {
-  messages.value = document.querySelector('.messages'); // bind to div by class name
-
-  // scrollToBottom(); // commented, because now the chat history placed under the message box
-});
 </script>

@@ -27,7 +27,7 @@ export const useWebSocketStore = defineStore({
         type: WSMessageType.PRIVATE_CHAT_MESSAGE,
         data: {
           user_uuid: uuid,
-          private_chat_user_id: this.private_chat_user_id,
+          target_user_id: this.private_chat_user_id,
           content: message,
         },
       };
@@ -355,9 +355,15 @@ export const useWebSocketStore = defineStore({
 
     private_chat_messages_list(): PrivateChatMessage[] {
       const private_chat_messages = this.messages.filter((message) => message.type === WSMessageType.PRIVATE_CHAT_MESSAGE && message.data !== null);
+
       const chat_messages = private_chat_messages.map((message) =>
         (message.data as PrivateChatMessage))
-      return [...chat_messages];
+
+      const messages = chat_messages.filter((message) =>
+        message.user_id === this.private_chat_user_id || message.target_user_id === this.private_chat_user_id
+      )
+
+      return [...messages];
     },
 
     private_chat_users_list(): UserForChatList[] {

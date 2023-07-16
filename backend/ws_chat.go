@@ -135,6 +135,7 @@ func wsGroupChatMessageHandler(conn *websocket.Conn, messageData map[string]inte
 }
 
 type WS_PRIVATE_CHAT_MESSAGE_DTO struct {
+	User_id        int    `json:"user_id"`
 	Content        string `json:"content"`
 	Email          string `json:"email"`
 	First_name     string `json:"first_name"`
@@ -173,14 +174,6 @@ func wsPrivateChatMessageHandler(conn *websocket.Conn, messageData map[string]in
 		return
 	}
 
-	created_at := time.Now().Format("2006-01-02 15:04:05")
-
-	var message WS_PRIVATE_CHAT_MESSAGE_DTO
-
-	message.Content = content
-	message.Created_at = created_at
-	message.Target_user_id = target_user_id
-
 	// Get user info
 	user_id, err := get_user_id_by_uuid(uuid)
 	if err != nil {
@@ -188,6 +181,12 @@ func wsPrivateChatMessageHandler(conn *websocket.Conn, messageData map[string]in
 		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError, " failed to get user_id")}, []string{uuid})
 		return
 	}
+
+	var message WS_PRIVATE_CHAT_MESSAGE_DTO
+	message.User_id = user_id
+	message.Content = content
+	message.Created_at = time.Now().Format("2006-01-02 15:04:05")
+	message.Target_user_id = target_user_id
 
 	var gap string
 	rows, err := statements["getUserbyID"].Query(user_id)

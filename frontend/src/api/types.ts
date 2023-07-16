@@ -99,6 +99,7 @@ export interface PrivateChatUser {
 }
 
 export interface PrivateChatMessage {
+  user_id: number;
   content: string;
   email: string;
   first_name: string;
