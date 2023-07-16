@@ -188,6 +188,7 @@ func chatUsersHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// todo: perhaps remove. requires refactoring, because of following/public+connected needed now
 func isOnline(username string) (found bool) {
 	clients.Range(func(_, value interface{}) bool {
 		if c, ok := value.(string); ok && c == username {

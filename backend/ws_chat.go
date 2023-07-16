@@ -240,3 +240,51 @@ func wsPrivateChatMessageHandler(conn *websocket.Conn, messageData map[string]in
 	wsSend(WS_PRIVATE_CHAT_MESSAGE, message, user_uuids)
 
 }
+
+type WS_PRIVATE_CHAT_USER_DTO struct {
+	User_id    int    `json:"user_id"`
+	Email      string `json:"email"`
+	First_name string `json:"first_name"`
+	Last_name  string `json:"last_name"`
+}
+type WS_PRIVATE_CHAT_USERS_LIST_DTO []WS_PRIVATE_CHAT_USER_DTO
+
+func wsPrivateChatUsersListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
+
+	defer wsRecover(messageData)
+
+	uuid, ok := messageData["user_uuid"].(string)
+	if !ok {
+		log.Println("failed to get user_uuid from message data")
+		return
+	}
+	user_id, err := get_user_id_by_uuid(uuid)
+	if err != nil {
+		log.Println("failed to get ID of the message sender", err.Error())
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
+		return
+	}
+
+	rows, err := statements["getPrivateChatUsers"].Query(user_id, user_id)
+	if err != nil {
+		log.Println("failed to get private chat users", err.Error())
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to get private chat users"}, []string{uuid})
+		return
+	}
+	defer rows.Close()
+
+	var private_chat_users WS_PRIVATE_CHAT_USERS_LIST_DTO
+	for rows.Next() {
+		var user WS_PRIVATE_CHAT_USER_DTO
+		err := rows.Scan(&user.User_id, &user.Email, &user.First_name, &user.Last_name)
+		if err != nil {
+			log.Println("failed to scan private chat users", err.Error())
+			wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " failed to scan private chat users"}, []string{uuid})
+			return
+		}
+		private_chat_users = append(private_chat_users, user)
+	}
+
+	wsSend(WS_PRIVATE_CHAT_USERS_LIST, private_chat_users, []string{uuid})
+
+}

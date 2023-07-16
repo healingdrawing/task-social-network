@@ -1,21 +1,21 @@
 import { defineStore } from 'pinia';
 
 interface ChatState {
-  chatId: number;
+  target_user_id: number;
 }
 
 export const useChatStore = defineStore({
   id: 'chat',
-  state: ():ChatState => ({
+  state: (): ChatState => ({
     // Define your state properties here
-    chatId: -1, 
+    target_user_id: 0,
   }),
   getters: {
     // Define your getters here
-    getChatId(): number { return this.chatId; },
+    get_target_user_id(): number { return this.target_user_id; },
   },
   actions: {
     // Define your actions here
-    setChatId(postId: number) { this.chatId = postId; },
+    set_target_user_id(user_id: number) { this.target_user_id = user_id; },
   },
 });

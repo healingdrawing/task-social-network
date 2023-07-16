@@ -109,6 +109,8 @@ func reader(uuid string, conn *websocket.Conn) {
 				wsGroupChatMessageHandler(conn, data.Data)
 			case string(WS_PRIVATE_CHAT_MESSAGE):
 				wsPrivateChatMessageHandler(conn, data.Data)
+			case string(WS_PRIVATE_CHAT_USERS_LIST):
+				wsPrivateChatUsersListHandler(conn, data.Data)
 
 			case string(WS_GROUP_SUBMIT):
 				wsGroupSubmitHandler(conn, data.Data)

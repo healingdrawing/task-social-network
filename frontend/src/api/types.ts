@@ -91,6 +91,13 @@ export interface SuccessResponse {
   message: string;
 }
 
+export interface PrivateChatUser {
+  user_id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+}
+
 export interface PrivateChatMessage {
   content: string;
   email: string;
@@ -267,6 +274,13 @@ export interface UserProfile {
 }
 
 export interface UserForList {
+  email: string;
+  first_name: string;
+  last_name: string;
+}
+
+export interface UserForChatList {
+  user_id: number;
   email: string;
   first_name: string;
   last_name: string;

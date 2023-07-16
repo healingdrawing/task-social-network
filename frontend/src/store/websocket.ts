@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { WSMessage, WSMessageType, Post, GroupPost, Comment, UserProfile, UserForList, UserVisitorStatus as Visitor, Bell, BellType, Group, Event, PrivateChatMessage, GroupChatMessage } from '@/api/types';
+import { WSMessage, WSMessageType, Post, GroupPost, Comment, UserProfile, UserForList, UserForChatList, UserVisitorStatus as Visitor, Bell, BellType, Group, Event, PrivateChatMessage, GroupChatMessage } from '@/api/types';
 import router from '@/router/index';
 
 const websockets: (WebSocket | null)[] = [];
@@ -110,6 +110,7 @@ export const useWebSocketStore = defineStore({
         case WSMessageType.USER_FOLLOWERS_LIST:
         case WSMessageType.USER_VISITOR_STATUS:
         case WSMessageType.USER_GROUP_VISITOR_STATUS:
+        case WSMessageType.PRIVATE_CHAT_USERS_LIST:
           this.messages = this.messages.filter((message) => message.type !== new_message.type);
           break;
 
@@ -357,6 +358,13 @@ export const useWebSocketStore = defineStore({
       const chat_messages = private_chat_messages.map((message) =>
         (message.data as PrivateChatMessage))
       return [...chat_messages];
+    },
+
+    private_chat_users_list(): UserForChatList[] {
+      const private_chat_users = this.messages.filter((message) => message.type === WSMessageType.PRIVATE_CHAT_USERS_LIST && message.data !== null);
+      const users = private_chat_users.map((message) =>
+        (message.data as UserForChatList)).flat()
+      return [...users];
     },
 
     followRequestsBellList(): Bell[] {
