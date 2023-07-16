@@ -121,8 +121,6 @@ function piniaManageDataProfile(email: string) {
 
 // send request to get old group posts list, used inside onMounted
 function updateGroupPostsList() {
-  console.log('=======FIRED======= updateGroupPostsList');
-
   wss.sendMessage({
     type: WSMessageType.GROUP_POSTS_LIST,
     data: {

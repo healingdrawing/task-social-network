@@ -30,8 +30,6 @@ export const useAvatarStore = defineStore({
     },
     handleAvatarUpload(event: Event) {
       const file = (event.target as HTMLInputElement).files?.[0];
-      // console.log('===============begin handle avatar upload======================')
-      // console.log('store/avatar.ts file', file)
       if (!file) return;
 
       const reader = new FileReader();

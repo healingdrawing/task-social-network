@@ -1,6 +1,7 @@
 // message type enum
 export enum WSMessageType {
   ERROR_RESPONSE = "error_response",
+  INFO_RESPONSE = "info_response",
   SUCCESS_RESPONSE = "success_response",
 
   COMMENT_SUBMIT = "comment_submit",

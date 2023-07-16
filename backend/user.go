@@ -73,6 +73,7 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	// if dob is empty, return error
 	if data.Dob == "" {
+		log.Println("dob is empty")
 		jsonResponse(w, http.StatusUnprocessableEntity, "Invalid date of birth")
 		return
 	}
@@ -84,7 +85,7 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		imageData, err := extractImageData(data.Avatar)
 		if err != nil {
 			log.Println("=FAIL extractImageData:", err.Error())
-			jsonResponse(w, http.StatusUnprocessableEntity, err.Error()) //error is handmade
+			jsonResponse(w, http.StatusUnprocessableEntity, err.Error()) //error here is handmade
 			return
 		}
 		avatarData, err := base64.StdEncoding.DecodeString(imageData)
@@ -124,28 +125,31 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	onlyEnglishRegex := regexp.MustCompile(`^[a-zA-Z0-9]{2,15}$`)
 
-	if data.Nickname != "" {
-		if !onlyEnglishRegex.MatchString(data.Nickname) {
-			message := `Invalid nickname: ` + data.Nickname + `
-			Nickname must only contain english letters and numbers.
-			Nickname must be between 2 and 15 characters long.`
-			jsonResponse(w, http.StatusUnprocessableEntity, message)
-			return
-		}
+	if len([]rune(strings.TrimSpace(data.Nickname))) > 15 {
+		data.Nickname =
+			string([]rune(strings.TrimSpace(data.Nickname))[:15])
 	}
 
-	if len(data.FirstName) < 1 || len(data.FirstName) > 32 {
+	if len(data.FirstName) < 1 {
 		message := `Invalid first name length: ` + data.FirstName + `
 		First name must be between 1 and 32 characters long`
+		log.Println(message)
 		jsonResponse(w, http.StatusUnprocessableEntity, message)
 		return
 	}
+	if len([]rune(strings.TrimSpace(data.FirstName))) > 32 {
+		data.FirstName = string([]rune(strings.TrimSpace(data.FirstName))[:32])
+	}
 
-	if len(data.LastName) < 1 || len(data.LastName) > 32 {
+	if len(data.LastName) < 1 {
 		message := `Invalid last name length: ` + data.LastName + `
 		Last name must be between 1 and 32 characters long`
+		log.Println(message)
 		jsonResponse(w, http.StatusUnprocessableEntity, message)
 		return
+	}
+	if len([]rune(strings.TrimSpace(data.LastName))) > 32 {
+		data.LastName = string([]rune(strings.TrimSpace(data.LastName))[:32])
 	}
 
 	emailRegex := regexp.MustCompile(`^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,4})+$`)
@@ -153,6 +157,7 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if !emailRegex.MatchString(strings.ToLower((data.Email))) {
 		message := `Invalid email: ` + data.Email + `
 		Email must be a valid email address`
+		log.Println(message)
 		jsonResponse(w, http.StatusUnprocessableEntity, message)
 		return
 	}
@@ -160,6 +165,7 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if len(data.Password) < 6 || len(data.Password) > 15 {
 		message := `Invalid password length: ` + data.Password + `
 		Password must be between 6 and 15 characters long`
+		log.Println(message)
 		jsonResponse(w, http.StatusUnprocessableEntity, message)
 		return
 	}
@@ -167,6 +173,7 @@ func userRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if !onlyEnglishRegex.MatchString(data.Password) {
 		message := `Invalid password: ` + data.Password + `
 Password must only contain english characters and numbers`
+		log.Println(message)
 		jsonResponse(w, http.StatusUnprocessableEntity, message)
 		return
 	}
@@ -198,10 +205,11 @@ Password must only contain english characters and numbers`
 	w.WriteHeader(200)
 	jsonResponseObj, _ := json.Marshal(map[string]string{
 		"UUID":  UUID,
-		"email": data.Email, // todo: perhaps remove later
+		"email": data.Email,
 	})
 	_, err = w.Write(jsonResponseObj)
 	if err != nil {
+		log.Println(err.Error())
 		jsonResponse(w, http.StatusInternalServerError, "w.Write(jsonResponseObj)<-UUID,email failed")
 		return
 	}
@@ -230,16 +238,19 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer rows.Close()
-	rows.Next()
-	err = rows.Scan(&email, &hash)
-	if err != nil {
-		log.Println(err.Error())
-		jsonResponse(w, http.StatusInternalServerError, "scan credentials failed") // bug: it fires also when the user is not registered and try to login with error "Rows are closed"
-		return
+
+	if rows.Next() {
+		err = rows.Scan(&email, &hash)
+		if err != nil {
+			log.Println(err.Error())
+			jsonResponse(w, http.StatusInternalServerError, "scan credentials failed")
+			return
+		}
+		rows.Close()
 	}
-	rows.Close()
 
 	if email == "" || hash == "" {
+		log.Println("Invalid credentials. Email or password is incorrect")
 		jsonResponse(w, http.StatusUnauthorized, "Invalid credentials. Email or password is incorrect")
 		return
 	}
@@ -282,6 +293,7 @@ func userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	})
 	_, err = w.Write(jsonResponseObj)
 	if err != nil {
+		log.Println(err.Error())
 		jsonResponse(w, http.StatusInternalServerError, "w.Write(jsonResponseObj)<-UUID,email failed")
 		return
 	}
@@ -292,6 +304,7 @@ func userLogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	cookie, err := r.Cookie("user_uuid")
 	if err != nil || cookie.Value == "" || cookie == nil {
+		log.Println(err.Error())
 		jsonResponse(w, http.StatusOK, "You are not logged in")
 		return
 	}
@@ -366,6 +379,7 @@ func sessionCheckHandler(w http.ResponseWriter, r *http.Request) {
 	})
 	_, err = w.Write(jsonResponseObj)
 	if err != nil {
+		log.Println(err.Error())
 		jsonResponse(w, http.StatusInternalServerError, "w.Write(jsonResponseObj)<-Exists:true failed")
 		return
 	}

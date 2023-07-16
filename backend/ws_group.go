@@ -118,7 +118,7 @@ func wsGroupSubmitHandler(conn *websocket.Conn, messageData map[string]interface
 	data.Name = strings.TrimSpace(data.Name)
 	data.Description = strings.TrimSpace(data.Description)
 	if data.Name == "" || data.Description == "" {
-		log.Println("empty fields")
+		log.Println("=== empty fields ===")
 		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " empty fields"}, []string{uuid})
 		return
 	}
@@ -372,7 +372,7 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 	invited_emails = strings.Join(strings.Fields(invited_emails), " ")
 	//check the string is enough long, at least "a@" or "a b"(should not happens, cause filtered by frontend html tag built-in checker for email)
 	if len(invited_emails) < 2 {
-		log.Println("no invited_emails in messageData")
+		log.Println("=== no invited_emails in messageData ===")
 		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " no invited_emails in messageData"}, []string{uuid})
 		return
 	}
@@ -483,17 +483,6 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " bulk insert failed"}, []string{uuid})
 		return
 	}
-
-	// for _, invited_user_id := range user_ids {
-	// 	// add the invited user to the group_invited_users table
-	// 	_, err = statements["addGroupInvitedUser"].Exec(invited_user_id, group_id, user_id, time.Now().Format("2006-01-02 15:04:05"))
-	// 	if err != nil {
-	// 		log.Println("addGroupInvitedUser query failed", err.Error())
-	// 		wsSend(WS_ERROR_RESPONSE,WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " addGroupInvitedUser query failed"},[]string{uuid})
-	// 		err_counter++
-	// 		continue
-	// 	}
-	// }
 
 	wsSend(WS_SUCCESS_RESPONSE, WS_SUCCESS_RESPONSE_DTO{fmt.Sprintf("%d Number of errors:%d. User/s invited to the group", http.StatusOK, err_counter)}, []string{uuid})
 }

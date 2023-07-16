@@ -123,7 +123,7 @@ watch(isPublic, (newValue) => {
 
 const UUIDStore = useUUIDStore();
 function handleCheckboxChange(value: boolean) {
-  console.log('=== HANDLE CHECKBOX CHANGE', value);
+  console.log('= handleCheckboxChange', value);
   // todo: undefined happens in time of move to BellView.vue, perhaps because of wss.facepalm() cleaning + reactivity
   if (value !== undefined) {
     wss.sendMessage({
@@ -202,8 +202,6 @@ const piniaManageDataPost = (post: Post) => {
 const groupPostsList = computed(() => wss.groupPostsList);
 // send request to get all group posts list, created by user in time of membering groups
 function updateUserGroupPostsList() {
-  console.log('=======FIRED======= updateGroupPostsList');
-
   wss.sendMessage({
     type: WSMessageType.USER_GROUP_POSTS_LIST,
     data: {

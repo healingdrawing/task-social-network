@@ -152,8 +152,6 @@ function updateFollowersList() {
 
 // send request to get old posts list, used inside onMounted
 function updatePostsList() {
-  console.log('=======FIRED======= updatePostsList');
-
   wss.sendMessage({
     type: WSMessageType.POSTS_LIST,
     data: {

@@ -86,7 +86,7 @@ func wsFollowingListHandler(conn *websocket.Conn, messageData map[string]interfa
 	rows.Close()
 
 	if target_id != user_id && !isFollower && profile.Privacy == "private" {
-		log.Println("user does not have permissions to see the target user profile")
+		log.Println("=== user does not have permissions to see the target user profile ===")
 		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusForbidden) + " user does not have permissions to see the target user profile"}, []string{uuid})
 		return
 	}
@@ -191,7 +191,7 @@ func wsFollowersListHandler(conn *websocket.Conn, messageData map[string]interfa
 	rows.Close()
 
 	if target_id != user_id && !isFollower && profile.Privacy == "private" {
-		log.Println("user does not have permissions to see the target user profile")
+		log.Println("=== user does not have permissions to see the target user profile ===")
 		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusForbidden) + " user does not have permissions to see the target user profile"}, []string{uuid})
 		return
 	}

@@ -18,39 +18,20 @@ import (
 // @params {w http.ResponseWriter, statusCode int, data any}
 // @sideEffect {jsonResponse -> w}
 func jsonResponse(w http.ResponseWriter, statusCode int, data any) {
-	jsonResponseObj := []byte{}
-	// if data type is string
-	if message, ok := data.(string); ok {
-		jsonResponseObj, _ = json.Marshal(map[string]string{
+	// only status "ok"(200) allows to show "message" content in browser console. With other statuses browser displays only status code. Maybe it is golang http package "feature"
+
+	if message, ok := data.(string); ok { // if data type is string
+		jsonResponseObj, _ := json.Marshal(map[string]string{
 			"message": http.StatusText(statusCode) + ": " + message,
 		})
-	}
-	// if data type is int
-	if message, ok := data.(int); ok {
-		jsonResponseObj, _ = json.Marshal(map[string]int{
-			"message": message,
-		})
-	}
-	// if data type is bool
-	if message, ok := data.(bool); ok {
-		jsonResponseObj, _ = json.Marshal(map[string]bool{
-			"message": message,
-		})
-	}
-	// if data type is slice
-	if _, ok := data.([]any); ok {
-		jsonResponseObj, _ = json.Marshal(map[string][]any{
-			"data": data.([]any),
-		})
-	}
-	// if data type is object
-	if _, ok := data.(map[string]any); ok {
-		jsonResponseObj, _ = json.Marshal(map[string]any{
-			"data": data.(map[string]any),
-		})
-	}
-	// if unhandled by above custom conversion
-	if len(jsonResponseObj) == 0 {
+		w.WriteHeader(statusCode)
+
+		_, err := w.Write(jsonResponseObj)
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+	} else { // if len(jsonResponseObj) == 0 { // if unhandled by above custom conversion
 		w.WriteHeader(statusCode)
 		err := json.NewEncoder(w).Encode(data)
 		if err != nil {
@@ -58,8 +39,7 @@ func jsonResponse(w http.ResponseWriter, statusCode int, data any) {
 		}
 		return
 	}
-	w.WriteHeader(statusCode)
-	w.Write(jsonResponseObj)
+
 }
 
 // # recovery is a utility function to recover from panic and send a json err response over http

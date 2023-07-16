@@ -44,7 +44,7 @@ func wsGroupChatMessageHandler(conn *websocket.Conn, messageData map[string]inte
 	}
 
 	if strings.TrimSpace(content) == "" {
-		log.Println("content is empty")
+		log.Println("=== content is empty ===")
 		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity, " content is empty")}, []string{uuid})
 		return
 	}
@@ -169,7 +169,7 @@ func wsPrivateChatMessageHandler(conn *websocket.Conn, messageData map[string]in
 	}
 
 	if strings.TrimSpace(content) == "" {
-		log.Println("content is empty")
+		log.Println("=== content is empty ===")
 		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity, " content is empty")}, []string{uuid})
 		return
 	}

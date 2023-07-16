@@ -38,7 +38,7 @@ func main() {
 			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-Auth-Token, X-Requested-With, Application, json")
 
 			if r.Method == "OPTIONS" {
-				log.Println("pre-fetch request") // todo: remove
+				log.Println("pre-fetch request") // todo: remove debug
 				w.WriteHeader(http.StatusOK)
 				return
 			}

@@ -13,6 +13,7 @@ type WSMT string
 
 const (
 	WS_ERROR_RESPONSE   WSMT = "error_response"
+	WS_INFO_RESPONSE    WSMT = "info_response"
 	WS_SUCCESS_RESPONSE WSMT = "success_response"
 
 	WS_COMMENT_SUBMIT WSMT = "comment_submit"
@@ -83,7 +84,7 @@ func wsCreateResponseMessage(messageType WSMT, data interface{}) ([]byte, error)
 		Data: data,
 	}
 
-	log.Println("wsCreateResponseMessage: ", messageType)
+	log.Println("= wsCreateResponseMessage: ", messageType)
 
 	jsonData, err := json.Marshal(response)
 	if err != nil {
@@ -93,7 +94,8 @@ func wsCreateResponseMessage(messageType WSMT, data interface{}) ([]byte, error)
 		return stableJsonErrorData, err
 	}
 
-	log.Println("CREATED ================ \nwsCreateResponseMessage: ", string(jsonData))
+	// todo: debug giant print in time of picture sending, so commented
+	// log.Println("CREATED ================ \nwsCreateResponseMessage: ", string(jsonData))
 
 	return jsonData, nil
 }
@@ -104,7 +106,7 @@ func wsRecover(messageData map[string]interface{}) {
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
-		log.Println("wsRecover: failed to get user_uuid from message data")
+		log.Println("=== wsRecover: === \n=== failed to get user_uuid from message data")
 		return
 	}
 

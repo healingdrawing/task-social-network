@@ -60,7 +60,8 @@ export const useWebSocketStore = defineStore({
       };
 
       this.socket.onmessage = (event) => {
-        console.log(`Received message: ${event.data}`);
+        console.log(`= Received message =`);
+        // console.log(`Received message: ${event.data}`); // todo: remove debug, giant output for picture, etc
         const message = JSON.parse(event.data) as WSMessage;
         this.clearMessagesWhenNewMessageArrives(message)
         this.messages.unshift(message);
@@ -81,13 +82,14 @@ export const useWebSocketStore = defineStore({
 
     /**clearMessagesWhenNewMessageArrives removes all the messages of type = message.Type, before unshift new message, to prevent duplication of messages in getters ( -> screen/view) */
     clearMessagesWhenNewMessageArrives(new_message: WSMessage) {
-      console.log('==================\n=clearMessagesWhenNewMessageArrives===', new_message.type, '\n==================');
-
-      this.messages = this.messages.filter((message) => message.type !== WSMessageType.SUCCESS_RESPONSE);
-      this.messages = this.messages.filter((message) => message.type !== WSMessageType.ERROR_RESPONSE);
-
+      console.log(
+        '====================================\n', '=clearMessagesWhenNewMessageArrives=\n', new_message.type, '\n',
+        '====================================');
 
       switch (new_message.type) {
+        case WSMessageType.ERROR_RESPONSE:
+        case WSMessageType.INFO_RESPONSE:
+        case WSMessageType.SUCCESS_RESPONSE:
         case WSMessageType.FOLLOW_REQUESTS_LIST:
         case WSMessageType.GROUP_INVITES_LIST:
         case WSMessageType.GROUP_REQUESTS_LIST:
@@ -106,7 +108,6 @@ export const useWebSocketStore = defineStore({
           this.messages = this.messages.filter((message) => message.type !== new_message.type);
           break;
 
-
         default:
           console.log('SKIP clearMessagesWhenNewMessageArrives default============', new_message.type);
       }
@@ -114,9 +115,9 @@ export const useWebSocketStore = defineStore({
 
     /**remove all the messages from the store */
     facepalm() {
-      console.log('===BEFORE facepalm===');
+      console.log('= BEFORE facepalm =');
       this.$state.messages = [];
-      console.log('===facepalm===');
+      console.log('= facepalm =');
     },
     /**
      * close all the websockets and empty the global array const websockets: (WebSocket | null)[] = [];
@@ -135,8 +136,6 @@ export const useWebSocketStore = defineStore({
       // websockets.length = 0; // it is const so "= []" raises error
       this.facepalm();
       router.push({ name: 'login' });
-      console.log('========\n=======before reset and after push ======\n======');
-      // this.$reset();
     },
 
   },
@@ -145,22 +144,18 @@ export const useWebSocketStore = defineStore({
       return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
     },
     visitor(): Visitor {
-      // filter in exact visitor status response messages
+      // filter in exact user visitor status response messages
       const visitor_messages = this.messages.filter((message) => message.type === WSMessageType.USER_VISITOR_STATUS);
       const visitor = visitor_messages.map((message) => message.data as Visitor)[0];
 
-      console.log('visitor.status========getter========', visitor);
       return visitor;
-
     },
     groupVisitor(): Visitor {
-      // filter in exact visitor status response messages
+      // filter in exact group visitor status response messages
       const visitor_messages = this.messages.filter((message) => message.type === WSMessageType.USER_GROUP_VISITOR_STATUS);
       const visitor = visitor_messages.map((message) => message.data as Visitor)[0];
 
-      console.log('groupVisitor.status========getter========', visitor);
       return visitor;
-
     },
     userProfile(): UserProfile {
       const profile_messages = this.messages.filter((message) => message.type === WSMessageType.USER_PROFILE);

@@ -96,9 +96,9 @@ function disconnectWebSocket() {
 }
 
 async function logout() {
-  console.log("stage 0")
+  console.log("= logout =") //todo: remove debug
   try {
-    const bodyJson = JSON.stringify(useUUIDStore().getUUID); //todo: perhaps remove/replace later
+    const bodyJson = JSON.stringify(useUUIDStore().getUUID);
     const response = await fetch('http://localhost:8080/api/user/logout', {
       method: 'POST',
       headers: {
@@ -109,12 +109,10 @@ async function logout() {
       mode: 'cors',
       // credentials: 'omit' // when commented, includes cookie for logout procedure on backend
     });
-    console.log("stage 1") //todo: clean up later
     const data = await response.json();
     if (data.error) {
       throw new Error(data.error as string + "problem with json parsing of response");
     }
-    console.log("stage 3")
 
     console.log(data);
     logoutError.value = '';
@@ -126,15 +124,9 @@ async function logout() {
     const errorResponse = error as ErrorResponse;
     logoutError.value = errorResponse.message;
   } finally {
-    console.log("stage 4")
+    console.log("= logout = 'finally' fired") //todo: remove debug
   }
 }
-
-const bellStore = useBellStore();
-const hasNewBells = computed(() => bellStore.bells.length > 0);
-
-const chatsStore = useChatsStore();
-const hasNewMessages = computed(() => chatsStore.hasNewMessages);
 
 //fade in/out effect for link
 let showLink = ref(true);

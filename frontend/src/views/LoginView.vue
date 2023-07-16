@@ -1,10 +1,10 @@
 <template>
   <div class="login">
     <img alt="Vue logo" src="../assets/logo.png">
-    <div> "LoginView.vue . Welcome to Your Vue.js + TypeScript App"</div>
+    <h1> Welcome Your Majesty!!!</h1>
   </div>
   <div>
-    <h1>Log in</h1>
+    <h3>Log in</h3>
 
     <div><hr><button type="button" @click="crap" title="remove in production">Fill Debug / remove later</button><hr></div> <!-- todo: remove later -->
 
@@ -51,8 +51,8 @@ const password = ref('');
 
 const login = async () => {
   resetPiniaStores();
+  console.log('== login ==');
   try {
-    /* todo: should happen only if signup is successful */
     await loginStore.fetchData({
       email: email.value,
       password: password.value,
@@ -82,9 +82,10 @@ const login = async () => {
     }
 
   } catch (error) {
+    alert("Wrong Hole! >;) ... i did not say stop o:)");
     console.error(error);
   } finally {
-    console.log('finally');
+    console.log("== login == 'finally' fired");
   }
 
 
