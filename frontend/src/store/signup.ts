@@ -38,14 +38,12 @@ export const useSignupStore = defineStore('signup', {
   },
   actions: {
     async fetchData(userData: SignupSubmit) {
-      console.log("stage 0")
+      console.log("= signup =")
       try {
         if (!userData.avatar) {
           userData.avatar = ''
         }
-        console.log("request signup userData: ", userData);
         const bodyJson = JSON.stringify(userData);
-        console.log("request signup userData: ", bodyJson);
 
         const response = await fetch('http://localhost:8080/api/user/register', {
           method: 'POST',
@@ -57,18 +55,16 @@ export const useSignupStore = defineStore('signup', {
           mode: 'cors',
           credentials: 'omit' // <-- modified option
         });
-        console.log("stage 1")
         const resp = await response;
         if (resp.status !== 200) {
           throw new Error('Network response was not ok');
         }
-        console.log("stage 2")
         console.log(resp);
+
         const data = await resp.json();
         if (data.error) {
           throw new Error(data.error as string + "problem with json parsing of response");
         }
-        console.log("stage 3")
 
         console.log(data);
         this.data = data;
@@ -77,7 +73,7 @@ export const useSignupStore = defineStore('signup', {
         const errorResponse = error as ErrorResponse;
         this.error = errorResponse.message;
       } finally {
-        console.log("stage 4")
+        console.log("= signup = 'finally' fired")
       }
     }
   },

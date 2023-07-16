@@ -198,6 +198,8 @@ func statementsCreation() {
 		ORDER BY events.created_at DESC;
 		`,
 
+		"getPrivateChatUsers": `SELECT id, email, first_name, last_name FROM users WHERE (id != ? AND privacy = "public") OR id IN ( SELECT follower_id FROM followers WHERE user_id = ? );`,
+
 		"getUserIDwithEventCount": `SELECT COUNT(*) FROM event_participants WHERE event_id = ? AND user_id = ?;`,
 
 		"getFollowers":                   `SELECT follower_id FROM followers INNER JOIN users ON users.id = follower_id WHERE user_id = ? ORDER BY email ASC;`,

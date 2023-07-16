@@ -82,13 +82,13 @@ func wsGroupEventSubmitHandler(conn *websocket.Conn, messageData map[string]inte
 	data.Decision = strings.TrimSpace(data.Decision)
 
 	if data.Decision != "going" && data.Decision != "not going" {
-		log.Println("invalid decision")
+		log.Println("=== invalid decision ===")
 		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " invalid decision"}, []string{uuid})
 		return
 	}
 
 	if data.Title == "" || data.Description == "" || data.Date == "" {
-		log.Println("empty fields")
+		log.Println("=== empty fields ===")
 		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " empty fields"}, []string{uuid})
 		return
 	}

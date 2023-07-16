@@ -233,8 +233,6 @@ function piniaManageDataPost(post: Post) {
 const groupPostsList = computed(() => wss.groupPostsList);
 // send request to get all group posts list, created by user in time of membering groups
 function updateUserGroupPostsList() {
-  console.log('=======FIRED======= updateGroupPostsList');
-
   wss.sendMessage({
     type: WSMessageType.USER_GROUP_POSTS_LIST,
     data: {

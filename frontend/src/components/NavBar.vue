@@ -4,10 +4,25 @@
       <img src="../assets/logo.png" alt="Vue logo" />
     </div>
     <div class="nav-bar__links">
-      <!-- todo: add implementation to mark/hightlight "Profile" and "Chats". Manage the "hasNewsBells" and "hasNewMessages" using backend data through the pinia store methods -->
-      <router-link :class="{ highlighted: hasNewBells }" to="/profile">Profile</router-link> |
+      <router-link
+        v-if="wss.bellsList.length < 1"
+        to="/bell"
+        @click="wss.facepalm()"
+      >
+        Express Royal Will
+      </router-link>
+      <router-link
+        v-else
+        to="/bell"
+        @click="wss.facepalm()"
+        :class="{ 'fade-in': showLink, 'fade-out': !showLink }"
+      >
+        Express Royal Will
+      </router-link>
+      <br>
+      <router-link to="/profile">Profile</router-link> |
       <router-link to="/posts">Posts</router-link> |
-      <router-link :class="{ highlighted: hasNewMessages }" to="/chats">Chats</router-link> |
+      <router-link to="/chats">Chats</router-link> |
       <router-link to="/groups">Groups</router-link> |
       <router-link to="/" @click="logout()">Logout</router-link>
     </div>
@@ -20,11 +35,39 @@
 .highlighted {
   background-color: gold;
 }
+
+.fade-in {
+  animation: fade-in 0.5s ease-in;
+}
+
+.fade-out {
+  animation: fade-out 0.5s ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
 </style>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
-import { ErrorResponse } from '@/api/types';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { ErrorResponse, BellRequest, WSMessageType } from '@/api/types';
 import { useBellStore } from '@/store/bell';
 import { useChatsStore } from '@/store/chats';
 
@@ -35,14 +78,14 @@ import { useWebSocketStore } from '@/store/websocket';
 
 const logoutError = ref('');
 
-const uuidStore = useUUIDStore();
+const UUIDStore = useUUIDStore();
 const loginStore = useLoginStore();
 const signupStore = useSignupStore();
 const wss = useWebSocketStore();
 
 //todo: reset all pinia stores. Add more later if needed
 function resetPiniaStores() {
-  uuidStore.$reset();
+  UUIDStore.$reset();
   loginStore.$reset();
   signupStore.$reset();
   window.dispatchEvent(new Event('beforeunload'));
@@ -53,9 +96,9 @@ function disconnectWebSocket() {
 }
 
 async function logout() {
-  console.log("stage 0")
+  console.log("= logout =") //todo: remove debug
   try {
-    const bodyJson = JSON.stringify(useUUIDStore().getUUID); //todo: perhaps remove/replace later
+    const bodyJson = JSON.stringify(useUUIDStore().getUUID);
     const response = await fetch('http://localhost:8080/api/user/logout', {
       method: 'POST',
       headers: {
@@ -66,14 +109,10 @@ async function logout() {
       mode: 'cors',
       // credentials: 'omit' // when commented, includes cookie for logout procedure on backend
     });
-    console.log("stage 1") //todo: clean up later
     const data = await response.json();
     if (data.error) {
       throw new Error(data.error as string + "problem with json parsing of response");
     }
-    console.log("stage 3")
-
-
 
     console.log(data);
     logoutError.value = '';
@@ -85,15 +124,57 @@ async function logout() {
     const errorResponse = error as ErrorResponse;
     logoutError.value = errorResponse.message;
   } finally {
-    console.log("stage 4")
+    console.log("= logout = 'finally' fired") //todo: remove debug
   }
 }
 
+//fade in/out effect for link
+let showLink = ref(true);
 
+onMounted(() => {
+  setInterval(() => {
+    showLink.value = !showLink.value;
+  }, 1000); // Adjust the interval duration as needed
 
-const bellStore = useBellStore();
-const hasNewBells = computed(() => bellStore.bells.length > 0);
+  const updateInterval = setInterval(() => {
+    updateBells(); // Call the update function
+  }, 20000); // Repeat every 10 seconds
 
-const chatsStore = useChatsStore();
-const hasNewMessages = computed(() => chatsStore.hasNewMessages);
+  // Clear the interval when the component is unmounted
+  onUnmounted(() => {
+    clearInterval(updateInterval);
+  });
+
+  updateBells(); // after success login call the update function once
+});
+
+function updateBells() {
+  // todo: add x4 cases for each type of bell
+  wss.sendMessage({
+    type: WSMessageType.FOLLOW_REQUESTS_LIST,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+    } as BellRequest,
+  })
+  wss.sendMessage({
+    type: WSMessageType.GROUP_REQUESTS_LIST,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+    } as BellRequest,
+  })
+  wss.sendMessage({
+    type: WSMessageType.GROUP_INVITES_LIST,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+    } as BellRequest,
+  })
+  wss.sendMessage({
+    type: WSMessageType.USER_GROUPS_FRESH_EVENTS_LIST,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+    } as BellRequest,
+  })
+  //todo: implement events too
+}
+
 </script>

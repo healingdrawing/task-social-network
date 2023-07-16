@@ -26,27 +26,6 @@ type wsStatus struct {
 	Online   bool   `json:"online"`
 }
 
-type wsMessage struct {
-	Type    string  `json:"type"`
-	Message Message `json:"message"`
-}
-
-type wsTyping struct {
-	Type         string `json:"type"`
-	UsernameFrom string `json:"usernameFrom"`
-	Typing       bool   `json:"typing"`
-}
-
-type wsError struct {
-	Type  string `json:"type"`
-	Error string `json:"error"`
-}
-
-type wsNotification struct {
-	Type string `json:"type"`
-	Data string `json:"data"`
-}
-
 func wsConnection(w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
@@ -66,8 +45,20 @@ func wsConnection(w http.ResponseWriter, r *http.Request) {
 	reader(uuid, ws)
 }
 
+type Client struct {
+	CONN    *websocket.Conn
+	USER_ID int
+}
+
 func reader(uuid string, conn *websocket.Conn) {
-	clients.Store(uuid, conn)
+	user_id, err := get_user_id_by_uuid(uuid)
+	if err != nil {
+		log.Println("=== inside reader ===", err.Error())
+		return
+	}
+
+	client := &Client{CONN: conn, USER_ID: user_id}
+	clients.Store(uuid, client)
 	defer clients.Delete(uuid)
 	defer conn.Close()
 	for {
@@ -78,9 +69,8 @@ func reader(uuid string, conn *websocket.Conn) {
 			return
 		}
 
-		log.Println("=================\nread message:",
-			"\nincoming as string:", string(incoming),
-			"\nmessageType: ", messageType) //todo: delete debug
+		// todo: debug giant print in time of picture sending, so commented
+		// log.Println("=================\nread message:", "\nincoming as string:", string(incoming), "\nmessageType: ", messageType) //todo: delete debug
 
 		if messageType == websocket.TextMessage {
 			log.Println("Text message received")
@@ -90,9 +80,17 @@ func reader(uuid string, conn *websocket.Conn) {
 				return
 			}
 
-			log.Println("data after unmarshalling: ", data) //todo: delete debug
+			// todo: debug giant print in time of picture sending, so commented
+			// log.Println("data after unmarshalling: ", data) //todo: delete debug
 
 			switch data.Type {
+			case string(WS_GROUP_CHAT_MESSAGE):
+				wsGroupChatMessageHandler(conn, data.Data)
+			case string(WS_PRIVATE_CHAT_MESSAGE):
+				wsPrivateChatMessageHandler(conn, data.Data)
+			case string(WS_PRIVATE_CHAT_USERS_LIST):
+				wsPrivateChatUsersListHandler(conn, data.Data)
+
 			case string(WS_GROUP_SUBMIT):
 				wsGroupSubmitHandler(conn, data.Data)
 			case string(WS_GROUPS_LIST):
@@ -179,11 +177,14 @@ func reader(uuid string, conn *websocket.Conn) {
 			case string(WS_USER_GROUP_VISITOR_STATUS):
 				wsUserGroupVisitorStatusHandler(conn, data.Data)
 
+				// todo: looks like this is not used, check and delete if so
 			case "login":
+				log.Println("==================LOGIN FIRED==================")
 				clients.Store(conn, data.Data["username"])
 				sendStatus(data.Data["username"].(string), true)
 				defer sendStatus(data.Data["username"].(string), false)
 			case "logout":
+				log.Println("==================LOGOUT FIRED==================")
 				conn.Close()
 				clients.Delete(conn)
 				sendStatus(data.Data["username"].(string), false)
@@ -207,13 +208,13 @@ func wsSend(message_type WSMT, message interface{}, uuids []string) {
 
 	for _, uuid := range uuids {
 		if conn, ok := clients.Load(uuid); ok {
-			if c, ok := conn.(*websocket.Conn); ok {
-				err = c.WriteMessage(websocket.TextMessage, outputMessage)
+			if c, ok := conn.(*Client); ok {
+				err = c.CONN.WriteMessage(websocket.TextMessage, outputMessage)
 				if err != nil {
 					log.Println(err)
 				}
 			} else {
-				log.Println("wsSend: clients.Load(uuid) is not *websocket.Conn")
+				log.Println("wsSend: clients.Load(uuid) is not a *Client")
 			}
 		} else {
 			log.Println("wsSend: client not found . clients.Load(uuid) failed")
@@ -224,7 +225,6 @@ func wsSend(message_type WSMT, message interface{}, uuids []string) {
 // //////////////////////////
 // fragments of old code. remove later if full cleaning will be executed
 // //////////////////////////
-// todo: remove code bottom only in case of full cleaning from old http implementation only. Can be not safe remove this part only
 
 func sendStatus(username string, online bool) {
 	data := wsStatus{"status", username, online}
@@ -234,40 +234,6 @@ func sendStatus(username string, online bool) {
 	}
 	clients.Range(func(key, value interface{}) bool {
 		if value.(string) != "" {
-			err = key.(*websocket.Conn).WriteMessage(websocket.TextMessage, output) // todo: CHECK IT! err was added, not sure it is correct
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
-
-func sendMessage(message Message) {
-	data := wsMessage{"message", message}
-	output, err := json.Marshal(data)
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if value.(string) == message.UsernameFrom || value.(string) == message.UsernameTo {
-			err = key.(*websocket.Conn).WriteMessage(websocket.TextMessage, output) // todo: CHECK IT! err was added, not sure it is correct
-			if err != nil {
-				log.Println(err)
-			}
-		}
-		return true
-	})
-}
-
-func sendTyping(typing Typing) {
-	data := wsTyping{"typing", typing.UsernameFrom, typing.Typing}
-	output, err := json.Marshal(data)
-	if err != nil {
-		log.Println(err)
-	}
-	clients.Range(func(key, value interface{}) bool {
-		if value.(string) == typing.UsernameTo {
 			err = key.(*websocket.Conn).WriteMessage(websocket.TextMessage, output) // todo: CHECK IT! err was added, not sure it is correct
 			if err != nil {
 				log.Println(err)

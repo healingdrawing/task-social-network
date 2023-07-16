@@ -212,12 +212,12 @@ func wsAcceptFollowerHandler(conn *websocket.Conn, messageData map[string]interf
 	// check if the user has the follower in the followers_pending table
 	// use the getFollowersPending statement
 	rows, err := statements["getFollowersPending"].Query(idol_user_id)
-	defer rows.Close()
 	if err != nil {
 		log.Println("getFollowersPending query failed", err.Error())
 		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getFollowersPending query failed"}, []string{uuid})
 		return
 	}
+	defer rows.Close()
 	var follower_id int
 	followers_pending := map[int]int{}
 	for rows.Next() {
@@ -292,12 +292,12 @@ func wsRejectFollowerHandler(conn *websocket.Conn, messageData map[string]interf
 	// check if the user has the follower in the followers_pending table
 	// use the getFollowersPending statement
 	rows, err := statements["getFollowersPending"].Query(idol_user_id)
-	defer rows.Close()
 	if err != nil {
 		log.Println("getFollowersPending query failed", err.Error())
 		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getFollowersPending query failed"}, []string{uuid})
 		return
 	}
+	defer rows.Close()
 	var follower_id int
 	followers_pending := map[int]int{}
 	for rows.Next() {
@@ -358,12 +358,12 @@ func wsGroupInviteAcceptHandler(conn *websocket.Conn, messageData map[string]int
 
 	// check if the user was invited to the group, using getGroupInvitedUsers statement
 	rows, err := statements["getGroupInvitedUsers"].Query(group_id)
-	defer rows.Close()
 	if err != nil {
 		log.Println("getGroupInvitedUsers query failed", err.Error())
 		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroupInvitedUsers query failed"}, []string{uuid})
 		return
 	}
+	defer rows.Close()
 	var invited_user_id int
 	var gapint int
 	var gapstring string
@@ -432,12 +432,12 @@ func wsGroupInviteRejectHandler(conn *websocket.Conn, messageData map[string]int
 
 	// check if the user was invited to the group, using getGroupInvitedUsers statement
 	rows, err := statements["getGroupInvitedUsers"].Query(group_id)
-	defer rows.Close()
 	if err != nil {
 		log.Println("getGroupInvitedUsers query failed", err.Error())
 		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getGroupInvitedUsers query failed"}, []string{uuid})
 		return
 	}
+	defer rows.Close()
 	var invited_user_id int
 	var gapint int
 	var gapstring string

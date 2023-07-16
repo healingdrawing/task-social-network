@@ -25,7 +25,7 @@ export const useLoginStore = defineStore('login', {
   },
   actions: {
     async fetchData(userData: LoginSubmit) {
-      console.log("stage 0")
+      console.log("= login =") // todo: remove debug
       try {
         const bodyJson = JSON.stringify(userData);
         const response = await fetch('http://localhost:8080/api/user/login', {
@@ -38,12 +38,10 @@ export const useLoginStore = defineStore('login', {
           mode: 'cors',
           credentials: 'omit' // <-- modified option
         });
-        console.log("stage 1") //todo: clean up later
         const data = await response.json();
         if (data.error) {
           throw new Error(data.error as string + "problem with json parsing of response");
         }
-        console.log("stage 3")
 
         console.log(data);
         this.data = data;
@@ -52,7 +50,7 @@ export const useLoginStore = defineStore('login', {
         const errorResponse = error as ErrorResponse;
         this.error = errorResponse.message;
       } finally {
-        console.log("stage 4")
+        console.log("= login = 'finally' fired")
       }
     }
   },

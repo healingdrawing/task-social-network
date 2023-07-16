@@ -196,8 +196,6 @@ func wsPostsListHandler(conn *websocket.Conn, messageData map[string]interface{}
 func wsUserPostsListHandler(conn *websocket.Conn, messageData map[string]interface{}) {
 	defer wsRecover(messageData)
 
-	log.Println("wsUserPostsListHandler golang ===================")
-
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
 		log.Println("failed to get user_uuid from messageData")
@@ -211,7 +209,6 @@ func wsUserPostsListHandler(conn *websocket.Conn, messageData map[string]interfa
 	}
 
 	target_email := messageData["target_email"].(string)
-	log.Println("target_email ", target_email)
 	target_id, err := get_user_id_by_email(target_email)
 	if err != nil {
 		log.Println("failed to get ID of the target", err.Error())
@@ -239,9 +236,6 @@ func wsUserPostsListHandler(conn *websocket.Conn, messageData map[string]interfa
 		}
 		post.Picture = base64.StdEncoding.EncodeToString(pictureBytes)
 		postsList = append(postsList, post)
-	}
-	for _, post := range postsList {
-		log.Println("post.Email ", post.Email) //todo: remove
 	}
 
 	wsSend(WS_POSTS_LIST, postsList, []string{uuid})

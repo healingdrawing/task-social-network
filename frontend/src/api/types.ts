@@ -1,14 +1,16 @@
 // message type enum
 export enum WSMessageType {
   ERROR_RESPONSE = "error_response",
+  INFO_RESPONSE = "info_response",
   SUCCESS_RESPONSE = "success_response",
 
   COMMENT_SUBMIT = "comment_submit",
   COMMENT_RESPONSE = "comment_response",
   COMMENTS_LIST = "comments_list",
 
-  CHAT_USERS_LIST = "chat_users_list",
-  CHAT_MESSAGE_SUBMIT = "chat_message_submit",
+  PRIVATE_CHAT_USERS_LIST = "private_chat_users_list",
+  PRIVATE_CHAT_MESSAGE = "private_chat_message",
+  GROUP_CHAT_MESSAGE = "group_chat_message",
 
   FOLLOW_REQUEST_REJECT = "follow_request_reject",
   FOLLOW_REQUEST_ACCEPT = "follow_request_accept",
@@ -18,7 +20,6 @@ export enum WSMessageType {
   POST_SUBMIT = "post_submit",
   POST_RESPONSE = "post_response",
   POSTS_LIST = "posts_list",
-  // ANY_PROFILE_VIEW_POSTS_LIST = "any_profile_view_posts_list",
 
   GROUPS_LIST = "groups_list",
   GROUPS_ALL_LIST = "groups_all_list",
@@ -89,6 +90,32 @@ export interface ErrorResponse {
 
 export interface SuccessResponse {
   message: string;
+}
+
+export interface PrivateChatUser {
+  user_id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+}
+
+export interface PrivateChatMessage {
+  user_id: number;
+  content: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  created_at: string; // use inside v-for like id, because no id in chat message
+  target_user_id: number;
+}
+
+export interface GroupChatMessage {
+  content: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  created_at: string; // use inside v-for like id, because no id in chat message
+  group_id: number; // which is group_chat_id in exact
 }
 
 export interface Comment {
@@ -249,6 +276,13 @@ export interface UserProfile {
 }
 
 export interface UserForList {
+  email: string;
+  first_name: string;
+  last_name: string;
+}
+
+export interface UserForChatList {
+  user_id: number;
   email: string;
   first_name: string;
   last_name: string;

@@ -1,15 +1,14 @@
 <template>
   <div>
-    <h1>Chats</h1>
-    <ul class="chats-list">
-      <li v-for="oponent in oponents" :key="oponent.userId">
-        <router-link :to="{ name: 'chat' }" @click="piniaManageData(oponent.chatId)">
-          <span v-if="oponent.online">😀</span>
-          <span v-else>😴</span>
-          {{ oponent.fullName }} ({{ oponent.email }})
+    <h1>Chats:</h1>
+    <div class="chats-list">
+      <div v-for="user in users_list" :key="user.email">
+        <hr>
+        <router-link :to="{ name: 'chat' }" @click="piniaManageData(user)">
+          {{ user.first_name }} {{ user.last_name }} ({{ user.email }})
         </router-link>
-      </li>
-    </ul>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -23,37 +22,37 @@
 </style>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
+import { useWebSocketStore } from '@/store/pinia'
+import { useUUIDStore } from '@/store/pinia'
+import { useProfileStore } from '@/store/pinia'
 import { useChatStore } from '@/store/chat';
+import { TargetProfileRequest, WSMessageType, UserForChatList } from '@/api/types';
 
+const wss = useWebSocketStore()
+const UUIDStore = useUUIDStore()
+const profileStore = useProfileStore()
 const chatStore = useChatStore()
 
-interface Oponent {
-  userId: number
-  email: string
-  fullName: string
-  online: boolean
-  chatId: number
-}
+const users_list = computed(() => wss.private_chat_users_list)
 
-const oponents = ref<Oponent[]>([])
 
 /** save data in pinia storage, to use inside "ChatView.vue", to do not have deal with params */
-function piniaManageData(chatId: number) {
-  chatStore.setChatId(chatId)
+function piniaManageData(user: UserForChatList) {
+  chatStore.set_target_user(user)
 }
 
-function updateOponents() {
-  //todo: get oponents from backend, and create new private chat if not exists
-  //dummy data
-  oponents.value = [
-    { userId: 1, email: 'dummy1@mail.com', fullName: 'Dummy User1', online: true, chatId: 1, },
-    { userId: 2, email: 'dummy2@mail.com', fullName: 'Dummy User2', online: false, chatId: 2, },
-    { userId: 3, email: 'dummy3@mail.com', fullName: 'Dummy User3', online: true, chatId: 3, },
-  ]
+function update_private_chat_users_list() {
+  wss.sendMessage({
+    type: WSMessageType.PRIVATE_CHAT_USERS_LIST,
+    data: {
+      user_uuid: UUIDStore.getUUID,
+      target_email: profileStore.getUserEmail,
+    } as TargetProfileRequest,
+  })
 }
 
 onMounted(() => {
-  updateOponents()
+  update_private_chat_users_list()
 })
 </script>

@@ -247,9 +247,6 @@ func wsUserGroupPostsListHandler(conn *websocket.Conn, messageData map[string]in
 		group_post.Picture = base64.StdEncoding.EncodeToString(pictureBytes)
 		group_posts_list = append(group_posts_list, group_post)
 	}
-	for _, post := range group_posts_list {
-		log.Println("post.Email ", post.Email) //todo: remove
-	}
 
 	wsSend(WS_GROUP_POSTS_LIST, group_posts_list, []string{uuid})
 }

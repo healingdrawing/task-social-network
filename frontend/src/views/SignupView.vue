@@ -1,10 +1,16 @@
 <template>
   <div class="signup">
     <img alt="Vue logo" src="../assets/logo.png">
-    <div>"SignupView.vue . Welcome to Your Vue.js + TypeScript App"</div>
+    <h1>
+      The Head of the Royal Family of these lands
+      <br> informs you all, that from now on,
+      <br> these lands belong to My Will.
+      <br> Call me "Your Majesty"! 
+      <br> Now Let is continue ...
+    </h1>
   </div>
   <div>
-    <h1>Sign up</h1>
+    <h3>Sign up</h3>
     
     <div><hr><button type="button" @click="crap" title="remove in production">Fill Debug / remove later</button><hr></div> <!-- todo: remove later -->
     
@@ -15,15 +21,15 @@
     </div>
     <div>
       <label for="password">Password:</label>
-      <input type="password" id="password" v-model="password" required>
+      <input title="6-15 english letters/digits. No spaces" type="password" id="password" v-model="password" required minlength="6" maxlength="15" pattern="[a-zA-Z0-9]+">
     </div>
     <div>
       <label for="firstName">First Name:</label>
-      <input type="text" id="firstName" v-model="firstName" required>
+      <input title="1-32 characters" type="text" id="firstName" v-model="firstName" required minlength="1" maxlength="32">
     </div>
     <div>
       <label for="lastName">Last Name:</label>
-      <input type="text" id="lastName" v-model="lastName" required>
+      <input title="1-32 characters" type="text" id="lastName" v-model="lastName" required minlength="1" maxlength="32">
     </div>
     <div>
       <label for="dob">Date of Birth:</label>
@@ -36,12 +42,12 @@
     </div>
     <div>
       <label for="nickname">Nickname:</label>
-      <input type="text" id="nickname" v-model="nickname">
+      <input title="1-15 characters" type="text" id="nickname" v-model="nickname" maxlength="15">
       <div class="optional">(optional)</div>
     </div>
     <div>
       <label for="aboutMe">About Me:</label>
-      <textarea id="aboutMe" v-model="aboutMe"></textarea>
+      <textarea title="1-300 characters" id="aboutMe" v-model="aboutMe" maxlength="300"></textarea>
       <div class="optional">(optional)</div>
     </div>
     <button type="submit">Submit</button>
@@ -91,6 +97,7 @@ function handleAvatarChange(event: Event) {
 
 const signup = async () => {
   resetPiniaStores();
+  console.log('== signup ==');
   try {
     /* todo: should happen only if signup is successful */
     await signupStore.fetchData({
@@ -104,13 +111,6 @@ const signup = async () => {
       about_me: aboutMe.value,
       public: false
     });
-
-
-    // Result storage logic here
-    // For example, you can store the result in a Vuex store or any other storage mechanism
-    // Assuming you have a Vuex store setup, you can dispatch an action to store the result
-    // Example:
-    // await store.dispatch('storeSignupResult', result);
 
     if (signupStore.getData.UUID === undefined) {
       signupStore.error = "Error: UUID is undefined. Signup failed.";
@@ -136,32 +136,11 @@ const signup = async () => {
     }
 
   } catch (error) {
-    // Error handling logic here
-    // For example, you can display the error message or log it
-    // Assuming you have a Vuex store setup for error handling, you can dispatch an action to handle the error
-    // Example:
-    // await store.dispatch('handleSignupError', error);
+    alert("Are you sure you are from Royal Family? :|\nWe expect you at least:\n- can read and write o:)\n- know other Royal Families\n- will not try to use their family emails")
     console.error(error);
   } finally {
-    // Finally logic here
-    console.log('finally');
-    // print the result to the console
-    // router.push('/profile');
+    console.log("== signup == 'finally' fired");
   }
-
-
-  // downscale avatar image and convert it into Blob string of bytes
-  // signupUser({
-  //   email: email.value,
-  //   password: password.value,
-  //   firstName: firstName.value,
-  //   lastName: lastName.value,
-  //   dob: dob.value,
-  //   avatar: avatar.value,
-  //   nickname: nickname.value,
-  //   aboutMe: aboutMe.value,
-  //   public: false
-  // })
 };
 
 // todo: remove later

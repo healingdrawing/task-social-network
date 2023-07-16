@@ -13,13 +13,15 @@ type WSMT string
 
 const (
 	WS_ERROR_RESPONSE   WSMT = "error_response"
+	WS_INFO_RESPONSE    WSMT = "info_response"
 	WS_SUCCESS_RESPONSE WSMT = "success_response"
 
 	WS_COMMENT_SUBMIT WSMT = "comment_submit"
 	WS_COMMENTS_LIST  WSMT = "comments_list"
 
-	WS_CHAT_USERS_LIST     WSMT = "chat_users_list"
-	WS_CHAT_MESSAGE_SUBMIT WSMT = "chat_message_submit"
+	WS_PRIVATE_CHAT_USERS_LIST WSMT = "private_chat_users_list"
+	WS_PRIVATE_CHAT_MESSAGE    WSMT = "private_chat_message"
+	WS_GROUP_CHAT_MESSAGE      WSMT = "group_chat_message"
 
 	WS_FOLLOW_REQUEST_RESPONSE WSMT = "follow_request_response" // NEW when broadcast the follow request from fan user, to idol user. Not implemented yet
 	WS_FOLLOW_REQUEST_REJECT   WSMT = "follow_request_reject"
@@ -28,7 +30,6 @@ const (
 
 	WS_POST_SUBMIT WSMT = "post_submit"
 	WS_POSTS_LIST  WSMT = "posts_list"
-	// WS_ANY_PROFILE_VIEW_POSTS_LIST WSMT = "any_profile_view_posts_list"
 
 	WS_GROUPS_LIST     WSMT = "groups_list"     // FOR USER MEMBERSHIP
 	WS_GROUPS_ALL_LIST WSMT = "groups_all_list" // TO DISCOVER ALL GROUPS
@@ -83,7 +84,7 @@ func wsCreateResponseMessage(messageType WSMT, data interface{}) ([]byte, error)
 		Data: data,
 	}
 
-	log.Println("wsCreateResponseMessage: ", messageType)
+	log.Println("= wsCreateResponseMessage: ", messageType)
 
 	jsonData, err := json.Marshal(response)
 	if err != nil {
@@ -93,7 +94,8 @@ func wsCreateResponseMessage(messageType WSMT, data interface{}) ([]byte, error)
 		return stableJsonErrorData, err
 	}
 
-	log.Println("CREATED ================ \nwsCreateResponseMessage: ", string(jsonData))
+	// todo: debug giant print in time of picture sending, so commented
+	// log.Println("CREATED ================ \nwsCreateResponseMessage: ", string(jsonData))
 
 	return jsonData, nil
 }
@@ -104,7 +106,7 @@ func wsRecover(messageData map[string]interface{}) {
 
 	uuid, ok := messageData["user_uuid"].(string)
 	if !ok {
-		log.Println("wsRecover: failed to get user_uuid from message data")
+		log.Println("=== wsRecover: === \n=== failed to get user_uuid from message data")
 		return
 	}
 

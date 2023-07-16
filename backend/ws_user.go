@@ -279,7 +279,7 @@ func wsUserProfileHandler(conn *websocket.Conn, messageData map[string]interface
 	full_profile := true
 	if target_id != user_id && !isFollower && profile_DTO.Privacy == "private" {
 		log.Println("user does not have permissions to see the target user profile")
-		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusForbidden) + " user does not have permissions to see the target user profile"}, []string{uuid})
+		wsSend(WS_INFO_RESPONSE, WS_INFO_RESPONSE_DTO{fmt.Sprint(http.StatusForbidden) + " user does not have permissions to see the target user profile"}, []string{uuid})
 		full_profile = false
 	}
 

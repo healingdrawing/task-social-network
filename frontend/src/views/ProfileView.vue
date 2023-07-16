@@ -1,5 +1,4 @@
 <template>
-  <router-link to="/bell" @click="wss.facepalm()" >Express Royal Will</router-link>
   <h1>Profile:</h1>
   <!-- todo: add button to open BellView.vue this button should be highlighted in case of still present a new, not marked by user as read already, notifications -->
   <!-- add checkbox to make profile public -->
@@ -124,7 +123,7 @@ watch(isPublic, (newValue) => {
 
 const UUIDStore = useUUIDStore();
 function handleCheckboxChange(value: boolean) {
-  console.log('=== HANDLE CHECKBOX CHANGE', value);
+  console.log('= handleCheckboxChange', value);
   // todo: undefined happens in time of move to BellView.vue, perhaps because of wss.facepalm() cleaning + reactivity
   if (value !== undefined) {
     wss.sendMessage({
@@ -203,8 +202,6 @@ const piniaManageDataPost = (post: Post) => {
 const groupPostsList = computed(() => wss.groupPostsList);
 // send request to get all group posts list, created by user in time of membering groups
 function updateUserGroupPostsList() {
-  console.log('=======FIRED======= updateGroupPostsList');
-
   wss.sendMessage({
     type: WSMessageType.USER_GROUP_POSTS_LIST,
     data: {

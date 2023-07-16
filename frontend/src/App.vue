@@ -15,22 +15,12 @@ import { useWebSocketStore } from './store/websocket';
 const wss = useWebSocketStore();
 
 window.onbeforeunload = function () {
-  alert("onbeforeunload event listener triggered")
+  alert("Your prestige is falling!!! See you soon >:<\n... after your kingdom has been conquered o:)")
   console.log("====================================")
   console.log("onbeforeunload event listener triggered")
   console.log("====================================")
   wss.killThemAll();
 }
-
-// Does not work properly. Replaced by window.onbeforeunload above
-// Register the beforeunload event listener.
-// window.addEventListener('beforeunload', () => {
-//   alert("beforeunload event listener triggered")
-//   console.log("====================================")
-//   console.log("beforeunload event listener triggered")
-//   console.log("====================================")
-//   wss.killThemAll();
-// });
 
 // Unregister the event listener when the component is unmounted
 onBeforeUnmount(() => {
