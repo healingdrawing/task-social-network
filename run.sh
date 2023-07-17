@@ -25,7 +25,7 @@ cd $BACK
 docker network create social_network
 
 # Run frontend container
-docker run -d -p 3000:80 --network=social_network --name frontend_container frontend_image
+docker run -d -p 3000:3000 --network=social_network --name frontend_container frontend_image
 
 # Run backend container
 docker run -d -p 8080:8080 --network=social_network --name backend_container backend_image
