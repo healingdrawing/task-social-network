@@ -1,25 +1,4 @@
 <template>
-
-  <!-- // todo: remove later
-  <pre style="text-align: left;">
-    The BellView.vue which displays the list of bells for the user.
-    There are x4 types of bells:
-    ok 1. "event" - when an event is created in a group the user is a member of. No action required. But it must have buttons :
-      - "Open Group" - to open group which event came from.
-      - "Close" - to remove the bell from the list.
-    ok 2. "following" - when other user sends a follow request to the user , and user profile is private. Must have two buttons:
-      - "Accept" - to accept the follow request, and remove the bell from the list.
-      - "Reject" - to reject the follow request, and remove the bell from the list.
-    ok 3. "invitation" - when other user invites the user to a group(include case of invitation from group the creator in time of group creation). Must have buttons:
-      - "Accept" - to join the group, and remove the bell from the list.
-      - "Reject" - to reject the invitation to join the group, and remove the bell from the list.
-    ok 4. "request" - when other user sends a request to join a group the user is a creator of. Must have buttons:
-      - "Accept" - to allow other user to join the group, and remove the bell from the list.
-      - "Reject" - to reject the request to join the group, and remove the bell from the list.
-    
-  </pre>
- -->
-
   <div v-if="bells.length > 0">
     <!-- <div>
       bells: {{ bells }} // todo: remove debug
@@ -156,7 +135,6 @@ import router from '@/router';
 import { useGroupStore } from '@/store/group';
 import { BellType, Bell, BellRequest, TargetProfileRequest, WSMessageType, WSMessage, GroupRequestActionSubmit, GroupVisitorStatusRequest, Group, GroupEventAction } from '@/api/types';
 import { useUUIDStore } from '@/store/uuid';
-import { useProfileStore } from '@/store/profile';
 
 const wss = useWebSocketStore()
 const bells = computed(() => wss.bellsList);
