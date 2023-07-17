@@ -1,53 +1,22 @@
-# stage1 as builder
-FROM node:latest as builder
+# Stage 1: Build Vue application
+FROM node:19.6.0 as build-stage
 
-WORKDIR /vue-ui
+WORKDIR /app
 
-# Copy the package.json and install dependencies
 COPY package*.json ./
 RUN npm install
 
-# Copy rest of the files
 COPY . .
 
-# Build the project
 RUN npm run build
 
-FROM nginx:alpine as production-build
-COPY ./.nginx/nginx.conf /etc/nginx/nginx.conf
+# Stage 2: Serve Vue application with Nginx
+FROM nginx:1.21.0 as production-stage
 
-## Remove default nginx index page
-RUN rm -rf /usr/share/nginx/html/*
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+COPY --from=build-stage /app /usr/share/nginx
 
-# Copy from the stahg 1
-COPY --from=builder /vue-ui/dist /usr/share/nginx/html
+EXPOSE 3000
 
-EXPOSE 8080
-ENTRYPOINT ["nginx", "-g", "daemon off;"]
-
-# First stage
-# FROM node as builder
-
-# # Set the working directory
-# WORKDIR /frontend
-
-# # Copy the application files to the working directory
-# COPY . /frontend/
-
-# # Install dependencies
-# RUN npm install
-
-# # Build the application
-# RUN npm run serve
-
-# # Second stage
-# FROM nginx:alpine
-
-# # Copy the built application files from the first stage to the nginx directory
-# COPY --from=builder /frontend/dist /usr/share/nginx/html
-
-# # Expose port 8080
-# EXPOSE 8080
-
-# # Start the nginx server
-# CMD ["nginx", "-g", "daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]

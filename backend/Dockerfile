@@ -1,25 +1,13 @@
-FROM golang as builder
+FROM golang:1.20.3 as backend-build
 
-WORKDIR /backend
+WORKDIR /app
 
-COPY . /backend/
-
+COPY go.mod go.sum ./
 RUN go mod download
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+COPY . .
+RUN go build -o main .
 
-# Second stage
-
-FROM alpine:latest
-
-RUN apk --no-cache add ca-certificates
-
-WORKDIR /backend
-
-RUN ls
-
-COPY --from=builder . /backend/
-
-EXPOSE 8000
+EXPOSE 8080
 
 CMD ["./main"]
