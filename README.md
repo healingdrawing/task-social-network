@@ -1,5 +1,11 @@
 # task-social-network
 
+## audit run
+To show two docker containers inside docker desktop or terminal, one for backend, and one for frontend (docker desktop must be started before), inside root folder of repository where `run.sh` placed, using terminal execute command:
+- `./run.sh`  
+to show containers in terminal:  
+- `docker ps`  
+
 ## dev run
 
 ### backend
