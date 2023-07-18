@@ -21,15 +21,15 @@
     </div>
     <div>
       <label for="password">Password:</label>
-      <input title="6-15 english letters/digits. No spaces" type="password" id="password" v-model="password" required minlength="6" maxlength="15" pattern="[a-zA-Z0-9]+">
+      <input title="6-15 english letters/digits. No spaces" type="password" id="password" v-model="password" minlength="6" maxlength="15" pattern="[a-zA-Z0-9]+" required>
     </div>
     <div>
       <label for="firstName">First Name:</label>
-      <input title="1-32 characters" type="text" id="firstName" v-model="firstName" required minlength="1" maxlength="32">
+      <input title="1-32 characters" type="text" id="firstName" v-model="firstName" minlength="1" maxlength="32" required>
     </div>
     <div>
       <label for="lastName">Last Name:</label>
-      <input title="1-32 characters" type="text" id="lastName" v-model="lastName" required minlength="1" maxlength="32">
+      <input title="1-32 characters" type="text" id="lastName" v-model="lastName" minlength="1" maxlength="32" required>
     </div>
     <div>
       <label for="dob">Date of Birth:</label>

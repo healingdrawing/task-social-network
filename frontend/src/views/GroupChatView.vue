@@ -3,7 +3,7 @@
     <h1>Group: {{ group.name }}</h1>
     <h1>Group Chat with id: {{ group.id }}</h1>
     <div>
-      <textarea v-model="messageText" @keydown.enter.ctrl.prevent="sendMessage"></textarea>
+      <textarea v-model="messageText" @keydown.enter.ctrl.prevent="sendMessage" required></textarea>
       <br>
       <button @click="sendMessage">Send</button>
     </div>
