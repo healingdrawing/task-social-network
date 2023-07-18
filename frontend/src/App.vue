@@ -46,19 +46,41 @@ const navComponent = computed(() => {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  // color: #2c3e50;
 }
 
 nav {
   padding: 30px;
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
+  // a {
+  //   font-weight: bold;
+  //   color: #2c3e50;
 
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+  //   &.router-link-exact-active {
+  //     color: #42b983;
+  //   }
+  // }
+}
+
+/* styles */
+body {
+  background-color: black;
+  color: white;
+}
+
+a {
+  border: 1px solid white;
+  padding: 5px;
+  margin: 5px;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+a.router-link-exact-active {
+  color: green;
+}
+
+a:hover {
+  color: orange;
 }
 </style>
