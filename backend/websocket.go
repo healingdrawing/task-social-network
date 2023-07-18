@@ -59,12 +59,17 @@ func reader(uuid string, conn *websocket.Conn) {
 
 	client := &Client{CONN: conn, USER_ID: user_id}
 	clients.Store(uuid, client)
-	defer clients.Delete(uuid)
-	defer conn.Close()
+	// defer clients.Delete(uuid)
+	// defer conn.Close()
 	for {
 		messageType, incoming, err := conn.ReadMessage()
+		log.Println("=== inside reader ===")
 		if err != nil {
-			log.Println(err)
+			log.Println("=== error in reader ===")
+			log.Println("messageType, incoming, err := conn.ReadMessage()")
+			log.Println("messageType", messageType)
+			log.Println("incoming", incoming)
+			log.Println("err", err)
 			log.Println("=== error in reader , before delete and close ws ===")
 			return
 		}

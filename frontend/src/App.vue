@@ -19,13 +19,14 @@ window.onbeforeunload = function () {
   console.log("====================================")
   console.log("onbeforeunload event listener triggered")
   console.log("====================================")
-  wss.killThemAll();
+  // wss.killThemAll();
 }
 
 // Unregister the event listener when the component is unmounted
 onBeforeUnmount(() => {
   window.removeEventListener('beforeunload', () => {
-    wss.killThemAll();
+    alert("wtf are you doing? Cant you use buttons like a normal person? >:(")
+    // wss.killThemAll();
   });
 });
 

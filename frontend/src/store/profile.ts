@@ -10,9 +10,10 @@ export const useProfileStore = defineStore({
   id: 'profile',
   state: (): ProfileState => ({
     // Define your state properties here
-    user_id: -1,// the order of these properties is not matter. it is object
-    user_email: "",
-    target_user_email: "",
+    user_id: localStorage.getItem("user_id") !== null ? parseInt(localStorage.getItem("user_id")!) : -1
+    ,// the order of these properties is not matter. it is object
+    user_email: localStorage.getItem("user_email") || "",
+    target_user_email: localStorage.getItem("target_user_email") || "",
   }),
   getters: {
     // Define your getters here
@@ -22,8 +23,17 @@ export const useProfileStore = defineStore({
   },
   actions: {
     // Define your actions here
-    setUserId(user_id: number) { this.user_id = user_id; },
-    setUserEmail(user_email: string) { this.user_email = user_email; },
-    setTargetUserEmail(target_user_email: string) { this.target_user_email = target_user_email; },
+    setUserId(user_id: number) {
+      this.user_id = user_id;
+      localStorage.setItem("user_id", user_id.toString());
+    },
+    setUserEmail(user_email: string) {
+      this.user_email = user_email;
+      localStorage.setItem("user_email", user_email);
+    },
+    setTargetUserEmail(target_user_email: string) {
+      this.target_user_email = target_user_email;
+      localStorage.setItem("target_user_email", target_user_email);
+    },
   },
 });
