@@ -67,8 +67,6 @@ function sendMessage() {
   // scrollToBottom(); // commented, because now the chat history placed under the message box
 }
 
-const messages = ref<HTMLElement | null>(null);
-
 function piniaManageData(message: GroupChatMessage) {
   profileStore.setTargetUserEmail(message.email);
 }

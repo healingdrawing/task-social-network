@@ -66,10 +66,8 @@
 </style>
 
 <script lang="ts" setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { ErrorResponse, BellRequest, WSMessageType } from '@/api/types';
-import { useBellStore } from '@/store/bell';
-import { useChatsStore } from '@/store/chats';
 
 import { useUUIDStore } from '@/store/uuid';
 import { useLoginStore } from '@/store/login';
