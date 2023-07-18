@@ -2,14 +2,14 @@
   <div>
     <h1>Create Post</h1>
 
-    <div><hr><button type="button" @click="crap" title="remove in production">Fill Debug / remove later</button><hr></div> <!-- todo: remove later -->
+    <div><button type="button" @click="crap" title="remove in production">Fill Debug / remove later</button></div> <!-- todo: remove later -->
 
     <form @submit.prevent="addPost">
       <label for="postTitle">Post Title:</label>
       <br> <input type="text" id="postTitle" v-model="postTitle" required>
       <br>
       <label for="postTags">Post Tags:</label>
-      <br> <input type="text" id="postTags" v-model="postTags">
+      <br> <input title="comma separated" type="text" id="postTags" v-model="postTags">
       <br>
       <label for="postContent">Post Content:</label>
       <br> <textarea id="postContent" v-model="postContent" required></textarea>
@@ -31,8 +31,11 @@
       </select>
       
       <div>
-        <label for="picture"> with picture(optional): </label>
-        <br> <input type="file" id="picture" accept="image/jpeg, image/png, image/gif" @change="handlePictureChange">
+        <br>
+        <label for="picture" class="label_file_upload">
+          with picture(optional):
+          <input type="file" id="picture" accept="image/jpeg, image/png, image/gif" @change="handlePictureChange">
+        </label>
       </div>
 
       <br>
@@ -45,31 +48,36 @@
     <!-- add posts list , already created -->
     <div v-for="post in postsList"
       :key="post.id">
-      <hr>
-      <router-link
-        :to="{ name: 'post' }"
-        @click="piniaManageDataPost(post)">
-        <p>Post id: {{ post.id }}</p>
-        <p>Post title: {{ post.title }}</p>
-        <p>Post tags: {{ post.categories }}</p>
-        <p>Post content: {{ post.content }}</p>
-        <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
-        <p>Post created: {{ post.created_at }}</p>
+      <div class="single_div_box">
+        <br>
+        <h3> Post title: </h3> <p> {{ post.title }} </p>
+        <h3> Post tags: </h3> <p> {{ post.categories }} </p>
+        <h3> Post content: </h3> <p> {{ post.content }} </p>
+        <h3> Post privacy: </h3> <p> {{ post.privacy }} </p><!-- todo: no need to display -->
+        <h3> Post created: </h3> <p> {{ post.created_at }} </p>
         <div v-if="post.picture !== ''">
-          <p>Post picture: 
+          <h3> Post picture: </h3>
+          <p>
             <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
           </p>
         </div>
-      </router-link>
-      <router-link
-      :to="{ name: 'target' }"
-      @click="piniaManageDataProfile(post.email)">
-        <h3>
-          Author: {{ post.first_name }}
-          {{ post.last_name }} 
-          ({{ post.email }})
-        </h3>
-      </router-link>
+        <router-link
+        :Title="post.first_name + '\n' + post.last_name + '\n' + post.email"
+        :to="{ name: 'target' }"
+        @click="piniaManageDataProfile(post.email)">
+          <div class="router_link_box">
+            visit author profile
+          </div>
+        </router-link>
+        <br>
+        <router-link
+        :to="{ name: 'post' }"
+        @click="piniaManageDataPost(post)">
+          <div class="router_link_box">
+            comment post {{ post.id }}
+          </div>
+        </router-link>
+      </div>
     </div>
   </div>
 </template>

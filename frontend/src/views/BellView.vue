@@ -4,7 +4,7 @@
       Your Majesty! The streets are not calm again.
       <br> Intervention of Your Majesty is required!
     </h1>
-    <h1>Bells</h1>
+    <h1>Bells:</h1>
     <div v-for="(bell, index) in bells" :key="index">
       <hr>
       <div v-if="bell.type === BellType.EVENT">

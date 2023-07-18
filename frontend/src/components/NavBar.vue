@@ -1,9 +1,9 @@
 <template>
-  <div class="nav-bar">
-    <div class="nav-bar__logo">
-      <img src="../assets/logo.png" alt="Vue logo" />
+  <div>
+    <div class="logo">
+      <img src="../assets/logo.png" alt="logo" />
     </div>
-    <div class="nav-bar__links">
+    <div>
       <router-link
         v-if="wss.bellsList.length < 1"
         to="/bell"
@@ -20,10 +20,12 @@
         Express Royal Will
       </router-link>
       <br>
-      <router-link to="/profile">Profile</router-link> |
-      <router-link to="/posts">Posts</router-link> |
-      <router-link to="/chats">Chats</router-link> |
-      <router-link to="/groups">Groups</router-link> |
+      <br>
+      <br>
+      <router-link to="/profile">Profile</router-link>
+      <router-link to="/posts">Posts</router-link>
+      <router-link to="/chats">Chats</router-link>
+      <router-link to="/groups">Groups</router-link>
       <router-link to="/" @click="logout()">Logout</router-link>
     </div>
     <router-view/>
