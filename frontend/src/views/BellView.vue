@@ -1,8 +1,5 @@
 <template>
   <div v-if="bells.length > 0">
-    <!-- <div>
-      bells: {{ bells }} // todo: remove debug
-    </div> -->
     <h1>
       Your Majesty! The streets are not calm again.
       <br> Intervention of Your Majesty is required!
@@ -38,7 +35,7 @@
         Your Majesty! A peasant named 
         <br> {{ bell.first_name }} {{ bell.last_name }} ({{ bell.email }})
         <br> is in revolt.
-        <br> Says that a member of the royal family
+        <br> Says that a member of the Royal Family
         <br> from a neighboring kingdom.
         <br> Also says there is not enough snow in their market.
         <br> <button title="Accept Following Request" @click="acceptFollowRequest(bell)">
@@ -79,7 +76,7 @@
           <br> This could be a matter of extreme importance 😤 !
           <br> Also make today the annual official holiday of snow 🥹 !
           <br> It's not every day you meet a person
-          <br> who can prove 🥹 for free.
+          <br> who can prove ... 🥹 for free.
         </button>
         <button title="Reject Invitation" @click="rejectInvitation(bell)">
           😠 Don't you see how I'm suffering 🥺 ?
