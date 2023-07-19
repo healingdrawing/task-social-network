@@ -52,7 +52,7 @@ export const useWebSocketStore = defineStore({
       return new Promise<void>((resolve) => {
         const interval = setInterval(() => {
           if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            alert('Connection is established')
+            console.log('=== Connection is established ===')
             clearInterval(interval);
             resolve();
           }
@@ -61,13 +61,13 @@ export const useWebSocketStore = defineStore({
     },
 
     refresh_websocket() {
-      alert("=== refreshing websocket ===");
+      console.log("=== refreshing websocket ===");
       if (this.socket) {
         return;
       }
       this.killThemAll();
       const uuid = sessionStorage.getItem('UUID');
-      alert('uuid inside refresh_websocket: ' + uuid);
+      console.log('=== uuid inside refresh_websocket:\n' + uuid);
       if (uuid) {
         this.connect(uuid);
       } else {
