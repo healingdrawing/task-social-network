@@ -42,12 +42,14 @@ const navComponent = computed(() => {
 
 <style lang="scss">
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  // font-family: Avenir, Helvetica, Arial, sans-serif;
+  // -webkit-font-smoothing: antialiased;
+  // -moz-osx-font-smoothing: grayscale;
   text-align: center;
   // color: #2c3e50;
 }
+
+* {}
 
 nav {
   padding: 30px;
@@ -120,7 +122,8 @@ h5,
 h6 {
   text-shadow:
     #511162 0px 0px 10px;
-  color: #b74cc0;
+  color: hsl(295, 71%, 63%);
+  // color: #b74cc0;
 }
 
 .single_div_box {
