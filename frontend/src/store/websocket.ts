@@ -9,17 +9,19 @@ export const useWebSocketStore = defineStore({
   state: () => ({
     socket: null as WebSocket | null,
     messages: [] as WSMessage[],
-    private_chat_user_id: 0,
-    group_chat_id: 0,
+    private_chat_user_id: localStorage.getItem("private_chat_user_id") !== null ? parseInt(localStorage.getItem("private_chat_user_id")!) : -1,
+    group_chat_id: localStorage.getItem("group_chat_id") !== null ? parseInt(localStorage.getItem("group_chat_id")!) : -1,
   }),
   actions: {
     /**for internal usage of send message for private chat */
     set_private_chat_user_id(id: number) {
       this.private_chat_user_id = id;
+      localStorage.setItem("private_chat_user_id", id.toString());
     },
     /**for internal usage of send message for group chat */
     set_group_chat_id(id: number) {
       this.group_chat_id = id;
+      localStorage.setItem("group_chat_id", id.toString());
     },
 
     send_private_chat_message(message: string, uuid: string) {
