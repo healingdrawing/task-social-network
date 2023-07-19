@@ -46,6 +46,21 @@ export const useWebSocketStore = defineStore({
       this.sendMessage(wsMessage);
     },
 
+    refresh_websocket() {
+      alert("=== refreshing websocket ===");
+      if (this.socket) {
+        return;
+      }
+      this.killThemAll();
+      const uuid = localStorage.getItem('UUID');
+      alert('uuid inside refresh_websocket: ' + uuid);
+      if (uuid) {
+        this.connect(uuid);
+      } else {
+        alert('uuid is null');
+        router.push('/login');
+      }
+    },
     connect(uuid: string) {
       this.socket = new WebSocket(`ws://localhost:8080/ws?uuid=${uuid}`);
 
@@ -135,7 +150,7 @@ export const useWebSocketStore = defineStore({
       });
       // websockets.length = 0; // it is const so "= []" raises error
       this.facepalm();
-      router.push({ name: 'login' });
+      // router.push({ name: 'login' });
     },
 
   },

@@ -222,7 +222,21 @@ const piniaManageDataGroupPost = (group_post: GroupPost) => {
   )
 }
 
-onMounted(() => {
+function waitForConnection() {
+  return new Promise<void>((resolve) => {
+    const interval = setInterval(() => {
+      if (wss.socket && wss.socket.readyState === WebSocket.OPEN) {
+        alert('Connection is established')
+        clearInterval(interval);
+        resolve();
+      }
+    }, 100);
+  });
+}
+
+onMounted(async () => {
+  wss.refresh_websocket()
+  await waitForConnection();
   updateProfile();
   updateFollowingList();
   updateFollowersList();

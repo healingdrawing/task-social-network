@@ -136,16 +136,16 @@ onMounted(() => {
     showLink.value = !showLink.value;
   }, 1000); // Adjust the interval duration as needed
 
-  const updateInterval = setInterval(() => {
-    updateBells(); // Call the update function
-  }, 20000); // Repeat every 10 seconds
+  // const updateInterval = setInterval(() => {
+  //   updateBells(); // Call the update function
+  // }, 20000); // Repeat every 10 seconds
 
-  // Clear the interval when the component is unmounted
-  onUnmounted(() => {
-    clearInterval(updateInterval);
-  });
+  // // Clear the interval when the component is unmounted
+  // onUnmounted(() => {
+  //   clearInterval(updateInterval);
+  // });
 
-  updateBells(); // after success login call the update function once
+  // updateBells(); // after success login call the update function once
 });
 
 function updateBells() {
