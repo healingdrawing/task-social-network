@@ -9,7 +9,9 @@
         to="/bell"
         @click="wss.facepalm()"
       >
-        Express Royal Will
+        <div class="router_link_box">
+          Express Royal Will
+        </div>
       </router-link>
       <router-link
         v-else
@@ -17,16 +19,38 @@
         @click="wss.facepalm()"
         :class="{ 'fade-in': showLink, 'fade-out': !showLink }"
       >
-        Express Royal Will
+        <div class="router_link_box">
+          Express Royal Will
+        </div>
       </router-link>
       <br>
       <br>
       <br>
-      <router-link to="/profile">Profile</router-link>
-      <router-link to="/posts">Posts</router-link>
-      <router-link to="/chats">Chats</router-link>
-      <router-link to="/groups">Groups</router-link>
-      <router-link to="/" @click="logout()">Logout</router-link>
+      <router-link to="/profile">
+        <div class="router_link_box">
+          Profile
+        </div>
+      </router-link>
+      <router-link to="/posts">
+        <div class="router_link_box">
+          Posts
+        </div>
+      </router-link>
+      <router-link to="/chats">
+        <div class="router_link_box">
+          Chats
+        </div>
+      </router-link>
+      <router-link to="/groups">
+        <div class="router_link_box">
+          Groups
+        </div>
+      </router-link>
+      <router-link to="/" @click="logout()">
+        <div class="router_link_box">
+          Logout
+        </div>
+      </router-link>
     </div>
     <router-view/>
   </div>
@@ -138,18 +162,19 @@ onMounted(async () => {
   wss.refresh_websocket()
   await wss.waitForConnection();
 
-  setInterval(() => {
-    showLink.value = !showLink.value;
-  }, 1000); // Adjust the interval duration as needed
+  // todo: UNCOMMENT
+  // setInterval(() => {
+  //   showLink.value = !showLink.value;
+  // }, 1000); // Adjust the interval duration as needed
 
-  updateInterval.value = setInterval(() => {
-    updateBells(); // Call the update function
-  }, 20000); // Repeat every 10 seconds
+  // updateInterval.value = setInterval(() => {
+  //   updateBells(); // Call the update function
+  // }, 20000); // Repeat every 10 seconds
 
-  // Clear the interval when the component is unmounted
-  onUnmounted(() => {
-    clearInterval(updateInterval.value);
-  });
+  // // Clear the interval when the component is unmounted
+  // onUnmounted(() => {
+  //   clearInterval(updateInterval.value);
+  // });
 
   updateBells(); // after success login call the update function once
 });

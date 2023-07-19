@@ -49,8 +49,6 @@ const navComponent = computed(() => {
   // color: #2c3e50;
 }
 
-* {}
-
 nav {
   padding: 30px;
 
@@ -69,6 +67,11 @@ nav {
   --gradient: linear-gradient(to right, #b74cc0, #bd08e3 30%, #bd08e3 70%, #b74cc0);
   --goldenGradient: linear-gradient(to bottom, #fde056, #ffffff 30%, #fec722);
   --yellowPink: linear-gradient(to bottom, #fde056, #ffffff 30%, #b74cc0);
+  --whiteGlassHorizontal: linear-gradient(to right,
+      hsla(0, 0%, 100%, 0.01),
+      #ffffff00 30%,
+      #ffffff00 70%,
+      hsla(0, 0%, 100%, 0.10));
 }
 
 
@@ -78,6 +81,34 @@ body {
   background-size: 100% 100vh;
   color: white;
 }
+
+// fucking headache
+
+.users_list_with_scroll {
+  background: var(--whiteGlassHorizontal);
+  height: 100px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scrollbar-color: white #fde056 !important;
+}
+
+
+.users_list_with_scroll::-webkit-scrollbar {
+  width: 2px;
+}
+
+.users_list_with_scroll::-webkit-scrollbar-thumb {
+  background-color: white;
+}
+
+.users_list_with_scroll::-webkit-scrollbar-track {
+  background-color: #fde056;
+}
+
+// end of fucking headache
+
+
+
 
 .label_file_upload input[type="file"] {
   /* Hide the default file input */
@@ -120,8 +151,7 @@ h3,
 h4,
 h5,
 h6 {
-  text-shadow:
-    #511162 0px 0px 10px;
+  text-shadow: #511162 0px 0px 10px;
   color: hsl(295, 71%, 63%);
   // color: #b74cc0;
 }
@@ -129,7 +159,7 @@ h6 {
 .single_div_box {
   border-radius: 24px;
   border-left: 2px solid #fde056;
-  border-right: 2px solid #fec722;
+  border-right: 2px solid #fde056;
 
   word-wrap: break-word;
   overflow-wrap: break-word;

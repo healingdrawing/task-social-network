@@ -53,7 +53,7 @@
         <h3> Post title: </h3> <p> {{ post.title }} </p>
         <h3> Post tags: </h3> <p> {{ post.categories }} </p>
         <h3> Post content: </h3> <p> {{ post.content }} </p>
-        <h3> Post privacy: </h3> <p> {{ post.privacy }} </p><!-- todo: no need to display -->
+        <h3> Post privacy: </h3> <p> {{ post.privacy }} </p>
         <h3> Post created: </h3> <p> {{ post.created_at }} </p>
         <div v-if="post.picture !== ''">
           <h3> Post picture: </h3>
