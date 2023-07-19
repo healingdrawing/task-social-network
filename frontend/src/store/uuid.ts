@@ -8,7 +8,7 @@ export const useUUIDStore = defineStore({
   id: 'uuid',
   state: (): UUIDState => ({
     // Define your state properties here
-    UUID: localStorage.getItem('UUID') || "-1",// the order of these properties is not matter. it is object field
+    UUID: sessionStorage.getItem('UUID') || "-1",// the order of these properties is not matter. it is object field
   }),
   getters: {
     // Define your getters here
@@ -18,7 +18,7 @@ export const useUUIDStore = defineStore({
     // Define your actions here
     setUUID(UUID: string) {
       this.UUID = UUID;
-      localStorage.setItem('UUID', UUID);
+      sessionStorage.setItem('UUID', UUID);
     },
   },
 });
