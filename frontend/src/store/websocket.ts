@@ -46,6 +46,18 @@ export const useWebSocketStore = defineStore({
       this.sendMessage(wsMessage);
     },
 
+    waitForConnection() {
+      return new Promise<void>((resolve) => {
+        const interval = setInterval(() => {
+          if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+            alert('Connection is established')
+            clearInterval(interval);
+            resolve();
+          }
+        }, 100);
+      });
+    },
+
     refresh_websocket() {
       alert("=== refreshing websocket ===");
       if (this.socket) {
@@ -93,6 +105,7 @@ export const useWebSocketStore = defineStore({
       this.socket?.close();
       this.socket = null;
       console.log('socket', this.socket);
+      this.killThemAll();
     },
 
     /**clearMessagesWhenNewMessageArrives removes all the messages of type = message.Type, before unshift new message, to prevent duplication of messages in getters ( -> screen/view) */
@@ -148,9 +161,8 @@ export const useWebSocketStore = defineStore({
         websocket = null;
         console.log('forEach websocket', websocket);
       });
-      // websockets.length = 0; // it is const so "= []" raises error
+      websockets.length = 0; // it is const so "= []" raises error.
       this.facepalm();
-      // router.push({ name: 'login' });
     },
 
   },

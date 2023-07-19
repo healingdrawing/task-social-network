@@ -26,7 +26,6 @@ window.onbeforeunload = function () {
 onBeforeUnmount(() => {
   window.removeEventListener('beforeunload', () => {
     alert("wtf are you doing? Cant you use buttons like a normal person? >:(")
-    // wss.killThemAll();
   });
 });
 

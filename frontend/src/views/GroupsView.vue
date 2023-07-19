@@ -108,7 +108,9 @@ const piniaManageDataProfile = (email: string) => {
   profileStore.setTargetUserEmail(email);
 };
 
-onMounted(() => {
+onMounted(async () => {
+  wss.refresh_websocket()
+  await wss.waitForConnection();
   updateFollowersList();
   updateGroupsList(); // with membership
 });

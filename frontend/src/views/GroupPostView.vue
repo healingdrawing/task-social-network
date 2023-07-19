@@ -126,7 +126,9 @@ function addComment() {
 
 }
 
-onMounted(() => {
+onMounted(async () => {
+  wss.refresh_websocket()
+  await wss.waitForConnection();
   updatePostComments();
 });
 

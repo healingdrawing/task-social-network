@@ -168,7 +168,9 @@ function updatePostsList() {
   });
 }
 
-onMounted(() => {
+onMounted(async () => {
+  wss.refresh_websocket()
+  await wss.waitForConnection();
   updatePostsList();
   updateFollowersList();
 });

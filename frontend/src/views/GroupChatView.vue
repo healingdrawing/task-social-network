@@ -33,7 +33,7 @@
 </style>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useWebSocketStore } from '@/store/pinia';
 import { useUUIDStore } from '@/store/pinia';
 import { useGroupStore } from '@/store/pinia';
@@ -70,4 +70,9 @@ function sendMessage() {
 function piniaManageData(message: GroupChatMessage) {
   profileStore.setTargetUserEmail(message.email);
 }
+
+onMounted(async () => {
+  wss.refresh_websocket()
+  await wss.waitForConnection();
+});
 </script>

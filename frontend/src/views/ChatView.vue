@@ -67,7 +67,9 @@ function piniaManageData(message: PrivateChatMessage) {
   profileStore.setTargetUserEmail(message.email);
 }
 
-onMounted(() => {
+onMounted(async () => {
+  wss.refresh_websocket()
+  await wss.waitForConnection();
   wss.set_group_chat_id(0)
   wss.set_private_chat_user_id(chat.user_id)
 });

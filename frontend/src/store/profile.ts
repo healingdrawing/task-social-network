@@ -10,8 +10,7 @@ export const useProfileStore = defineStore({
   id: 'profile',
   state: (): ProfileState => ({
     // Define your state properties here
-    user_id: localStorage.getItem("user_id") !== null ? parseInt(localStorage.getItem("user_id")!) : -1
-    ,// the order of these properties is not matter. it is object
+    user_id: localStorage.getItem("user_id") !== null ? parseInt(localStorage.getItem("user_id")!) : -1, // the order of these properties is not matter. it is object
     user_email: localStorage.getItem("user_email") || "",
     target_user_email: localStorage.getItem("target_user_email") || "",
   }),

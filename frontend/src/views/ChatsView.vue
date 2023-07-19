@@ -52,7 +52,9 @@ function update_private_chat_users_list() {
   })
 }
 
-onMounted(() => {
+onMounted(async () => {
+  wss.refresh_websocket()
+  await wss.waitForConnection();
   update_private_chat_users_list()
 })
 </script>

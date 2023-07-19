@@ -254,7 +254,9 @@ const piniaManageDataGroupPost = (group_post: GroupPost) => {
 }
 
 
-onMounted(() => {
+onMounted(async () => {
+  wss.refresh_websocket()
+  await wss.waitForConnection();
   updateVisitorStatus();
   updateProfile();
   updateFollowingList();

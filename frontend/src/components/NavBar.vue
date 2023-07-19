@@ -117,6 +117,7 @@ async function logout() {
     console.log(data);
     logoutError.value = '';
 
+    clearInterval(updateInterval.value);
     disconnectWebSocket();
     resetPiniaStores();
 
@@ -131,21 +132,26 @@ async function logout() {
 //fade in/out effect for link
 let showLink = ref(true);
 
-onMounted(() => {
+const updateInterval = ref(0);
+
+onMounted(async () => {
+  wss.refresh_websocket()
+  await wss.waitForConnection();
+
   setInterval(() => {
     showLink.value = !showLink.value;
   }, 1000); // Adjust the interval duration as needed
 
-  // const updateInterval = setInterval(() => {
-  //   updateBells(); // Call the update function
-  // }, 20000); // Repeat every 10 seconds
+  updateInterval.value = setInterval(() => {
+    updateBells(); // Call the update function
+  }, 20000); // Repeat every 10 seconds
 
-  // // Clear the interval when the component is unmounted
-  // onUnmounted(() => {
-  //   clearInterval(updateInterval);
-  // });
+  // Clear the interval when the component is unmounted
+  onUnmounted(() => {
+    clearInterval(updateInterval.value);
+  });
 
-  // updateBells(); // after success login call the update function once
+  updateBells(); // after success login call the update function once
 });
 
 function updateBells() {

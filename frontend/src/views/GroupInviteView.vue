@@ -60,7 +60,9 @@ const inviteUsers = () => {
   router.push({ name: 'group' }); // the group id is same, so no need any changes in pinia, before router push
 };
 
-onMounted(() => {
+onMounted(async () => {
+  wss.refresh_websocket()
+  await wss.waitForConnection();
   updateFollowersList();
 });
 </script>

@@ -50,7 +50,9 @@ const piniaManageDataProfile = (email: string) => {
 };
 
 
-onMounted(() => {
+onMounted(async () => {
+  wss.refresh_websocket()
+  await wss.waitForConnection();
   updateGroupsList()
 });
 

@@ -282,7 +282,9 @@ function updateBells() {
   //todo: implement events too
 }
 
-onMounted(() => {
+onMounted(async () => {
+  wss.refresh_websocket()
+  await wss.waitForConnection();
   updateBells();
 });
 
