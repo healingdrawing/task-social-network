@@ -30,9 +30,6 @@
 <style>
 .message {
   white-space: pre-wrap;
-  max-height: 500px;
-
-  /* add a vertical scrollbar when content exceeds height */
 }
 </style>
 

@@ -8,16 +8,16 @@
       <button @click="sendMessage">Send</button>
     </div>
     <div class="messages">
-      <div class="message" v-for="message in messages_list" :key="message.created_at">
-        <hr>
-        <h6>
-          <router-link
-            :to="{ name: 'target' }"
-            @click="piniaManageData(message)">            
-            {{ message.first_name }} {{ message.last_name }} ({{ message.email }})
-          </router-link>
-        </h6>
+      <div class="message single_div_box " v-for="message in messages_list" :key="message.created_at">
         <br>
+        <router-link
+          :to="{ name: 'target' }"
+          @click="piniaManageData(message)">
+          <div class="router_link_box">
+            {{ message.first_name }} {{ message.last_name }} ({{ message.email }})
+          </div>
+        </router-link>
+        <br> <br> <br>
         {{ message.content }}
       </div>
     </div>
@@ -27,8 +27,6 @@
 <style>
 .message {
   white-space: pre-wrap;
-  overflow: auto;
-  /* add a vertical scrollbar when content exceeds height */
 }
 </style>
 
