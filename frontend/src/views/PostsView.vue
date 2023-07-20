@@ -5,40 +5,38 @@
     <div><button type="button" @click="crap" title="remove in production">Fill Debug / remove later</button></div> <!-- todo: remove later -->
 
     <form @submit.prevent="addPost">
-      <label for="postTitle">Post Title:</label>
+      <label for="postTitle">Post title:</label>
       <br> <input type="text" id="postTitle" v-model="postTitle" required>
       <br>
-      <label for="postTags">Post Tags:</label>
+      <label for="postTags">Post tags:</label>
       <br> <input title="comma separated" type="text" id="postTags" v-model="postTags">
       <br>
-      <label for="postContent">Post Content:</label>
+      <label for="postContent">Post content:</label>
       <br> <textarea id="postContent" v-model="postContent" required></textarea>
       
       <br>
-      <label for="postPrivacy">Post Privacy:</label>
+      <label for="postPrivacy">Post privacy:</label>
       <br>
       <input type="radio" id="public" name="postPrivacy" value="public" v-model="postPrivacy">
-      <label for="public">Public - for all users</label>
+      <label for="public">public - for all users</label>
       <br>
       <input type="radio" id="private" name="postPrivacy" value="private" v-model="postPrivacy">
-      <label for="private">Private - for all followers</label>
+      <label for="private">private - for all followers</label>
       <br>
       <input type="radio" id="almost_private" name="postPrivacy" value="almost private" v-model="postPrivacy">
-      <label for="almost_private">Almost Private - for selected followers</label>
+      <label for="almost_private">almost private - for selected followers</label>
       <br>
       <select v-if="postPrivacy === 'almost private'" multiple v-model="selectedFollowers" class="users_list_with_scroll">
         <option v-for="follower in followersList" :key="follower.email" :value="follower.email">{{ follower.first_name }} {{ follower.last_name }} ({{ follower.email }})</option>
       </select>
       
       <div>
-        <br>
         <label for="picture" class="label_file_upload">
           with picture(optional):
           <input type="file" id="picture" accept="image/jpeg, image/png, image/gif" @change="handlePictureChange">
         </label>
       </div>
 
-      <br>
       <button type="submit">Submit</button>
     </form>
     <div v-if="pictureStore.pictureError">{{ pictureStore.pictureError }}</div>
