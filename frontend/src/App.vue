@@ -99,7 +99,7 @@ body {
   color: white; // to fix select multiple different color, which ignores body, facepalm
 }
 
-// fucking headache
+// headache
 
 .users_list_with_scroll {
   background: var(--g_horizontal_white_glass);
@@ -137,10 +137,7 @@ textarea::-webkit-scrollbar-track {
   background-color: none;
 }
 
-// end of fucking headache
-
-
-
+// end of headache
 
 .label_file_upload input[type="file"] {
   /* Hide the default file input */
