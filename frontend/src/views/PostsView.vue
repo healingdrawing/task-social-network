@@ -12,7 +12,7 @@
       <br> <input title="comma separated" type="text" id="postTags" v-model="postTags">
       <br>
       <label for="postContent">Post Content:</label>
-      <br> <textarea id="postContent" v-model="postContent" required class="scroll_style"></textarea>
+      <br> <textarea id="postContent" v-model="postContent" required></textarea>
       
       <br>
       <label for="postPrivacy">Post Privacy:</label>
