@@ -10,45 +10,44 @@
     </h1>
   </div>
   <div>
-    <h3>Sign up</h3>
+    <h2>Sign up</h2>
     
-    <div><hr><button type="button" @click="crap" title="remove in production">Fill Debug / remove later</button><hr></div> <!-- todo: remove later -->
+    <div><button type="button" @click="crap" title="remove in production">Fill Debug / remove later</button></div> <!-- todo: remove later -->
     
     <form @submit.prevent="signup"> 
     <div>
       <label for="email">Email:</label>
-      <input type="email" id="email" v-model="email" required>
+      <br> <input type="email" id="email" v-model="email" required>
     </div>
     <div>
       <label for="password">Password:</label>
-      <input title="6-15 english letters/digits. No spaces" type="password" id="password" v-model="password" minlength="6" maxlength="15" pattern="[a-zA-Z0-9]+" required>
+      <br> <input title="6-15 english letters/digits. No spaces" type="password" id="password" v-model="password" minlength="6" maxlength="15" pattern="[a-zA-Z0-9]+" required>
     </div>
     <div>
       <label for="firstName">First Name:</label>
-      <input title="1-32 characters" type="text" id="firstName" v-model="firstName" minlength="1" maxlength="32" required>
+      <br> <input title="1-32 characters" type="text" id="firstName" v-model="firstName" minlength="1" maxlength="32" required>
     </div>
     <div>
       <label for="lastName">Last Name:</label>
-      <input title="1-32 characters" type="text" id="lastName" v-model="lastName" minlength="1" maxlength="32" required>
+      <br> <input title="1-32 characters" type="text" id="lastName" v-model="lastName" minlength="1" maxlength="32" required>
     </div>
     <div>
       <label for="dob">Date of Birth:</label>
-      <input type="date" id="dob" v-model="dob" required>
+      <br> <input type="date" id="dob" v-model="dob" required>
     </div>
     <div>
-      <label for="avatar">Avatar:</label>
-      <input type="file" id="avatar" accept="image/jpeg, image/png, image/gif" @change="handleAvatarChange">
-      <div class="optional">(optional)</div>
+      <label for="avatar" class="label_file_upload">
+        Avatar(optional):
+        <input type="file" id="avatar" accept="image/jpeg, image/png, image/gif" @change="handleAvatarChange">
+      </label>
     </div>
     <div>
-      <label for="nickname">Nickname:</label>
-      <input title="1-15 characters" type="text" id="nickname" v-model="nickname" maxlength="15">
-      <div class="optional">(optional)</div>
+      <label for="nickname">Nickname(optional):</label>
+      <br> <input title="1-15 characters" type="text" id="nickname" v-model="nickname" maxlength="15">
     </div>
     <div>
-      <label for="aboutMe">About Me:</label>
-      <textarea title="1-300 characters" id="aboutMe" v-model="aboutMe" maxlength="300"></textarea>
-      <div class="optional">(optional)</div>
+      <label for="aboutMe">About Me(optional):</label>
+      <br> <textarea title="1-300 characters" id="aboutMe" v-model="aboutMe" maxlength="300"></textarea>
     </div>
     <button type="submit">Submit</button>
   </form>
