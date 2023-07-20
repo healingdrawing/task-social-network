@@ -89,14 +89,10 @@ nav {
 
 
 body {
-  background-color: var(--pink_bright) !important;
+  background-color: var(--pink_bright);
   background: var(--gradient);
   background-size: 100% 100vh;
-  color: white;
-}
-
-* {
-  color: white; // to fix select multiple different color, which ignores body, facepalm
+  color: var(--yellow_dark);
 }
 
 // headache
@@ -106,7 +102,8 @@ body {
   height: 100px;
   overflow-y: scroll;
   overflow-x: hidden;
-  scrollbar-color: white #fde056 !important;
+  scrollbar-color: white hsla(0, 0%, 100%, 0.5);
+  scrollbar-width: thin;
 }
 
 .users_list_with_scroll::-webkit-scrollbar {
@@ -118,11 +115,13 @@ body {
 }
 
 .users_list_with_scroll::-webkit-scrollbar-track {
-  background-color: #fde056;
+  background-color: hsla(0, 0%, 100%, 0);
 }
 
 textarea {
-  scrollbar-color: white none !important;
+  color: var(--yellow_dark);
+  scrollbar-color: white hsla(0, 0%, 100%, 0);
+  scrollbar-width: thin;
 }
 
 textarea::-webkit-scrollbar {
@@ -134,7 +133,8 @@ textarea::-webkit-scrollbar-thumb {
 }
 
 textarea::-webkit-scrollbar-track {
-  background-color: none;
+  background-color: hsla(0, 0%, 100%, 0);
+  ;
 }
 
 // end of headache
@@ -221,6 +221,7 @@ h6 {
 
 input {
   background: var(--g_horizontal_white_glass);
+  color: var(--yellow_dark);
   border-style: solid;
   border-width: 0 2px;
   border-color: var(--yellow_light);
@@ -230,13 +231,14 @@ input {
 
 input:focus {
   outline: none;
-  border-color: white;
+  border-color: var(--yellow_dark);
   background: var(--pink_dark);
 }
 
 select {
   overflow: hidden;
   border: none;
+  color: var(--yellow_light);
 }
 
 select:focus {
@@ -255,7 +257,7 @@ textarea {
 
 textarea:focus {
   outline: none;
-  border-color: white;
+  border-color: var(--yellow_dark);
   background: var(--pink_dark);
 }
 </style>
