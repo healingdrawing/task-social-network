@@ -19,14 +19,14 @@
     <div v-if="profile.about_me">
       <h3> About Me: </h3> <p> {{ profile.about_me }} </p>
     </div>
+    <div v-if="profile.avatar !== ''">
+      <h3> Avatar: </h3>
+      <p>
+        <br> <img :src="`data:image/jpeg;base64,${profile.avatar}`" alt="avatar" />
+      </p>
+    </div>
   </div>
-  <!-- separately add avatar, perhaps it should be on the right half of screen -->
-  <div v-if="profile && profile.avatar !== ''">
-    <h3> Avatar: </h3>
-    <p>
-      <br> <img :src="`data:image/jpeg;base64,${profile.avatar}`" alt="avatar" />
-    </p>
-  </div>
+  
   <!-- add following list. The other users followed by the user -->
   <h2>Following:</h2>
   <div v-if="followingList.length > 0" class="users_list_with_scroll">
@@ -46,38 +46,38 @@
   <!-- add user posts list. The posts created by the user -->
   <h2>Posts:</h2>
   <div v-for="post in postsList"
-      :key="post.id">
-      <div class="single_div_box">
-        <br>
-        <h3> Post title: </h3> <p> {{ post.title }} </p>
-        <h3> Post tags: </h3> <p> {{ post.categories }} </p>
-        <h3> Post content: </h3> <p> {{ post.content }} </p>
-        <h3> Post privacy: </h3> <p> {{ post.privacy }} </p>
-        <h3> Post created: </h3> <p> {{ post.created_at }} </p>
-        <div v-if="post.picture !== ''">
-          <h3> Post picture: </h3>
-          <p>
-            <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
-          </p>
-        </div>
-        <router-link
-        :Title="post.first_name + '\n' + post.last_name + '\n' + post.email"
-        :to="{ name: 'target' }"
-        @click="piniaManageDataProfile(post.email)">
-          <div class="router_link_box">
-            visit author profile
-          </div>
-        </router-link>
-        <br>
-        <router-link
-        :to="{ name: 'post' }"
-        @click="piniaManageDataPost(post)">
-          <div class="router_link_box">
-            comment post {{ post.id }}
-          </div>
-        </router-link>
+    :key="post.id">
+    <div class="single_div_box">
+      <br>
+      <h3> Post title: </h3> <p> {{ post.title }} </p>
+      <h3> Post tags: </h3> <p> {{ post.categories }} </p>
+      <h3> Post content: </h3> <p> {{ post.content }} </p>
+      <h3> Post privacy: </h3> <p> {{ post.privacy }} </p>
+      <h3> Post created: </h3> <p> {{ post.created_at }} </p>
+      <div v-if="post.picture !== ''">
+        <h3> Post picture: </h3>
+        <p>
+          <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
+        </p>
       </div>
+      <router-link
+      :Title="post.first_name + '\n' + post.last_name + '\n' + post.email"
+      :to="{ name: 'target' }"
+      @click="piniaManageDataProfile(post.email)">
+        <div class="router_link_box">
+          visit author profile
+        </div>
+      </router-link>
+      <br>
+      <router-link
+      :to="{ name: 'post' }"
+      @click="piniaManageDataPost(post)">
+        <div class="router_link_box">
+          comment post {{ post.id }}
+        </div>
+      </router-link>
     </div>
+  </div>
   <!-- ( :to="{ name: 'post' }" ) also can be ( :to="'/post'" ) -->
 
   <!-- add user group posts list. The group posts created by the user in time of group membership -->
