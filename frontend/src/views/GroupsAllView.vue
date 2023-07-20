@@ -1,17 +1,31 @@
 <template>
   <div>
-    <router-link to="/groups">Back to Groups</router-link>
+    <br>
+    <router-link to="/groups">
+      <div class="router_link_box">
+        Back to Groups
+      </div>
+    </router-link>
     <div v-for="group in groups_list" :key="group.id">
-      <hr>
-      <router-link :to="{ name: 'group' }" @click="piniaManageDataGroup(group)">
-        group id: {{ group.id }}
-        <br> group name: {{ group.name }}
-        <br> group description: {{ group.description }}
-        <br> group created: {{ group.created_at }}
-      </router-link>
-      <router-link :to="{ name: 'target' }" @click="piniaManageDataProfile(group.email)">
-        <br> group creator: {{ group.first_name }} {{ group.last_name }} ({{ group.email }})
-      </router-link>
+      <div class="single_div_box">
+        <br>
+        <h3> Group name: </h3> <p> {{ group.name }} </p>
+        <h3> Group description: </h3> <p> {{ group.description }} </p>
+        <h3> Group created: </h3> <p> {{ group.created_at }} </p>
+        <router-link
+          :Title = "group.first_name + '\n' + group.last_name + '\n' + group.email"
+          :to="{ name: 'target' }" @click="piniaManageDataProfile(group.email)">
+          <div class="router_link_box">
+            visit creator profile
+          </div>
+        </router-link>
+        <br>
+        <router-link :to="{ name: 'group' }" @click="piniaManageDataGroup(group)">
+          <div class="router_link_box">
+            visit group {{ group.id }}
+          </div>
+        </router-link>
+      </div>
     </div>
   </div>
 
