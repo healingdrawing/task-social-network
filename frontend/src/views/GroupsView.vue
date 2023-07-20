@@ -15,7 +15,7 @@
         <label>
           Invite followers:
           <br>
-          <select multiple v-model="selectedFollowers">
+          <select multiple v-model="selectedFollowers" class="users_list_with_scroll">
           <option v-for="follower in followersList" :key="follower.email" :value="follower.email">{{ follower.first_name }} {{ follower.last_name }} ({{ follower.email }})</option>
         </select>
         </label>
@@ -24,19 +24,34 @@
       <button type="submit">Create Group</button>
     </form>
 
-    <h2><router-link :to="{ name: 'groups_all' }">Browse All Groups</router-link></h2>
+    
+    <router-link :to="{ name: 'groups_all' }">
+      <div class="router_link_box">
+        Browse All Groups
+      </div>
+    </router-link>
+  
     <h2>Groups With Membership:</h2>
     <div v-for="group in groupsList" :key="group.id">
-      <hr>
-      <router-link :to="{ name: 'group' }" @click="piniaManageDataGroup(group)">
-        group id: {{ group.id }}
-        <br> group name: {{ group.name }}
-        <br> group description: {{ group.description }}
-        <br> group created: {{ group.created_at }}
-      </router-link>
-      <router-link :to="{ name: 'target' }" @click="piniaManageDataProfile(group.email)">
-        <br> group creator: {{ group.first_name }} {{ group.last_name }} ({{ group.email }})
-      </router-link>
+      <div class="single_div_box">
+        <br>
+        <h3> Group name: </h3> <p> {{ group.name }} </p>
+        <h3> Group description: </h3> <p> {{ group.description }} </p>
+        <h3> Group created: </h3> <p> {{ group.created_at }} </p>
+        <router-link
+          :Title = "group.first_name + '\n' + group.last_name + '\n' + group.email"
+          :to="{ name: 'target' }" @click="piniaManageDataProfile(group.email)">
+          <div class="router_link_box">
+            visit creator profile
+          </div>
+        </router-link>
+        <br>
+        <router-link :to="{ name: 'group' }" @click="piniaManageDataGroup(group)">
+          <div class="router_link_box">
+            visit group {{ group.id }}
+          </div>
+        </router-link>
+      </div>
     </div>
   </div>
 </template>
