@@ -1,6 +1,5 @@
 <template>
-  <h1>Profile:</h1>
-  <!-- todo: add button to open BellView.vue this button should be highlighted in case of still present a new, not marked by user as read already, notifications -->
+  <h1>Profile</h1>
   <!-- add checkbox to make profile public -->
   <div>
     <label v-if="profile">
@@ -10,16 +9,21 @@
   </div>
   <!-- add user information -->
   <div v-if="profile">
-    <p>Email: {{ profile.email }}</p>
-    <p>First Name: {{ profile.first_name }}</p>
-    <p>Last Name: {{ profile.last_name }}</p>
-    <p>Date of Birth: {{ profile.dob }}</p>
-    <p>Nickname: {{ profile.nickname }}</p>
-    <p>About Me: {{ profile.about_me }}</p>
+    <h3> Email: </h3> <p> {{ profile.email }} </p>
+    <h3> First Name: </h3> <p> {{ profile.first_name }} </p>
+    <h3> Last Name: </h3> <p> {{ profile.last_name }} </p>
+    <h3> Date of Birth: </h3> <p> {{ profile.dob }} </p>
+    <div v-if="profile.nickname">
+      <h3> Nickname: </h3> <p> {{ profile.nickname }} </p>
+    </div>
+    <div v-if="profile.about_me">
+      <h3> About Me: </h3> <p> {{ profile.about_me }} </p>
+    </div>
   </div>
   <!-- separately add avatar, perhaps it should be on the right half of screen -->
   <div v-if="profile && profile.avatar !== ''">
-    <p>Avatar: 
+    <h3> Avatar: </h3>
+    <p>
       <br> <img :src="`data:image/jpeg;base64,${profile.avatar}`" alt="avatar" />
     </p>
   </div>
