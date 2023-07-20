@@ -95,6 +95,11 @@ body {
   color: var(--yellow_dark);
 }
 
+:focus {
+  outline-offset: -24px;
+  outline-color: rgba(255, 255, 255, 1);
+}
+
 // headache
 
 .users_list_with_scroll {
