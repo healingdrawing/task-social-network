@@ -4,8 +4,7 @@
       <div class="router_link_box">
         Login
       </div>
-    </router-link> |
-    <router-link to="/signup">
+    </router-link>__<router-link to="/signup">
       <div class="router_link_box">
         Signup
       </div>

@@ -42,24 +42,13 @@ const navComponent = computed(() => {
 
 <style lang="scss">
 #app {
-  // font-family: Avenir, Helvetica, Arial, sans-serif;
-  // -webkit-font-smoothing: antialiased;
-  // -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  // color: #2c3e50;
 }
 
 nav {
   padding: 30px;
-
-  // a {
-  //   font-weight: bold;
-  //   color: #2c3e50;
-
-  //   &.router-link-exact-active {
-  //     color: #42b983;
-  //   }
-  // }
 }
 
 /* styles */
@@ -67,7 +56,13 @@ nav {
   --yellow_dark: #fec722;
   --yellow_light: #fde056;
   --pink_dark: #511162;
-  --gradient: linear-gradient(to right, #b74cc0, #bd08e3 30%, #bd08e3 70%, #b74cc0);
+  --pink_bright: #bd08e3;
+  --pink_light: #b74cc0;
+  --gradient: linear-gradient(to right,
+      var(--pink_light),
+      var(--pink_bright) 30%,
+      var(--pink_bright) 70%,
+      var(--pink_light));
   --g_horizontal_white_glass: linear-gradient(to right,
       hsla(0, 0%, 100%, 0.01),
       #ffffff00 30%,
@@ -87,14 +82,14 @@ nav {
 
   --g_active_router_link: linear-gradient(to right,
       white,
-      #511162 20px,
-      #511162 calc(100% - 20px),
+      var(--pink_dark) 20px,
+      var(--pink_dark) calc(100% - 20px),
       white);
 }
 
 
 body {
-  background-color: #bd08e3 !important;
+  background-color: var(--pink_bright) !important;
   background: var(--gradient);
   background-size: 100% 100vh;
   color: white;
@@ -183,7 +178,6 @@ a {
 
 a.router-link-exact-active {
   background: var(--g_active_router_link);
-  // #511162
   // #003FAE
 }
 
@@ -197,7 +191,7 @@ h3,
 h4,
 h5,
 h6 {
-  text-shadow: #511162 0px 0px 10px;
+  text-shadow: var(--pink_dark) 0px 0px 10px;
   color: hsl(295, 71%, 63%);
 }
 

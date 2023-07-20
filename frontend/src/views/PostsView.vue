@@ -12,7 +12,7 @@
       <br> <input title="comma separated" type="text" id="postTags" v-model="postTags">
       <br>
       <label for="postContent">Post Content:</label>
-      <br> <textarea id="postContent" v-model="postContent" required></textarea>
+      <br> <textarea id="postContent" v-model="postContent" required class="scroll_style"></textarea>
       
       <br>
       <label for="postPrivacy">Post Privacy:</label>
@@ -26,7 +26,7 @@
       <input type="radio" id="almost_private" name="postPrivacy" value="almost private" v-model="postPrivacy">
       <label for="almost_private">Almost Private - for selected followers</label>
       <br>
-      <select v-if="postPrivacy === 'almost private'" multiple v-model="selectedFollowers">
+      <select v-if="postPrivacy === 'almost private'" multiple v-model="selectedFollowers" class="users_list_with_scroll">
         <option v-for="follower in followersList" :key="follower.email" :value="follower.email">{{ follower.first_name }} {{ follower.last_name }} ({{ follower.email }})</option>
       </select>
       
