@@ -1,13 +1,18 @@
 <template>
   <div>
-    <router-link to="/group">Back to Group</router-link>
+    <br>
+    <router-link to="/group">
+      <div class="router_link_box">
+        Back to Group
+      </div>
+    </router-link>
     <br>
     <div v-if="followersList && followersList.length > 0">
-      <br>
+      <br> <br>
       <label>
         Invite followers:
         <br>
-        <select multiple v-model="selectedFollowers">
+        <select multiple v-model="selectedFollowers" class="users_list_with_scroll">
           <option v-for="follower in followersList" :key="follower.email" :value="follower.email">{{ follower.first_name }} {{ follower.last_name }} ({{ follower.email }})</option>
         </select>
       </label>
