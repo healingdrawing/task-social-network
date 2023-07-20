@@ -45,16 +45,19 @@
         </div>
         <h2>List of Group Events: </h2>
         <div v-for="event in events_list" :key="event.id">
-          <hr>
-          <p>{{ event.date }}</p>
-          <h3> {{ event.title }} </h3>
-          <p>{{ event.description }}</p>
-          <div v-if="event.decision === 'waiting'">
-            <button @click="going_yes(event)" >going</button>
-            <button @click="going_no(event)" >not going</button>
-          </div>
-          <div v-else>
-            {{ event.decision }}
+          <div class="single_div_box">
+            <br>
+            <h3> Event title: </h3> <p> {{ event.title }} </p>
+            <h3> Event description: </h3> <p> {{ event.description }} </p>
+            <h3> Event date: </h3> <p>{{ event.date }}</p>
+            <h3> Event decision: </h3>
+            <div v-if="event.decision === 'waiting'">
+              <button @click="going_yes(event)" >going</button>
+              <button @click="going_no(event)" >not going</button>
+            </div>
+            <div v-else>
+              {{ event.decision }}
+            </div>
           </div>
         </div>
       </div>
