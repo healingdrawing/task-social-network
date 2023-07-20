@@ -1,39 +1,45 @@
 <template>
-  <router-link to="/group_posts">Back to Group Posts</router-link>
+  <br>
+  <router-link to="/group_posts">
+    <div class="router_link_box">
+      Back to Group Posts
+    </div>  
+  </router-link>
   <div>
-    <h1>Group Post:</h1>
-    <div>
-      <p>Group Post id: {{ group_post.id }}</p>
-      <p>Group Post title: {{ group_post.title }}</p>
-      <p>Group Post tags: {{ group_post.categories }}</p>
-      <p>Group Post content: {{ group_post.content }}</p>
-      <p>Group Post created: {{ group_post.created_at }}</p>
+    <h1>Group Post</h1>
+    <div class="single_div_box">
+      <br>
+      <h3>Group Post title: </h3> <p> {{ group_post.title }} </p>
+      <h3>Group Post tags: </h3> <p> {{ group_post.categories }} </p>
+      <h3>Group Post content: </h3> <p> {{ group_post.content }} </p>
+      <h3>Group Post created: </h3> <p> {{ group_post.created_at }} </p>
       <div v-if="group_post.picture !== ''">
-        <p>Group Post picture: 
-          <br> <img :src="`data:image/jpeg;base64,${group_post.picture}`" alt="picture" />
+        <h3>Group Post picture: </h3>
+        <p>
+          <img :src="`data:image/jpeg;base64,${group_post.picture}`" alt="picture" />
         </p>
       </div>
       <router-link
+      :Title="group_post.first_name + '\n' + group_post.last_name + '\n' + group_post.email"
       :to="{ name: 'target' }"
       @click="piniaManageDataProfile(group_post.email)">
-        <h3>
-          Author: {{ group_post.first_name }}
-          {{ group_post.last_name }} 
-          ({{ group_post.email }})
-        </h3>
+        <div class="router_link_box">
+          visit author profile
+        </div>
       </router-link>
     </div>
   </div>
   <div>
     <!-- add new comment using text area -->
-    <hr>
     <div>
       <form @submit.prevent="addComment">
         <label for="commentContent"> Create Comment </label>
         <br> <textarea id="commentContent" v-model="commentContent" required></textarea>
         <div>
-          <label for="picture"> with picture(optional): </label>
-          <br> <input type="file" id="picture" accept="image/jpeg, image/png, image/gif" @change="handlePictureChange">
+          <label for="picture" class="label_file_upload">
+            with picture(optional):
+            <input type="file" id="picture" accept="image/jpeg, image/png, image/gif" @change="handlePictureChange">
+          </label>
         </div>
         <br>
         <button type="submit">Submit</button>
@@ -44,22 +50,26 @@
     <h2>Comments:</h2>
     <div v-for="comment in commentsList"
       :key="comment.created_at">
-      <hr>
-      <p>Comment content: {{ comment.content }}</p>
-      <div v-if="comment.picture !== ''">
-        <p>Comment picture: 
-          <br> <img :src="`data:image/jpeg;base64,${comment.picture}`" alt="picture" />
-        </p>
+      <br v-if="comment.content.trim() !== '' || comment.picture !== ''">
+      <div v-if="comment.content.trim() !== '' || comment.picture !== ''" class="single_div_box">
+        <div v-if="comment.content.trim() !== ''">
+          <h3> Comment content: </h3> <p> {{ comment.content }}</p>
+        </div>
+        <div v-if="comment.picture !== ''">
+          <h3> Comment picture: </h3>
+          <p>
+            <br> <img :src="`data:image/jpeg;base64,${comment.picture}`" alt="picture" />
+          </p>
+        </div>
+        <router-link
+        :Title="comment.first_name + '\n' + comment.last_name + '\n' + comment.email"
+        :to="{ name: 'target' }"
+        @click="piniaManageDataProfile(comment.email)">
+          <div class="router_link_box">
+            visit author profile
+          </div>
+        </router-link>
       </div>
-      <router-link
-      :to="{ name: 'target' }"
-      @click="piniaManageDataProfile(comment.email)">
-      <h6>Comment Author:
-        {{ comment.first_name }} 
-        {{ comment.last_name }} 
-        ({{ comment.email }})
-      </h6>
-      </router-link>
     </div>
   </div>
 </template>

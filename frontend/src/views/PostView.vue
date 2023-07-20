@@ -2,27 +2,27 @@
   <div>
     <h1>Post</h1>
     <div class="single_div_box">
-        <br>
-        <h3> Post title: </h3> <p> {{ post.title }} </p>
-        <h3> Post tags: </h3> <p> {{ post.categories }} </p>
-        <h3> Post content: </h3> <p> {{ post.content }} </p>
-        <h3> Post privacy: </h3> <p> {{ post.privacy }} </p>
-        <h3> Post created: </h3> <p> {{ post.created_at }} </p>
-        <div v-if="post.picture !== ''">
-          <h3> Post picture: </h3>
-          <p>
-            <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
-          </p>
-        </div>
-        <router-link
-        :Title="post.first_name + '\n' + post.last_name + '\n' + post.email"
-        :to="{ name: 'target' }"
-        @click="piniaManageDataProfile(post.email)">
-          <div class="router_link_box">
-            visit author profile
-          </div>
-        </router-link>
+      <br>
+      <h3> Post title: </h3> <p> {{ post.title }} </p>
+      <h3> Post tags: </h3> <p> {{ post.categories }} </p>
+      <h3> Post content: </h3> <p> {{ post.content }} </p>
+      <h3> Post privacy: </h3> <p> {{ post.privacy }} </p>
+      <h3> Post created: </h3> <p> {{ post.created_at }} </p>
+      <div v-if="post.picture !== ''">
+        <h3> Post picture: </h3>
+        <p>
+          <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
+        </p>
       </div>
+      <router-link
+      :Title="post.first_name + '\n' + post.last_name + '\n' + post.email"
+      :to="{ name: 'target' }"
+      @click="piniaManageDataProfile(post.email)">
+        <div class="router_link_box">
+          visit author profile
+        </div>
+      </router-link>
+    </div>
   </div>
   <div>
     <!-- add new comment using text area -->
