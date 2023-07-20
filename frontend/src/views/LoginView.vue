@@ -4,7 +4,7 @@
     <h1> Welcome Your Majesty!!!</h1>
   </div>
   <div>
-    <h3>Log in</h3>
+    <h2>Log in</h2>
 
     <div><button type="button" @click="crap" title="remove in production">Fill Debug / remove later</button></div> <!-- todo: remove later -->
 
