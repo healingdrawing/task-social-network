@@ -92,7 +92,7 @@ const routes: Array<RouteRecordRaw> = [
 const router = createRouter({
   history: createWebHashHistory(),
   routes,
-  scrollBehavior(/*to, from, savedPosition*/) { //todo: BE CAREFUL. scrollBehavior(to, from, savedPosition) { - raise warning(NOT DEADLY). To mute this shit of vscode, incoming parameters was removed. This can produce weird behavior if you will try to use router with scrollBehavior later (according to perplexity message).
+  scrollBehavior(/*to, from, savedPosition*/) { //todo: BE CAREFUL. scrollBehavior(to, from, savedPosition) { - raise warning(NOT DEADLY). To mute this shit of vscode, incoming parameters was removed/commented. This can produce weird behavior if you will try to use router with scrollBehavior later (according to perplexity message).
     return { top: 0 };//scroll to top in time of navigation between routes
   },
 })

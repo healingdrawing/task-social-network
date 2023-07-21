@@ -1,11 +1,13 @@
 <template>
   <div>
     <h1>Chats:</h1>
-    <div class="chats-list">
+    <div class=" users_list_with_scroll chats_list">
       <div v-for="user in users_list" :key="user.email">
-        <hr>
+        <br>
         <router-link :to="{ name: 'chat' }" @click="piniaManageData(user)">
-          {{ user.first_name }} {{ user.last_name }} ({{ user.email }})
+          <div class="router_link_box">
+            {{ user.first_name }} {{ user.last_name }} ({{ user.email }})
+          </div>
         </router-link>
       </div>
     </div>
@@ -13,7 +15,7 @@
 </template>
 
 <style>
-.chats-list {
+.chats_list {
   height: 300px;
   /* set the height of the list */
   overflow-y: auto;
@@ -52,7 +54,9 @@ function update_private_chat_users_list() {
   })
 }
 
-onMounted(() => {
+onMounted(async () => {
+  wss.refresh_websocket()
+  await wss.waitForConnection();
   update_private_chat_users_list()
 })
 </script>

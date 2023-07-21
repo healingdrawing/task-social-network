@@ -4,18 +4,18 @@
     <h1> Welcome Your Majesty!!!</h1>
   </div>
   <div>
-    <h3>Log in</h3>
+    <h2>Log in</h2>
 
-    <div><hr><button type="button" @click="crap" title="remove in production">Fill Debug / remove later</button><hr></div> <!-- todo: remove later -->
+    <div><button type="button" @click="crap" title="remove in production">Fill Debug / remove later</button></div> <!-- todo: remove later -->
 
     <form @submit.prevent="login"> <!-- login means the function name will be call after the default behavior was prevented -->
       <div>
         <label for="email">Email:</label>
-        <input type="email" id="email" v-model="email" required>
+        <br> <input type="email" id="email" v-model="email" required>
       </div>
       <div>
         <label for="password">Password:</label>
-        <input type="password" id="password" v-model="password" required>
+        <br> <input type="password" id="password" v-model="password" required>
       </div>
       <button type="submit">Submit</button>
     </form>
@@ -87,12 +87,6 @@ const login = async () => {
   } finally {
     console.log("== login == 'finally' fired");
   }
-
-
-  /* todo: also manual open any routes from browser url window,
-  should logout the user, and redirect to login page again
-  to prevent any not desirable experimenting, and decrease
-  chances of pretension in audit process, from experimentators */
 
 }
 

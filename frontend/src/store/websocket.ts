@@ -9,17 +9,19 @@ export const useWebSocketStore = defineStore({
   state: () => ({
     socket: null as WebSocket | null,
     messages: [] as WSMessage[],
-    private_chat_user_id: 0,
-    group_chat_id: 0,
+    private_chat_user_id: sessionStorage.getItem("private_chat_user_id") !== null ? parseInt(sessionStorage.getItem("private_chat_user_id")!) : -1,
+    group_chat_id: sessionStorage.getItem("group_chat_id") !== null ? parseInt(sessionStorage.getItem("group_chat_id")!) : -1,
   }),
   actions: {
     /**for internal usage of send message for private chat */
     set_private_chat_user_id(id: number) {
       this.private_chat_user_id = id;
+      sessionStorage.setItem("private_chat_user_id", id.toString());
     },
     /**for internal usage of send message for group chat */
     set_group_chat_id(id: number) {
       this.group_chat_id = id;
+      sessionStorage.setItem("group_chat_id", id.toString());
     },
 
     send_private_chat_message(message: string, uuid: string) {
@@ -46,6 +48,33 @@ export const useWebSocketStore = defineStore({
       this.sendMessage(wsMessage);
     },
 
+    waitForConnection() {
+      return new Promise<void>((resolve) => {
+        const interval = setInterval(() => {
+          if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+            console.log('=== Connection is established ===')
+            clearInterval(interval);
+            resolve();
+          }
+        }, 100);
+      });
+    },
+
+    refresh_websocket() {
+      console.log("=== refreshing websocket ===");
+      if (this.socket) {
+        return;
+      }
+      this.killThemAll();
+      const uuid = sessionStorage.getItem('UUID');
+      console.log('=== uuid inside refresh_websocket:\n' + uuid);
+      if (uuid) {
+        this.connect(uuid);
+      } else {
+        alert('uuid is null');
+        router.push('/login');
+      }
+    },
     connect(uuid: string) {
       this.socket = new WebSocket(`ws://localhost:8080/ws?uuid=${uuid}`);
 
@@ -78,6 +107,7 @@ export const useWebSocketStore = defineStore({
       this.socket?.close();
       this.socket = null;
       console.log('socket', this.socket);
+      this.killThemAll();
     },
 
     /**clearMessagesWhenNewMessageArrives removes all the messages of type = message.Type, before unshift new message, to prevent duplication of messages in getters ( -> screen/view) */
@@ -133,9 +163,8 @@ export const useWebSocketStore = defineStore({
         websocket = null;
         console.log('forEach websocket', websocket);
       });
-      // websockets.length = 0; // it is const so "= []" raises error
+      websockets.length = 0; // it is const so "= []" raises error.
       this.facepalm();
-      router.push({ name: 'login' });
     },
 
   },

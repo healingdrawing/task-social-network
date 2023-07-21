@@ -10,10 +10,10 @@ export const useChatStore = defineStore({
   state: (): ChatState => ({
     // Define your state properties here
     target_user: {
-      user_id: 0,
-      email: '',
-      first_name: '',
-      last_name: '',
+      user_id: sessionStorage.getItem("chat_target_user_id") !== null ? parseInt(sessionStorage.getItem("chat_target_user_id")!) : -1,
+      email: sessionStorage.getItem("chat_target_user_email") || "",
+      first_name: sessionStorage.getItem("chat_target_user_first_name") || "",
+      last_name: sessionStorage.getItem("chat_target_user_last_name") || "",
     }
   }),
   getters: {
@@ -22,6 +22,12 @@ export const useChatStore = defineStore({
   },
   actions: {
     // Define your actions here
-    set_target_user(user: UserForChatList) { this.target_user = user; },
+    set_target_user(user: UserForChatList) {
+      this.target_user = user;
+      sessionStorage.setItem("chat_target_user_id", user.user_id.toString());
+      sessionStorage.setItem("chat_target_user_email", user.email);
+      sessionStorage.setItem("chat_target_user_first_name", user.first_name);
+      sessionStorage.setItem("chat_target_user_last_name", user.last_name);
+    },
   },
 });

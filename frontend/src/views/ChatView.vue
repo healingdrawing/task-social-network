@@ -6,19 +6,21 @@
     </h3>
     <h1> Let's get it on! </h1>
     <div>
-      <textarea v-model="messageText" @keydown.enter.ctrl.prevent="sendMessage"></textarea>
+      <textarea v-model="messageText" @keydown.enter.ctrl.prevent="sendMessage" required></textarea>
       <br>
       <button @click="sendMessage">Send</button>
     </div>
     <div class="messages">
-      <div class="message" v-for="message in messages_list" :key="message.created_at">
-        <hr>
+      <div class="message single_div_box " v-for="message in messages_list" :key="message.created_at">
+        <br>
         <router-link
           :to="{ name: 'target' }"
-          @click="piniaManageData(message)">            
-          {{ message.first_name }} {{ message.last_name }} ({{ message.email }})
+          @click="piniaManageData(message)">
+          <div class="router_link_box">
+            {{ message.first_name }} {{ message.last_name }} ({{ message.email }})
+          </div>
         </router-link>
-        <br>
+        <br> <br> <br>
         {{ message.content }}
       </div>
     </div>
@@ -28,8 +30,6 @@
 <style>
 .message {
   white-space: pre-wrap;
-  overflow: auto;
-  /* add a vertical scrollbar when content exceeds height */
 }
 </style>
 
@@ -67,7 +67,9 @@ function piniaManageData(message: PrivateChatMessage) {
   profileStore.setTargetUserEmail(message.email);
 }
 
-onMounted(() => {
+onMounted(async () => {
+  wss.refresh_websocket()
+  await wss.waitForConnection();
   wss.set_group_chat_id(0)
   wss.set_private_chat_user_id(chat.user_id)
 });

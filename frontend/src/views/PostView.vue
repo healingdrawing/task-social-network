@@ -1,41 +1,42 @@
 <template>
   <div>
-    <h1>Post:</h1>
-    <div>
-      <p>Post id: {{ post.id }}</p>
-      <p>Post title: {{ post.title }}</p>
-      <p>Post tags: {{ post.categories }}</p>
-      <p>Post content: {{ post.content }}</p>
-      <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
-      <p>Post created: {{ post.created_at }}</p>
+    <h1>Post</h1>
+    <div class="single_div_box">
+      <br>
+      <h3> Post title: </h3> <p> {{ post.title }} </p>
+      <h3> Post tags: </h3> <p> {{ post.categories }} </p>
+      <h3> Post content: </h3> <p> {{ post.content }} </p>
+      <h3> Post privacy: </h3> <p> {{ post.privacy }} </p>
+      <h3> Post created: </h3> <p> {{ post.created_at }} </p>
       <div v-if="post.picture !== ''">
-        <p>Post picture: 
-          <br> <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
+        <h3> Post picture: </h3>
+        <p>
+          <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
         </p>
       </div>
       <router-link
+      :Title="post.first_name + '\n' + post.last_name + '\n' + post.email"
       :to="{ name: 'target' }"
       @click="piniaManageDataProfile(post.email)">
-        <h3>
-          Author: {{ post.first_name }}
-          {{ post.last_name }} 
-          ({{ post.email }})
-        </h3>
+        <div class="router_link_box">
+          visit author profile
+        </div>
       </router-link>
     </div>
   </div>
   <div>
     <!-- add new comment using text area -->
-    <hr>
     <div>
       <form @submit.prevent="addComment">
         <label for="commentContent"> Create Comment </label>
         <br> <textarea id="commentContent" v-model="commentContent" required></textarea>
         <div>
-          <label for="picture"> with picture(optional): </label>
-          <br> <input type="file" id="picture" accept="image/jpeg, image/png, image/gif" @change="handlePictureChange">
+          <label for="picture" class="label_file_upload">
+            with picture(optional):
+            <input type="file" id="picture" accept="image/jpeg, image/png, image/gif" @change="handlePictureChange">
+          </label>
         </div>
-        <br>
+        
         <button type="submit">Submit</button>
       </form>
       <div v-if="pictureStore.pictureError">{{ pictureStore.pictureError }}</div>
@@ -44,22 +45,26 @@
     <h2>Comments:</h2>
     <div v-for="comment in commentsList"
       :key="comment.created_at">
-      <hr>
-      <p>Comment content: {{ comment.content }}</p>
-      <div v-if="comment.picture !== ''">
-        <p>Comment picture: 
-          <br> <img :src="`data:image/jpeg;base64,${comment.picture}`" alt="picture" />
-        </p>
+      <br v-if="comment.content.trim() !== '' || comment.picture !== ''">
+      <div v-if="comment.content.trim() !== '' || comment.picture !== ''" class="single_div_box">
+        <div v-if="comment.content.trim() !== ''">
+          <h3> Comment content: </h3> <p> {{ comment.content }}</p>
+        </div>
+        <div v-if="comment.picture !== ''">
+          <h3> Comment picture: </h3>
+          <p>
+            <br> <img :src="`data:image/jpeg;base64,${comment.picture}`" alt="picture" />
+          </p>
+        </div>
+        <router-link
+        :Title="comment.first_name + '\n' + comment.last_name + '\n' + comment.email"
+        :to="{ name: 'target' }"
+        @click="piniaManageDataProfile(comment.email)">
+          <div class="router_link_box">
+            visit author profile
+          </div>
+        </router-link>
       </div>
-      <router-link
-      :to="{ name: 'target' }"
-      @click="piniaManageDataProfile(comment.email)">
-      <h6>Comment Author:
-        {{ comment.first_name }} 
-        {{ comment.last_name }} 
-        ({{ comment.email }})
-      </h6>
-      </router-link>
     </div>
   </div>
 </template>
@@ -126,7 +131,9 @@ function addComment() {
 
 }
 
-onMounted(() => {
+onMounted(async () => {
+  wss.refresh_websocket()
+  await wss.waitForConnection();
   updatePostComments();
 });
 

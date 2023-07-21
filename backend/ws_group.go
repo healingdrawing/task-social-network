@@ -459,7 +459,7 @@ func wsGroupInvitesSubmitHandler(conn *websocket.Conn, messageData map[string]in
 		user_ids = append(user_ids, id)
 	}
 
-	// todo: CHECK THIS BULK APPROACH. if it fails, remove and use for loop, which is slower
+	// todo: BULK APPROACH. Just information marker
 	// Prepare the SQL statement for bulk insertion
 	bulkInsertStmt, err := db.Prepare("INSERT INTO group_invited_users (user_id, group_id, inviter_id, created_at) VALUES (?, ?, ?, ?)")
 	if err != nil {

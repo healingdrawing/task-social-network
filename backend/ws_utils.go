@@ -100,7 +100,6 @@ func wsCreateResponseMessage(messageType WSMT, data interface{}) ([]byte, error)
 	return jsonData, nil
 }
 
-// todo: CHECK IT! old version refactored, raw code
 // wsRecover recover from panic and send a json err response over websocket
 func wsRecover(messageData map[string]interface{}) {
 

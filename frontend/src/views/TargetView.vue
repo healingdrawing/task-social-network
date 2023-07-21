@@ -1,5 +1,8 @@
 <template>
-  <h1>Target Profile:</h1>
+  <h1>Target Profile</h1>
+  <div v-if="profile">
+    
+  </div>  
 
   <div v-if="visitor">
     <button @click="handleFollowing()">{{ button_text }}</button>
@@ -8,30 +11,34 @@
  
   <!-- add user information -->
   <div v-if="profile">
-    <p>Email: {{ profile.email }}</p>
-    <p>First Name: {{ profile.first_name }}</p>
-    <p>Last Name: {{ profile.last_name }}</p>
+    <h3> Privacy: </h3> <p> {{ profile.public ? "public" : "private" }} </p>
+    <h3> Email: </h3> <p> {{ profile.email }} </p>
+    <h3> First Name: </h3> <p> {{ profile.first_name }} </p>
+    <h3> Last Name: </h3> <p> {{ profile.last_name }} </p>
   </div>
   <div v-else>no profile</div>
 
   <div v-if="profile && (profile.public ||
     visitor && visitor.status == VisitorStatus.FOLLOWER ||
     visitor && visitor.status == VisitorStatus.OWNER)">
-    <div v-if="profile">
-      <p>Date of Birth: {{ profile.dob }}</p>
-      <p>Nickname: {{ profile.nickname }}</p>
-      <p>About Me: {{ profile.about_me }}</p>
-      <p>{{ profile.public ? "Public" : "Private" }}</p>
+    
+    <h3> Date of Birth: </h3> <p> {{ profile.dob }} </p>
+    <div v-if="profile.nickname">
+      <h3> Nickname: </h3> <p> {{ profile.nickname }} </p>
     </div>
-    <!-- separately add avatar, perhaps it should be on the right half of screen -->
-    <div v-if="profile && profile.avatar !== ''">
-      <p>Avatar:
+    <div v-if="profile.about_me">
+      <h3> About Me: </h3> <p> {{ profile.about_me }} </p>
+    </div>
+    <div v-if="profile.avatar !== ''">
+      <h3> Avatar: </h3>
+      <p>
         <br> <img :src="`data:image/jpeg;base64,${profile.avatar}`" alt="avatar" />
       </p>
-    </div>
+    </div>  
+    
     <!-- add following list. The other users followed by the user -->
     <h2>Following:</h2>
-    <div v-if="followingList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;">
+    <div v-if="followingList.length > 0" class="users_list_with_scroll" style="height: 100px; overflow-y: scroll;">
       <!-- {{ followingList.length }} <br> {{ followingList }} -->
       <div v-for="user in followingList" :key="user.email">{{ `${user.first_name} ${user.last_name} (${user.email})` }}</div>
     </div>
@@ -39,7 +46,7 @@
 
     <!-- add followers list. The other users following the user -->
     <h2>Followers:</h2>
-    <div v-if="followersList.length > 0" class="user-list" style="height: 100px; overflow-y: scroll;">
+    <div v-if="followersList.length > 0" class="users_list_with_scroll" style="height: 100px; overflow-y: scroll;">
       <!-- {{ followersList.length }} <br> {{ followersList }} -->
       <div v-for="user in followersList" :key="user.email">{{ `${user.first_name} ${user.last_name} (${user.email})` }}</div>
     </div>
@@ -47,64 +54,87 @@
 
     <!-- add user posts list. The posts created by the user -->
     <h2>Posts:</h2>
-    <div v-for="post in postsList"
-      :key="post.id">
-      <hr>
-      <router-link
-        :to="{ name: 'post' }"
-        @click="piniaManageDataPost(post)">
-        <p>Post id: {{ post.id }}</p>
-        <p>Post title: {{ post.title }}</p>
-        <p>Post tags: {{ post.categories }}</p>
-        <p>Post content: {{ post.content }}</p>
-        <p>Post privacy: {{ post.privacy }}</p><!-- todo: no need to display -->
-        <p>Post created: {{ post.created_at }}</p>
-        <div v-if="post.picture !== ''">
-          <p>Post picture: 
-            <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
-          </p>
+    <div v-if="postsList.length > 0">
+      <div v-for="post in postsList"
+        :key="post.id">
+        <div class="single_div_box">
+          <br>
+          <h3> Post title: </h3> <p> {{ post.title }} </p>
+          <h3> Post tags: </h3> <p> {{ post.categories }} </p>
+          <h3> Post content: </h3> <p> {{ post.content }} </p>
+          <h3> Post privacy: </h3> <p> {{ post.privacy }} </p>
+          <h3> Post created: </h3> <p> {{ post.created_at }} </p>
+          <div v-if="post.picture !== ''">
+            <h3> Post picture: </h3>
+            <p>
+              <img :src="`data:image/jpeg;base64,${post.picture}`" alt="picture" />
+            </p>
+          </div>
+          <router-link
+          :Title="post.first_name + '\n' + post.last_name + '\n' + post.email"
+          :to="{ name: 'target' }"
+          @click="piniaManageDataProfile(post.email)">
+            <div class="router_link_box">
+              visit author profile
+            </div>
+          </router-link>
+          <br>
+          <router-link
+          :to="{ name: 'post' }"
+          @click="piniaManageDataPost(post)">
+            <div class="router_link_box">
+              comment post {{ post.id }}
+            </div>
+          </router-link>
         </div>
-      </router-link>
-      <router-link
-      :to="{ name: 'target' }"
-      @click="piniaManageDataProfile(post.email)">
-        <h3>
-          Author: {{ post.first_name }}
-          {{ post.last_name }} 
-          ({{ post.email }})
-        </h3>
-      </router-link>
+      </div>
     </div>
+    <div v-else>No posts</div>
     <!-- ( :to="{ name: 'post' }" ) also can be ( :to="'/post'" ) -->
 
     <!-- add user group posts list. The group posts created by the user in time of group membership -->
     <h2>Group Posts:</h2>
-    <div v-for="group_post in groupPostsList"
-      :key="group_post.id">
-      <hr>
-      <router-link
-        :to="{ name: 'group' }"
-        @click="piniaManageDataGroupPost(group_post)">
-        <p>Group id: {{ group_post.group_id }}</p>
-        <p>Group name: {{ group_post.group_name }}</p>
-        <p>Group description: {{ group_post.group_description }}</p>
-      </router-link>
-      <p>Group Post id: {{ group_post.id }}</p>
-      <p>Group Post title: {{ group_post.title }}</p>
-      <p>Group Post tags: {{ group_post.categories }}</p>
-      <p>Group Post content: {{ group_post.content }}</p>
-      <p>Group Post created: {{ group_post.created_at }}</p>
-      <div v-if="group_post.picture !== ''">
-        <p>Group Post picture: 
-          <br> <img :src="`data:image/jpeg;base64,${group_post.picture}`" alt="picture" />
-        </p>
+    <div v-if="groupPostsList.length > 0">
+      <div v-for="group_post in groupPostsList"
+        :key="group_post.id">
+
+        <div class="single_div_box">
+
+          <h3> Group Post id: </h3> <p> {{ group_post.id }} </p>
+          <h3> Group Post title: </h3> <p> {{ group_post.title }} </p>
+          <h3> Group Post tags: </h3> <p> {{ group_post.categories }} </p>
+          <h3> Group Post content: </h3> <p> {{ group_post.content }} </p>
+          <h3> Group Post created: </h3> <p> {{ group_post.created_at }} </p>
+          <div v-if="group_post.picture !== ''">
+            <h3> Group Post picture: </h3>
+            <p>
+              <br> <img :src="`data:image/jpeg;base64,${group_post.picture}`" alt="picture" />
+            </p>
+          </div>
+          
+          <router-link
+          :Title="group_post.first_name + '\n' + group_post.last_name + '\n' + group_post.email"
+          :to="{ name: 'target' }"
+          @click="piniaManageDataProfile(group_post.email)">
+            <div class="router_link_box">
+              visit author profile
+            </div>
+          </router-link>
+          <br>
+          <router-link
+          :Title="group_post.group_name"
+          :to="{ name: 'group' }"
+          @click="piniaManageDataGroupPost(group_post)">
+            <div class="router_link_box">
+              visit group {{ group_post.group_id }}
+            </div>
+          </router-link>
+
+        </div>
+        
       </div>
-      <h3>
-        Author: {{ group_post.first_name }}
-        {{ group_post.last_name }} 
-        ({{ group_post.email }})
-      </h3>
     </div>
+    <div v-else>No group posts</div>
 
   </div>
 </template>
@@ -217,7 +247,7 @@ const postsList = computed(() => wss.postsList);
 /** updatePostsList updates the posts list from the server, able to see for the visitor */
 function updatePostsList() {
   wss.sendMessage({
-    type: WSMessageType.USER_POSTS_LIST, // todo: do not forget filter by able to see
+    type: WSMessageType.USER_POSTS_LIST,
     data: {
       user_uuid: UUIDStore.getUUID,
       target_email: profileStore.getTargetUserEmail,
@@ -254,7 +284,9 @@ const piniaManageDataGroupPost = (group_post: GroupPost) => {
 }
 
 
-onMounted(() => {
+onMounted(async () => {
+  wss.refresh_websocket()
+  await wss.waitForConnection();
   updateVisitorStatus();
   updateProfile();
   updateFollowingList();

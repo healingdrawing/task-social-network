@@ -93,8 +93,6 @@ func wsPostSubmitHandler(conn *websocket.Conn, messageData map[string]interface{
 		postPicture = pictureData
 	}
 
-	// todo: here is no default image addition as it is on signup avatar section
-
 	user_id, err := get_user_id_by_uuid(data.User_uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())

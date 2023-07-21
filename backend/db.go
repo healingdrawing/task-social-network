@@ -107,7 +107,6 @@ func dbInit() {
 	}
 }
 
-// todo: CHECK IT! getPostsAbleToSee cybermonster is not checked properly
 func statementsCreation() {
 	for key, query := range map[string]string{
 		"addUser":            `INSERT INTO users (email, password, first_name, last_name, dob, avatar, nickname, about_me, privacy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,

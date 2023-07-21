@@ -7,7 +7,7 @@ After run project, open the browser on `http://localhost:3000/`
 To show two docker containers inside docker desktop or terminal, one for backend, and one for frontend (docker desktop must be started before), inside root folder of repository where `run.sh` placed, using terminal execute command:
 - `./run.sh`  
 to show containers in terminal:  
-- `docker ps`  
+- `docker ps -a`  
 
 ## dev run  
 

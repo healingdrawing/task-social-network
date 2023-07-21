@@ -59,12 +59,17 @@ func reader(uuid string, conn *websocket.Conn) {
 
 	client := &Client{CONN: conn, USER_ID: user_id}
 	clients.Store(uuid, client)
-	defer clients.Delete(uuid)
-	defer conn.Close()
+	// defer clients.Delete(uuid)
+	// defer conn.Close()
 	for {
 		messageType, incoming, err := conn.ReadMessage()
+		log.Println("=== inside reader ===")
 		if err != nil {
-			log.Println(err)
+			log.Println("=== error in reader ===")
+			log.Println("messageType, incoming, err := conn.ReadMessage()")
+			log.Println("messageType", messageType)
+			log.Println("incoming", incoming)
+			log.Println("err", err)
 			log.Println("=== error in reader , before delete and close ws ===")
 			return
 		}
@@ -177,7 +182,7 @@ func reader(uuid string, conn *websocket.Conn) {
 			case string(WS_USER_GROUP_VISITOR_STATUS):
 				wsUserGroupVisitorStatusHandler(conn, data.Data)
 
-				// todo: looks like this is not used, check and delete if so
+				// todo: looks like this is not used(managed by http)), check and delete if so
 			case "login":
 				log.Println("==================LOGIN FIRED==================")
 				clients.Store(conn, data.Data["username"])
@@ -234,7 +239,7 @@ func sendStatus(username string, online bool) {
 	}
 	clients.Range(func(key, value interface{}) bool {
 		if value.(string) != "" {
-			err = key.(*websocket.Conn).WriteMessage(websocket.TextMessage, output) // todo: CHECK IT! err was added, not sure it is correct
+			err = key.(*websocket.Conn).WriteMessage(websocket.TextMessage, output)
 			if err != nil {
 				log.Println(err)
 			}

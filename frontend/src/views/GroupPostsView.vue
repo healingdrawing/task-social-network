@@ -1,26 +1,33 @@
 <template>
-  <router-link to="/group">Back to Group</router-link>
+  <br>
+  <router-link to="/group">
+    <div class="router_link_box">
+      Back to Group
+    </div>
+  </router-link>
+  <br>
   <div>
     <h1>Create Group Post</h1>
 
-    <div><hr><button type="button" @click="crap" title="remove in production">Fill Debug / remove later</button><hr></div> <!-- todo: remove later -->
+    <div><button type="button" @click="crap" title="remove in production">Fill Debug / remove later</button></div> <!-- todo: remove later -->
 
     <form @submit.prevent="addGroupPost">
-      <label for="postTitle">Group Post Title:</label>
+      <label for="postTitle">Group Post title:</label>
       <br> <input type="text" id="postTitle" v-model="postTitle" required>
       <br>
-      <label for="postTags">Group Post Tags:</label>
-      <br> <input type="text" id="postTags" v-model="postTags">
+      <label for="postTags">Group Post tags:</label>
+      <br> <input title="comma separated" type="text" id="postTags" v-model="postTags">
       <br>
-      <label for="postContent">Group Post Content:</label>
+      <label for="postContent">Group Post content:</label>
       <br> <textarea id="postContent" v-model="postContent" required></textarea>
       
       <div>
-        <label for="picture"> with picture(optional): </label>
-        <br> <input type="file" id="picture" accept="image/jpeg, image/png, image/gif" @change="handlePictureChange">
+        <label for="picture" class="label_file_upload">
+          with picture(optional):
+          <input type="file" id="picture" accept="image/jpeg, image/png, image/gif" @change="handlePictureChange">
+        </label>
       </div>
 
-      <br>
       <button type="submit">Submit</button>
     </form>
     <div v-if="pictureStore.pictureError">{{ pictureStore.pictureError }}</div>
@@ -30,30 +37,35 @@
     <!-- add posts list , already created -->
     <div v-for="group_post in group_posts_list"
       :key="group_post.id">
-      <hr>
-      <router-link
-        :to="{ name: 'group_post' }"
-        @click="piniaManageDataGroupPost(group_post)">
-        <p>Group Post id: {{ group_post.id }}</p>
-        <p>Group Post title: {{ group_post.title }}</p>
-        <p>Group Post tags: {{ group_post.categories }}</p>
-        <p>Group Post content: {{ group_post.content }}</p>
-        <p>Group Post created: {{ group_post.created_at }}</p>
+      <div class="single_div_box">
+        <br>
+        <h3> Group Post title: </h3> <p> {{ group_post.title }}</p>
+        <h3> Group Post tags: </h3> <p> {{ group_post.categories }}</p>
+        <h3> Group Post content: </h3> <p> {{ group_post.content }}</p>
+        <h3> Group Post created: </h3> <p> {{ group_post.created_at }}</p>
         <div v-if="group_post.picture !== ''">
-          <p>Group Post picture: 
-            <br> <img :src="`data:image/jpeg;base64,${group_post.picture}`" alt="picture" />
+          <h3> Group Post picture: </h3>
+          <p>
+            <img :src="`data:image/jpeg;base64,${group_post.picture}`" alt="picture" />
           </p>
         </div>
-      </router-link>
-      <router-link
-      :to="{ name: 'target' }"
-      @click="piniaManageDataProfile(group_post.email)">
-        <h3>
-          Author: {{ group_post.first_name }}
-          {{ group_post.last_name }} 
-          ({{ group_post.email }})
-        </h3>
-      </router-link>
+        <router-link
+        :Title="group_post.first_name + '\n' + group_post.last_name + '\n' + group_post.email"
+        :to="{ name: 'target' }"
+        @click="piniaManageDataProfile(group_post.email)">
+          <div class="router_link_box">
+            visit author profile
+          </div>
+        </router-link>
+        <br>
+        <router-link
+          :to="{ name: 'group_post' }"
+          @click="piniaManageDataGroupPost(group_post)">
+          <div class="router_link_box">
+            comment group post {{ group_post.id }}
+          </div>
+        </router-link>
+      </div>
     </div>
   </div>
 </template>
@@ -130,7 +142,9 @@ function updateGroupPostsList() {
   });
 }
 
-onMounted(() => {
+onMounted(async () => {
+  wss.refresh_websocket()
+  await wss.waitForConnection();
   updateGroupPostsList();
 });
 

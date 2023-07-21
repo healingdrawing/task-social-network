@@ -338,7 +338,7 @@ func createSession(email string) (UUID string, err error) {
 	return UUID, nil
 }
 
-// todo : still not refactored to ws. Because not used at the moment
+// todo : still not refactored to ws. While ws connection is OPEN, We just use uuid + websocket + pinia(in refresh page process the build-in sessionStorage used to manage data for websocket and other pinia stores)
 func sessionCheckHandler(w http.ResponseWriter, r *http.Request) {
 	defer recovery(w)
 	var data UUIDData
