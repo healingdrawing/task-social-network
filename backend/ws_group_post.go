@@ -206,14 +206,22 @@ func wsUserGroupPostsListHandler(conn *websocket.Conn, messageData map[string]in
 		log.Println("failed to get user_uuid from messageData")
 		return
 	}
-	user_id, err := get_user_id_by_uuid(uuid)
+	_, err := get_user_id_by_uuid(uuid)
 	if err != nil {
 		log.Println("failed to get ID of the message sender", err.Error())
 		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the message sender"}, []string{uuid})
 		return
 	}
 
-	rows, err := statements["getUserAllGroupPosts"].Query(user_id)
+	target_email := messageData["target_email"].(string)
+	target_id, err := get_user_id_by_email(target_email)
+	if err != nil {
+		log.Println("failed to get ID of the target", err.Error())
+		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusUnprocessableEntity) + " failed to get ID of the target"}, []string{uuid})
+		return
+	}
+
+	rows, err := statements["getUserAllGroupPosts"].Query(target_id)
 	if err != nil {
 		log.Println("getUserAllGroupPosts query failed", err.Error())
 		wsSend(WS_ERROR_RESPONSE, WS_ERROR_RESPONSE_DTO{fmt.Sprint(http.StatusInternalServerError) + " getUserAllGroupPosts query failed"}, []string{uuid})

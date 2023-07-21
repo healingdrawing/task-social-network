@@ -146,7 +146,7 @@ import { useUUIDStore } from '@/store/uuid';
 import { useProfileStore } from '@/store/profile';
 import { usePostStore } from '@/store/post';
 import { useGroupStore } from '@/store/group';
-import { WSMessageType, TargetProfileRequest, VisitorStatus, Post, GroupPost, GroupPostsListRequest, Group } from '@/api/types';
+import { WSMessageType, TargetProfileRequest, VisitorStatus, Post, GroupPost, Group } from '@/api/types';
 
 
 
@@ -267,8 +267,8 @@ function updateUserGroupPostsList() {
     type: WSMessageType.USER_GROUP_POSTS_LIST,
     data: {
       user_uuid: UUIDStore.getUUID,
-      group_id: -1, // no needed, because it is all group posts collector for user
-    } as GroupPostsListRequest,
+      target_email: profileStore.getTargetUserEmail,
+    } as TargetProfileRequest,
   });
 }
 
