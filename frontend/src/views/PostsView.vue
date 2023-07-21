@@ -26,10 +26,13 @@
       <input type="radio" id="almost_private" name="postPrivacy" value="almost private" v-model="postPrivacy">
       <label for="almost_private">almost private - for selected followers</label>
       <br>
-      <select v-if="postPrivacy === 'almost private'" multiple v-model="selectedFollowers" class="users_list_with_scroll">
-        <option v-for="follower in followersList" :key="follower.email" :value="follower.email">{{ follower.first_name }} {{ follower.last_name }} ({{ follower.email }})</option>
-      </select>
-      
+      <div v-if="postPrivacy === 'almost private'">
+        <select v-if="followersList.length > 0" multiple v-model="selectedFollowers" class="users_list_with_scroll">
+          <option v-for="follower in followersList" :key="follower.email" :value="follower.email">{{ follower.first_name }} {{ follower.last_name }} ({{ follower.email }})</option>
+        </select>
+        <div v-else> No followers to select </div>
+      </div>
+
       <div>
         <label for="picture" class="label_file_upload">
           with picture(optional):

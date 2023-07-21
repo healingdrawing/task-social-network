@@ -20,6 +20,7 @@
       <button @click="inviteUsers">Submit</button>
     </div>
     <div v-else>
+      <br> <br>
       No followers to invite.
     </div>
   </div>
