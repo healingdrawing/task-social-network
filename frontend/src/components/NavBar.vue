@@ -1,6 +1,7 @@
 <template>
   <div>
     <div class="logo">
+      <h1> Royal Resort</h1>
       <img src="../assets/logo.png" alt="logo" />
     </div>
     <div>
@@ -58,10 +59,6 @@
 </template>
 
 <style scoped>
-.highlighted {
-  background-color: gold;
-}
-
 .fade-in {
   animation: fade-in 0.5s ease-in;
 }
@@ -162,25 +159,25 @@ onMounted(async () => {
   wss.refresh_websocket()
   await wss.waitForConnection();
 
-  // todo: UNCOMMENT
-  // setInterval(() => {
-  //   showLink.value = !showLink.value;
-  // }, 1000); // Adjust the interval duration as needed
+  // todo: UNCOMMENT to monitor new notifications
+  setInterval(() => {
+    showLink.value = !showLink.value;
+  }, 1000); // Adjust the interval duration as needed
 
-  // updateInterval.value = setInterval(() => {
-  //   updateBells(); // Call the update function
-  // }, 20000); // Repeat every 10 seconds
+  updateInterval.value = setInterval(() => {
+    updateBells(); // Call the update function
+  }, 10000); // Repeat every 10 seconds
 
-  // // Clear the interval when the component is unmounted
-  // onUnmounted(() => {
-  //   clearInterval(updateInterval.value);
-  // });
+  // Clear the interval when the component is unmounted
+  onUnmounted(() => {
+    clearInterval(updateInterval.value);
+  });
 
   updateBells(); // after success login call the update function once
 });
 
 function updateBells() {
-  // todo: add x4 cases for each type of bell
+  // add x4 cases for each type of bell/notification
   wss.sendMessage({
     type: WSMessageType.FOLLOW_REQUESTS_LIST,
     data: {
@@ -205,7 +202,6 @@ function updateBells() {
       user_uuid: UUIDStore.getUUID,
     } as BellRequest,
   })
-  //todo: implement events too
 }
 
 </script>

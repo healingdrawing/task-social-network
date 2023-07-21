@@ -83,7 +83,7 @@ const password = ref('');
 const firstName = ref('');
 const lastName = ref('');
 const dob = ref('');
-const avatar: Ref<Blob | null> = ref(null); //todo: chat gpt solution, to fix null value case, because field is optional
+const avatar: Ref<Blob | null> = ref(null); // to fix null value case, because field is optional
 const nickname = ref('');
 const aboutMe = ref('');
 
@@ -98,7 +98,6 @@ const signup = async () => {
   resetPiniaStores();
   console.log('== signup ==');
   try {
-    /* todo: should happen only if signup is successful */
     await signupStore.fetchData({
       email: email.value,
       password: password.value,

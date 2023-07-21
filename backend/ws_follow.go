@@ -98,8 +98,6 @@ func wsFollowingListHandler(conn *websocket.Conn, messageData map[string]interfa
 		return
 	}
 
-	// todo: continue refactor here
-
 	allFollowingIds := []int{}
 	for rows.Next() {
 		var id int

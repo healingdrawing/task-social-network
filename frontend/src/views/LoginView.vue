@@ -88,12 +88,6 @@ const login = async () => {
     console.log("== login == 'finally' fired");
   }
 
-
-  /* todo: also manual open any routes from browser url window,
-  should logout the user, and redirect to login page again
-  to prevent any not desirable experimenting, and decrease
-  chances of pretension in audit process, from experimentators */
-
 }
 
 const crap = () => {

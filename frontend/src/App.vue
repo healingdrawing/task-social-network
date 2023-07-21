@@ -59,10 +59,10 @@ nav {
   --pink_bright: #bd08e3;
   --pink_light: #b74cc0;
   --gradient: linear-gradient(to right,
-      var(--pink_light),
-      var(--pink_bright) 30%,
-      var(--pink_bright) 70%,
-      var(--pink_light));
+      var(--pink_dark),
+      var(--pink_bright) 40%,
+      var(--pink_bright) 60%,
+      var(--pink_dark));
   --g_horizontal_white_glass: linear-gradient(to right,
       hsla(0, 0%, 100%, 0.01),
       #ffffff00 30%,
@@ -93,6 +93,11 @@ body {
   background: var(--gradient);
   background-size: 100% 100vh;
   color: var(--yellow_dark);
+}
+
+.logo img {
+  position: relative;
+  margin-top: -50px;
 }
 
 :focus {

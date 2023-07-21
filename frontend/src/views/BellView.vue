@@ -258,7 +258,7 @@ function rejectJoinRequest(bell: Bell) {
 
 const UUIDStore = useUUIDStore();
 function updateBells() {
-  // todo: add x4 cases for each type of bell
+  // add x4 cases for each type of bell
   wss.sendMessage({
     type: WSMessageType.FOLLOW_REQUESTS_LIST,
     data: {
@@ -283,7 +283,6 @@ function updateBells() {
       user_uuid: UUIDStore.getUUID,
     } as BellRequest,
   })
-  //todo: implement events too
 }
 
 onMounted(async () => {

@@ -107,7 +107,6 @@ function updateGroupEventsList() {
   })
 }
 
-//todo: implement createEvent() function
 const createEvent = async () => {
 
   const group_event_submit: GroupEventSubmit = {
@@ -176,7 +175,7 @@ const groupChat = () => { router.push({ name: 'group_chat' }) }
 // open GroupInviteView.vue
 const groupInvite = () => { router.push({ name: 'group_invite' }) }
 
-// open GroupPostsView.vue . // todo: saparated table for group posts used
+// open GroupPostsView.vue . Separated table for group posts used
 const groupPosts = () => { router.push({ name: 'group_posts' }) }
 
 onMounted(async () => {
