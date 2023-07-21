@@ -19,6 +19,7 @@ to show containers in terminal:
 ### frontend  
 
 - `cd frontend`
+- `npm i`
 - `npm run serve`
 
 ## At the moment the recomendations are:  
