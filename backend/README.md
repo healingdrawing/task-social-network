@@ -1,3 +1,5 @@
+# DEPRECATED . REFACTORED IN CODE . ARTEFACT
+
 # DTO (Data Transfer Object) for  
 
 [request]: https://i.postimg.cc/C5c0SmRN/requestww.jpg "Request"
