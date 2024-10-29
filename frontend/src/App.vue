@@ -55,14 +55,14 @@ nav {
 :root {
   --yellow_dark: #fec722;
   --yellow_light: #fde056;
-  --pink_dark: #511162;
-  --pink_bright: #bd08e3;
+  --pink_royal: #511162;
+  --blue_royal: hsl(260, 70%, 23%);
   --pink_light: #b74cc0;
   --gradient: linear-gradient(to right,
-      var(--pink_dark),
-      var(--pink_bright) 40%,
-      var(--pink_bright) 60%,
-      var(--pink_dark));
+      var(--pink_royal),
+      var(--blue_royal) 40%,
+      var(--blue_royal) 60%,
+      var(--pink_royal));
   --g_horizontal_white_glass: linear-gradient(to right,
       hsla(0, 0%, 100%, 0.01),
       #ffffff00 30%,
@@ -82,14 +82,14 @@ nav {
 
   --g_active_router_link: linear-gradient(to right,
       white,
-      var(--pink_dark) 20px,
-      var(--pink_dark) calc(100% - 20px),
+      var(--pink_royal) 20px,
+      var(--pink_royal) calc(100% - 20px),
       white);
 }
 
 
 body {
-  background-color: var(--pink_bright);
+  background-color: var(--blue_royal);
   background: var(--gradient);
   background-size: 100% 100vh;
   color: var(--yellow_dark);
@@ -198,7 +198,7 @@ h3,
 h4,
 h5,
 h6 {
-  text-shadow: var(--pink_dark) 0px 0px 10px;
+  text-shadow: var(--pink_royal) 0px 0px 10px;
   color: hsl(295, 71%, 63%);
 }
 
@@ -242,7 +242,7 @@ input {
 input:focus {
   outline: none;
   border-color: var(--yellow_dark);
-  background: var(--pink_dark);
+  background: var(--pink_royal);
 }
 
 select {
@@ -253,7 +253,7 @@ select {
 
 select:focus {
   outline: none;
-  background: var(--pink_dark);
+  background: var(--pink_royal);
 }
 
 textarea {
@@ -268,6 +268,6 @@ textarea {
 textarea:focus {
   outline: none;
   border-color: var(--yellow_dark);
-  background: var(--pink_dark);
+  background: var(--pink_royal);
 }
 </style>

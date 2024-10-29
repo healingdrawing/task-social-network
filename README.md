@@ -1,4 +1,5 @@
 # task-social-network
+![demo](sndemo.webp)
 
 After run project, open the browser on `http://localhost:3000/`  
 
